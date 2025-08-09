@@ -1,0 +1,14 @@
+
+- add trivial graphics code to hello.js (and saved to pdf)
+- make sure code runs in both browser and server modes
+- add coord-translation to position components
+- figure out how to unit-test appropriately
+
+- figure out how to fill w/ a "texture" (code)
+- figure out how to crop texture filling
+
+- add a bunch of color capability
+
+- add code to assign components to positions on pages
+    (use very simple to start with)
+
