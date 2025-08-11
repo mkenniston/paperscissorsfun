@@ -1,6 +1,26 @@
+TODO:
 
+- create "psflib.js" with Component, Kit, Page, AffineTransformation, Point,
+    Scale, Rotate, Reflect, Translate classes, all with unit tests
+- include lots of comments explaining "world" vs "rendered" coord systems
+
+- create a "generate.js" file and a "generate.html" file, each with
+    bare-minimum code to load the libraries, create a kit, and render it,
+    make sure works correctly both ways
+
+- get simple HTML and JS hosted on XNet,
+    figure out how URLs work to make it testable from local copy
+
+- check JS syntax for private members
+- find a style-checker/linter for JS
+
+- add input-options mechanism for setting params from either
+    the web interface or the API level
+- add the "scale" setting (e.g. HO = 87.1)
+- add the "units" setting (ft-in, in, m, m-cm)
+    review how variable params work
+    - can also be used for getter/setter obj.prop()/obj.prop(newval)
 - add trivial graphics code to hello.js (and saved to pdf)
-- make sure code runs in both browser and server modes
 - add coord-translation to position components
 - figure out how to unit-test appropriately
 
@@ -11,4 +31,25 @@
 
 - add code to assign components to positions on pages
     (use very simple to start with)
+
+
+DONE:
+- researched Python-vs-JavaScript, decided to go with JS because it will
+    allow users to generate PDF files without installing *anything*
+    on their computers (and without me doing complex hosting of back-end
+    computations)
+- researched and chose jspdf library for PDF generation
+- got node.js installed on both ocelot and neofelis
+- reviewed enough JS to start writing code
+- got some skeleton code working on HTML to generate PDF with JS
+- got skeleton code to work in node.js to generate PDF with JS
+    (Now have proof-of-concept that JS and jspdf will work)
+- researched and chose jest for unit-testing, installed on neofelis and ocelot
+- got some skeleton test code working
+- removed all references to paper-scissors-fun.com, replaced with
+    paperscissorsfun.com, which is what I have registered at namecheap
+- got git working on neofelis
+- got git working on ocelot (so I can also work downstairs)
+- researched matrix multiplication
+- researched using matrix representation of affine transformations
 
