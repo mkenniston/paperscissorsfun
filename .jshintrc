@@ -1,0 +1,20 @@
+    {
+      "globals": {
+        "console": true,
+        "module": true,
+        "require": true,
+        "test": true,
+        "describe": true,
+        "it": true,
+        "expect": true,
+        "jest": true,
+        "beforeEach": true,
+        "afterEach": true,
+        "beforeAll": true,
+        "afterAll": true
+      },
+      "esversion": 6,
+      "undef": true,
+      "unused": true,
+      "browser": true
+    }

@@ -10,7 +10,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^30.0.5"
+    "globals": "^16.3.0",
+    "jest": "^30.0.5",
+    "jshint": "^2.13.6"
   },
   "dependencies": {
     "jspdf": "^3.0.1"

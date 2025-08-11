@@ -11,18 +11,13 @@ TODO:
 - get simple HTML and JS hosted on XNet,
     figure out how URLs work to make it testable from local copy
 
-- check JS syntax for private members
-- find a style-checker/linter for JS
-
 - add input-options mechanism for setting params from either
     the web interface or the API level
 - add the "scale" setting (e.g. HO = 87.1)
-- add the "units" setting (ft-in, in, m, m-cm)
-    review how variable params work
+- add the "units" setting:  US -- US Customary (ft/in), or SI - metric (m/cm)
     - can also be used for getter/setter obj.prop()/obj.prop(newval)
 - add trivial graphics code to hello.js (and saved to pdf)
 - add coord-translation to position components
-- figure out how to unit-test appropriately
 
 - figure out how to fill w/ a "texture" (code)
 - figure out how to crop texture filling
@@ -52,4 +47,8 @@ DONE:
 - got git working on ocelot (so I can also work downstairs)
 - researched matrix multiplication
 - researched using matrix representation of affine transformations
+- checked syntax for private members (_ just like python)
+- researched, chose, installed a JS linter: jshint
+- created psflib.js and psflib.test.js w/ initial fragments of code
+- looked up variable parameters, added code to handle inch-only or ft+in
 
