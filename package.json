@@ -11,5 +11,8 @@
   "license": "ISC",
   "devDependencies": {
     "jest": "^30.0.5"
+  },
+  "dependencies": {
+    "jspdf": "^3.0.1"
   }
 }
