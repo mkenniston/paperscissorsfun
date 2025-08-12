@@ -27,10 +27,11 @@ SOFTWARE.
 // http://paperscissorsfun.com
 
 /*
-    ==== MEASUREMENT ====
+    ==== MEASUREMENT UNITS ====
 
-The Measurement class encapsulates the conversion of various units (e.g.
-US Customary and SI/metric) into the standard unit (meters).
+The toSI function encapsulates the conversion of various measurement
+units (e.g. US Customary and SI/metric) into the standard unit (meters)
+used internally.
 
 */
 
@@ -38,7 +39,7 @@ const INCH = 0.0254;
 const FOOT = 0.3048;
 const YARD = 0.9144;
 
-const measurements = {
+const MEASUREMENT_UNITS = {
     'km':          1000,
     'kilometer':   1000,
     'kilometers':  1000,
@@ -89,51 +90,51 @@ const measurements = {
     };
 
 function tokenize(input) {
-  const tokens = [];
-  let index = 0;
-  const regexes = {
-    number: /^[0123456789\.\+\-]+/,
-    units: /^[a-z\'\"]+/,
-    whitespace: /^\s+/,
-  };
+    const tokens = [];
+    let index = 0;
+    const regexes = {
+        number: /^[0123456789\.\+\-]+/,
+        units: /^[a-z\'\"]+/,
+        whitespace: /^\s+/,
+    };
 
-  while (index < input.length) {
-    let matched = false;
-    for (const type in regexes) {
-      const match = input.substring(index).match(regexes[type]);
-      if (match) {
-        if (type !== 'whitespace') { // Ignore whitespace tokens
-          tokens.push({ type: type, value: match[0] });
+    while (index < input.length) {
+        let matched = false;
+        for (const type in regexes) {
+            const match = input.substring(index).match(regexes[type]);
+            if (match) {
+                if (type !== 'whitespace') { // Ignore whitespace tokens
+                    tokens.push({ type: type, value: match[0] });
+                }
+                index += match[0].length;
+                matched = true;
+                break;
+            }
         }
-        index += match[0].length;
-        matched = true;
-        break;
-      }
+        if (!matched) {
+            throw new Error(`Unexpected character at index ${index}: ${input[index]}`);
+        }
     }
-    if (!matched) {
-      throw new Error(`Unexpected character at index ${index}: ${input[index]}`);
-    }
-  }
-  return tokens;
+    return tokens;
 }
 
 
-function toSI(s) {
-    // split the tokens apart
-    const tokens = tokenize(s.toLowerCase());
+function toSI(stringRep) {
+    const tokens = tokenize(stringRep.toLowerCase());
     if (tokens.length % 2 != 0) {
-        throw new Error(`${s} has odd number of tokens`);
+        throw new Error(`${stringRep} has odd number of tokens`);
     }
     let index = 0;
     let value = 0;
     while (index < tokens.length) {
         const num = tokens[index].value;
-        const unit = tokens[index + 1].value;
-        index += 2;
-        if (! measurements.hasOwnProperty(unit)) {
-            throw new Error(`invalid measurement ${unit}`);
+        index += 1;
+        const unit = tokens[index].value;
+        index += 1;
+        if (! MEASUREMENT_UNITS.hasOwnProperty(unit)) {
+            throw new Error(`invalid measurement unit ${unit}`);
         }
-        value += Number(num) * measurements[unit];
+        value += Number(num) * MEASUREMENT_UNITS[unit];
     }
     return value;
 }

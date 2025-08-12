@@ -1,5 +1,13 @@
 TODO:
 
+- convert all 4-tabs to 2-tabs (JS standard)
+- Measurements:
+	- fill in missing test (multiples, spaceless, errors)
+	- remove old var-args code, back to just 2 args in both
+	points and add() code
+
+- add code to Transform classes to multiply matrix X matrix, and X vector/point
+
 - create "psflib.js" with Component, Kit, Page, AffineTransformation, Point,
     Scale, Rotate, Reflect, Translate classes, all with unit tests
 - include lots of comments explaining "world" vs "rendered" coord systems
