@@ -32,38 +32,38 @@ describe("toSI", () => {
     expect(toSI("2 meter")).toBeCloseTo(2);
     expect(toSI("3.5 meters")).toBeCloseTo(3.5);
     expect(toSI("4 metre")).toBeCloseTo(4);
-    expect(toSI("-0.05 metres")).toBeCloseTo(-0.05);
+    expect(toSI("-0.05 metres")).toBeCloseTo(-0.05, 4);
     expect(toSI("1.23 km")).toBeCloseTo(1230);
     expect(toSI("1.34 kilometer")).toBeCloseTo(1340);
     expect(toSI("2.34 kilometers")).toBeCloseTo(2340);
     expect(toSI("3.45 kilometre")).toBeCloseTo(3450);
     expect(toSI("4.567 kilometres")).toBeCloseTo(4567);
-    expect(toSI("34.5 cm")).toBeCloseTo(0.345);
-    expect(toSI("23 centimeter")).toBeCloseTo(0.23);
-    expect(toSI("2 centimeters")).toBeCloseTo(0.02);
-    expect(toSI("0.43 centimetre")).toBeCloseTo(0.0043);
-    expect(toSI("0.001 centimetres")).toBeCloseTo(0.00001);
-    expect(toSI("146 mm")).toBeCloseTo(0.146);
-    expect(toSI("89 millimeter")).toBeCloseTo(0.089);
-    expect(toSI("3 millimeters")).toBeCloseTo(0.003);
-    expect(toSI("63 millimetre")).toBeCloseTo(0.063);
-    expect(toSI("1 millimetres")).toBeCloseTo(0.001);
+    expect(toSI("34.5 cm")).toBeCloseTo(0.345, 3);
+    expect(toSI("23 centimeter")).toBeCloseTo(0.23, 3);
+    expect(toSI("2 centimeters")).toBeCloseTo(0.02, 4);
+    expect(toSI("0.43 centimetre")).toBeCloseTo(0.0043, 5);
+    expect(toSI("0.001 centimetres")).toBeCloseTo(0.00001, 7);
+    expect(toSI("146 mm")).toBeCloseTo(0.146, 3);
+    expect(toSI("89 millimeter")).toBeCloseTo(0.089, 4);
+    expect(toSI("3 millimeters")).toBeCloseTo(0.003, 5);
+    expect(toSI("63 millimetre")).toBeCloseTo(0.063, 4);
+    expect(toSI("1 millimetres")).toBeCloseTo(0.001, 5);
   });
 
   test("single US units work", () => {
-    expect(toSI("2 inch")).toBeCloseTo(0.0508);
-    expect(toSI("3 inches")).toBeCloseTo(0.0761);
-    expect(toSI("4 in")).toBeCloseTo(0.1016);
-    expect(toSI('6"')).toBeCloseTo(0.1524);
+    expect(toSI("2 inch")).toBeCloseTo(0.0508, 4);
+    expect(toSI("3 inches")).toBeCloseTo(0.0762, 4);
+    expect(toSI("4 in")).toBeCloseTo(0.1016, 3);
+    expect(toSI('6"')).toBeCloseTo(0.1524, 3);
     expect(toSI("3.5 foot")).toBeCloseTo(1.0668);
-    expect(toSI("2 feet")).toBeCloseTo(0.6096);
+    expect(toSI("2 feet")).toBeCloseTo(0.6096, 3);
     expect(toSI("10 ft")).toBeCloseTo(3.048);
     expect(toSI("4'")).toBeCloseTo(1.2192);
-    expect(toSI("0.4 yard")).toBeCloseTo(0.36576);
+    expect(toSI("0.4 yard")).toBeCloseTo(0.36576, 3);
     expect(toSI("1.7 yards")).toBeCloseTo(1.55448);
     expect(toSI("5 yd")).toBeCloseTo(4.572);
-    expect(toSI("1 barleycorn")).toBeCloseTo(0.00846667);
-    expect(toSI("2 barleycorns")).toBeCloseTo(0.0169333);
+    expect(toSI("1 barleycorn")).toBeCloseTo(0.00846667, 5);
+    expect(toSI("2 barleycorns")).toBeCloseTo(0.0169333, 4);
     expect(toSI("3 furlong")).toBeCloseTo(603.504);
     expect(toSI("4 furlongs")).toBeCloseTo(804.672);
     expect(toSI("5 chain")).toBeCloseTo(100.584);
@@ -81,7 +81,7 @@ describe("toSI", () => {
   });
 
   test("multiple units and non-spaced work", () => {
-    expect(toSI('1 ft 3"')).toBeCloseTo(0.381);
+    expect(toSI('1 ft 3"')).toBeCloseTo(0.381, 3);
   });
 
   test("illegal formats detected", () => {
@@ -94,7 +94,7 @@ describe("Point", () => {
   const p2 = new Point(null, 3, 5, 1, 7);
 
   test("point is created", () => {
-    expect(p1 instanceof Point);
+    expect(p1).toBeInstanceOf(Point);
   });
 
   test("input coordinates available", () => {
