@@ -13,7 +13,7 @@
         "beforeAll": true,
         "afterAll": true
       },
-      "esversion": 11,
+      "esversion": 6,
       "undef": true,
       "unused": true,
       "browser": true

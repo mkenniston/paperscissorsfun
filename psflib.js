@@ -27,7 +27,7 @@ SOFTWARE.
 // http://paperscissorsfun.com
 
 /*
-    ==== MEASUREMENT UNITS ====
+  ==== MEASUREMENT UNITS ====
 
 The toSI function encapsulates the conversion of various measurement
 units (e.g. US Customary and SI/metric) into the standard unit (meters)
@@ -40,107 +40,108 @@ const FOOT = 0.3048;
 const YARD = 0.9144;
 
 const MEASUREMENT_UNITS = {
-    'km':          1000,
-    'kilometer':   1000,
-    'kilometers':  1000,
-    'kilometre':   1000,
-    'kilometres':  1000,
-    'm':           1,
-    'meter':       1,
-    'meters':      1,
-    'metre':       1,
-    'metres':      1,
-    'cm':          0.01,
-    'centimeter':  0.01,
-    'centimeters': 0.01,
-    'centimetre':  0.01,
-    'centimetres': 0.01,
-    'mm':          0.001,
-    'millimeter':  0.001,
-    'millimeters': 0.001,
-    'millimetre':  0.001,
-    'millimetres': 0.001,
-    'inch':        INCH,
-    'inches':      INCH,
-    'in':          INCH,
-    '"':           INCH,
-    'foot':        FOOT,
-    'feet':        FOOT,
-    'ft':          FOOT,
-    '\'':          FOOT,
-    'yard':        YARD,
-    'yards':       YARD,
-    'yd':          YARD,
-    'barleycorn':  0.00846667,
-    'barleycorns': 0.00846667,
-    'furlong':     201.168,
-    'furlongs':    201.168,
-    'chain':       20.1168,
-    'chains':      20.1168,
-    'rod':         5.0292,
-    'rods':        5.0292,
-    'link':        0.201,
-    'links':       0.201,
-    'cubit':       0.4572,
-    'cubits':      0.4572,
-    'fathom':      1.8288,
-    'fathoms':     1.8288,
-    'league':      5556,
-    'leagues':     5556,
-    };
+  'km':          1000,
+  'kilometer':   1000,
+  'kilometers':  1000,
+  'kilometre':   1000,
+  'kilometres':  1000,
+  'm':           1,
+  'meter':       1,
+  'meters':      1,
+  'metre':       1,
+  'metres':      1,
+  'cm':          0.01,
+  'centimeter':  0.01,
+  'centimeters': 0.01,
+  'centimetre':  0.01,
+  'centimetres': 0.01,
+  'mm':          0.001,
+  'millimeter':  0.001,
+  'millimeters': 0.001,
+  'millimetre':  0.001,
+  'millimetres': 0.001,
+  'inch':        INCH,
+  'inches':      INCH,
+  'in':          INCH,
+  '"':           INCH,
+  'foot':        FOOT,
+  'feet':        FOOT,
+  'ft':          FOOT,
+  '\'':          FOOT,
+  'yard':        YARD,
+  'yards':       YARD,
+  'yd':          YARD,
+  'barleycorn':  0.00846667,
+  'barleycorns': 0.00846667,
+  'furlong':     201.168,
+  'furlongs':    201.168,
+  'chain':       20.1168,
+  'chains':      20.1168,
+  'rod':         5.0292,
+  'rods':        5.0292,
+  'link':        0.201,
+  'links':       0.201,
+  'cubit':       0.4572,
+  'cubits':      0.4572,
+  'fathom':      1.8288,
+  'fathoms':     1.8288,
+  'league':      5556,
+  'leagues':     5556,
+  };
 
 function tokenize(input) {
-    const tokens = [];
-    let index = 0;
-    const regexes = {
-        number: /^[0123456789\.\+\-]+/,
-        units: /^[a-z\'\"]+/,
-        whitespace: /^\s+/,
-    };
+  const tokens = [];
+  let index = 0;
+  const regexes = {
+    number: /^[0123456789\.\+\-]+/,
+    units: /^[a-z\'\"]+/,
+    whitespace: /^\s+/,
+  };
 
-    while (index < input.length) {
-        let matched = false;
-        for (const type in regexes) {
-            const match = input.substring(index).match(regexes[type]);
-            if (match) {
-                if (type !== 'whitespace') { // Ignore whitespace tokens
-                    tokens.push({ type: type, value: match[0] });
-                }
-                index += match[0].length;
-                matched = true;
-                break;
-            }
+  while (index < input.length) {
+    let matched = false;
+    for (const type in regexes) {
+      const match = input.substring(index).match(regexes[type]);
+      if (match) {
+        if (type !== 'whitespace') { // Ignore whitespace tokens
+          tokens.push({ type: type, value: match[0] });
         }
-        if (!matched) {
-            throw new Error(`Unexpected character at index ${index}: ${input[index]}`);
-        }
+        index += match[0].length;
+        matched = true;
+        break;
+      }
     }
-    return tokens;
+    if (!matched) {
+      throw new Error(
+        `Unexpected character at index ${index}: ${input[index]}`);
+    }
+  }
+  return tokens;
 }
 
 
 function toSI(stringRep) {
-    const tokens = tokenize(stringRep.toLowerCase());
-    if (tokens.length % 2 != 0) {
-        throw new Error(`${stringRep} has odd number of tokens`);
+  const tokens = tokenize(stringRep.toLowerCase());
+  if (tokens.length % 2 != 0) {
+    throw new Error(`${stringRep} has odd number of tokens`);
+  }
+  let index = 0;
+  let value = 0;
+  while (index < tokens.length) {
+    const num = tokens[index].value;
+    index += 1;
+    const unit = tokens[index].value;
+    index += 1;
+    if (! MEASUREMENT_UNITS.hasOwnProperty(unit)) {
+      throw new Error(`invalid measurement unit ${unit}`);
     }
-    let index = 0;
-    let value = 0;
-    while (index < tokens.length) {
-        const num = tokens[index].value;
-        index += 1;
-        const unit = tokens[index].value;
-        index += 1;
-        if (! MEASUREMENT_UNITS.hasOwnProperty(unit)) {
-            throw new Error(`invalid measurement unit ${unit}`);
-        }
-        value += Number(num) * MEASUREMENT_UNITS[unit];
-    }
-    return value;
+    value += Number(num) * MEASUREMENT_UNITS[unit];
+  }
+  return value;
 }
 
 /*
-    ==== POINT ====
+  ==== POINT ====
 
 The "Point" class encapsulates the representation of 2-D points using
 two different coordinate systems:
@@ -149,18 +150,18 @@ two different coordinate systems:
 height and width of a door in feet/inches or meters.
 To maintain consistency with mathematics, this uses standard Cartesian
 coordinates:
-    - The origin is at the lower left corner of the page.
-    - X increases as you move toward the right edge of the page.
-    - Y increases as you move toward the top edge of the page.
+  - The origin is at the lower left corner of the page.
+  - X increases as you move toward the right edge of the page.
+  - Y increases as you move toward the top edge of the page.
 
 - The "out" coordinates (X and Y) are the "rendering" coordinates, i.e.
 the place on the PDF page where the door appears, which is later the
 place on a piece of paper where image of the door is printed.
 The jsPdf library dictates that we use a different coordinate system,
 similiar to rows and columns but measuring instead of counting:
-    - The origin is at the upper left corner of the page.
-    - X increases as you move toward the right edge of the page.
-    - Y increases as you move toward the bottom edge of the page.
+  - The origin is at the upper left corner of the page.
+  - X increases as you move toward the right edge of the page.
+  - Y increases as you move toward the bottom edge of the page.
 
 We always use the "in" coordinates when defining the sizes and positions
 of various shapes which we want to appear in the final PDF.  The "out"
@@ -185,71 +186,71 @@ polygons.
 */
 
 class Point {
-    constructor() {
-        var inX, inY;
-        if (arguments.length == 3) {
-            // inches
-            inX = arguments[1];
-            inY = arguments[2];
-        } else if (arguments.length == 5) {
-            // feet-and-inches
-            inX = arguments[1] * 12 + arguments[2];
-            inY = arguments[3] * 12 + arguments[4];
-        } else {
-            throw new Error(`invalid ${arguments.length} args to ctor()`);
-        }
-        this._parent = arguments[0];
-        this._inX = inX;
-        this._inY = inY;
-        this._outX = null;
-        this._outY = null;
+  constructor() {
+    var inX, inY;
+    if (arguments.length == 3) {
+      // inches
+      inX = arguments[1];
+      inY = arguments[2];
+    } else if (arguments.length == 5) {
+      // feet-and-inches
+      inX = arguments[1] * 12 + arguments[2];
+      inY = arguments[3] * 12 + arguments[4];
+    } else {
+      throw new Error(`invalid ${arguments.length} args to ctor()`);
     }
+    this._parent = arguments[0];
+    this._inX = inX;
+    this._inY = inY;
+    this._outX = null;
+    this._outY = null;
+  }
 
-    inX() {
-        return this._inX;
-    }
+  inX() {
+    return this._inX;
+  }
 
-    inY() {
-        return this._inY;
-    }
+  inY() {
+    return this._inY;
+  }
 
-    move() {
-        var dx, dy;
-        if (arguments.length == 2) {
-            // inches
-            dx = arguments[0];
-            dy = arguments[1];
-        } else if (arguments.length == 4) {
-            // feet-and-inches
-            dx = arguments[0] * 12 + arguments[1];
-            dy = arguments[2] * 12 + arguments[3];
-        } else {
-            throw new Error(`invalid ${arguments.length} args to move()`);
-        }
-        return new Point(this._parent, this._inX + dx, this._inY + dy);
+  move() {
+    var dx, dy;
+    if (arguments.length == 2) {
+      // inches
+      dx = arguments[0];
+      dy = arguments[1];
+    } else if (arguments.length == 4) {
+      // feet-and-inches
+      dx = arguments[0] * 12 + arguments[1];
+      dy = arguments[2] * 12 + arguments[3];
+    } else {
+      throw new Error(`invalid ${arguments.length} args to move()`);
     }
+    return new Point(this._parent, this._inX + dx, this._inY + dy);
+  }
 
-    _applyTransforms() {
-        if (this._outX == null) {
-            // generate the "out" coordinates here
-            this._outX = 111;  // FIX ME
-            this._outY = 222;
-        }
+  _applyTransforms() {
+    if (this._outX == null) {
+      // generate the "out" coordinates here
+      this._outX = 111;  // FIX ME
+      this._outY = 222;
     }
+  }
 
-    outX() {
-        this._applyTransforms();
-        return this._outX;
-    }
+  outX() {
+    this._applyTransforms();
+    return this._outX;
+  }
 
-    outY() {
-        this._applyTransforms();
-        return this._outY;
-    }
+  outY() {
+    this._applyTransforms();
+    return this._outY;
+  }
 }
 
 /*
-    ==== AFFINE_TRANSFORMATION ====
+  ==== AFFINE_TRANSFORMATION ====
 
 There is a whole set of classes which define the transformations we
 might want to do on our coordinates.  The most obvious is that something
@@ -263,42 +264,42 @@ each type uses a limited subset of all available value combinations.
 */
 
 class AffineTransformation {
-    constructor(matrix) {
-        this._matrix = matrix;
-    }
+  constructor(matrix) {
+    this._matrix = matrix;
+  }
 }
 
 class Scale extends AffineTransformation {
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 }
 
 class Translate extends AffineTransformation {
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 }
 
 class Rotate extends AffineTransformation {
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 }
 
 class Reflect extends AffineTransformation {
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 }
 
 module.exports = {
-    toSI: toSI,
-    Point: Point,
-    AffineTransformation: AffineTransformation,
-    Scale: Scale,
-    Translate: Translate,
-    Rotate: Rotate,
-    Reflect: Reflect,
+  toSI: toSI,
+  Point: Point,
+  AffineTransformation: AffineTransformation,
+  Scale: Scale,
+  Translate: Translate,
+  Rotate: Rotate,
+  Reflect: Reflect,
 };
 
