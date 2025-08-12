@@ -24,6 +24,70 @@ SOFTWARE.
 
 const psflib = require('./psflib');
 const Point = psflib.Point;
+const toSI = psflib.toSI;
+
+describe("toSI", () => {
+    test("single metric units work", () => {
+        expect(toSI("1 m")).toBeCloseTo(1);
+        expect(toSI("2 meter")).toBeCloseTo(2);
+        expect(toSI("3.5 meters")).toBeCloseTo(3.5);
+        expect(toSI("4 metre")).toBeCloseTo(4);
+        expect(toSI("-0.05 metres")).toBeCloseTo(-0.05);
+        expect(toSI("1.23 km")).toBeCloseTo(1230);
+        expect(toSI("1.34 kilometer")).toBeCloseTo(1340);
+        expect(toSI("2.34 kilometers")).toBeCloseTo(2340);
+        expect(toSI("3.45 kilometre")).toBeCloseTo(3450);
+        expect(toSI("4.567 kilometres")).toBeCloseTo(4567);
+        expect(toSI("34.5 cm")).toBeCloseTo(0.345);
+        expect(toSI("23 centimeter")).toBeCloseTo(0.23);
+        expect(toSI("2 centimeters")).toBeCloseTo(0.02);
+        expect(toSI("0.43 centimetre")).toBeCloseTo(0.0043);
+        expect(toSI("0.001 centimetres")).toBeCloseTo(0.00001);
+        expect(toSI("146 mm")).toBeCloseTo(0.146);
+        expect(toSI("89 millimeter")).toBeCloseTo(0.089);
+        expect(toSI("3 millimeters")).toBeCloseTo(0.003);
+        expect(toSI("63 millimetre")).toBeCloseTo(0.063);
+        expect(toSI("1 millimetres")).toBeCloseTo(0.001);
+    });
+
+    test("single US units work", () => {
+        expect(toSI("2 inch")).toBeCloseTo(0.0508);
+        expect(toSI("3 inches")).toBeCloseTo(0.0761);
+        expect(toSI("4 in")).toBeCloseTo(0.1016);
+        expect(toSI('6"')).toBeCloseTo(0.1524);
+        expect(toSI("3.5 foot")).toBeCloseTo(1.0668);
+        expect(toSI("2 feet")).toBeCloseTo(0.6096);
+        expect(toSI("10 ft")).toBeCloseTo(3.048);
+        expect(toSI("4'")).toBeCloseTo(1.2192);
+        expect(toSI("0.4 yard")).toBeCloseTo(0.36576);
+        expect(toSI("1.7 yards")).toBeCloseTo(1.55448);
+        expect(toSI("5 yd")).toBeCloseTo(4.572);
+        expect(toSI("1 barleycorn")).toBeCloseTo(0.00846667);
+        expect(toSI("2 barleycorns")).toBeCloseTo(0.0169333);
+        expect(toSI("3 furlong")).toBeCloseTo(603.504);
+        expect(toSI("4 furlongs")).toBeCloseTo(804.672);
+        expect(toSI("5 chain")).toBeCloseTo(100.584);
+        expect(toSI("6 chains")).toBeCloseTo(120.701);
+        expect(toSI("7 rod")).toBeCloseTo(35.204);
+        expect(toSI("8 rods")).toBeCloseTo(40.2336);
+        expect(toSI("9 link")).toBeCloseTo(1.809);
+        expect(toSI("10 links")).toBeCloseTo(2.01168);
+        expect(toSI("11 cubit")).toBeCloseTo(5.0292);
+        expect(toSI("12 cubits")).toBeCloseTo(5.4864);
+        expect(toSI("13 fathom")).toBeCloseTo(23.7744);
+        expect(toSI("14 fathoms")).toBeCloseTo(25.6032);
+        expect(toSI("15 league")).toBeCloseTo(83340);
+        expect(toSI("16 leagues")).toBeCloseTo(88896);
+    });
+
+    test("multiple units and non-spaced work", () => {
+        expect(toSI('1 ft 3"')).toBeCloseTo(0.381);
+    });
+
+    test("illegal formats detected", () => {
+    });
+});
+
 
 describe("Point", () => {
     const p1 = new Point(null, 10, 20);
