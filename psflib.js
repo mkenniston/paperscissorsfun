@@ -65,6 +65,10 @@ example the following are all acceptable inputs:
   "-5 m"       // negative values are allowed
   "+3 cm"      // a plus sign is redundant but allowed
 
+Whenever any method takes a Distance object as a paramter, you can also
+just pass a string.  The method will still build a Distance object out of
+that string, but it keeps your code more concise and easier to read.
+
 */
 
 const INCH = 0.0254;
@@ -206,12 +210,7 @@ class Distance {
   }
 
   plus(addend) {
-    if (typeof addend == "string") {
-        addend = new Distance(addend);
-    }
-    if (! (addend instanceof Distance)) {
-      throw new Error("Distance.plus() arg must be string or Distance");
-    }
+    addend = distantize(addend);
     const result = new Distance(this);
     result._value += addend._value;
     return result;
@@ -225,6 +224,16 @@ class Distance {
     result._value *= multiplier;
     return result;
   }
+}
+
+function distantize(arg) {
+  if (typeof arg == 'string') {
+    return new Distance(arg);
+  }
+  if (arg instanceof Distance) {
+    return arg;
+  }
+  throw new Error(`found ${arg} where string or Distance expected`);
 }
 
 /*
@@ -274,18 +283,9 @@ polygons.
 
 class Point {
   constructor(parent, inX, inY) {
-    if (typeof inX == 'string') {
-      inX = new Distance(inX);
-    }
-    if (typeof inY == 'string') {
-      inY = new Distance(inY);
-    }
-    if (! (inX instanceof Distance) | ! (inY instanceof Distance)) {
-      throw new Error("Point.constructor() args must be string or Distance");
-    }
     this._parent = parent;
-    this._inX = inX;
-    this._inY = inY;
+    this._inX = distantize(inX);
+    this._inY = distantize(inY);
     this._outX = null;
     this._outY = null;
   }
@@ -299,15 +299,6 @@ class Point {
   }
 
   move(dx, dy) {
-    if (typeof dx == 'string') {
-      dx = new Distance(dx);
-    }
-    if (typeof dy == 'string') {
-      dy = new Distance(dy);
-    }
-    if (! (dx instanceof Distance) | ! (dy instanceof Distance)) {
-      throw new Error("Point.move(): args must be strings or Distances");
-    }
     return new Point(this._parent, this._inX.plus(dx), this._inY.plus(dy));
   }
 
