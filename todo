@@ -18,10 +18,7 @@ TODO:
     figure out how URLs work to make it testable from local copy
 
 - add input-options mechanism for setting params from either
-    the web interface or the API level
-- add the "scale" setting (e.g. HO = 87.1)
-- add the "units" setting:  US -- US Customary (ft/in), or SI - metric (m/cm)
-    - can also be used for getter/setter obj.prop()/obj.prop(newval)
+    the web interface or the API level (includes scale/HO, etc.)
 - add trivial graphics code to hello.js (and saved to pdf)
 - add coord-translation to position components
 
@@ -57,4 +54,9 @@ DONE:
 - researched, chose, installed a JS linter: jshint
 - created psflib.js and psflib.test.js w/ initial fragments of code
 - looked up variable parameters, added code to handle inch-only or ft+in
+- cleaned up indentation to match the usual JS conventions
+- added Distance class (with tests) to enforce measurement consistency
+- started adding Point code for plus() and times()
+- added scale factors (HO etc.)
+
 
