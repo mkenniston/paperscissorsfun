@@ -24,64 +24,64 @@ SOFTWARE.
 
 const psflib = require('./psflib');
 const Point = psflib.Point;
-const toSI = psflib.toSI;
+const dist = psflib.dist;
 
-describe("toSI", () => {
+describe("dist", () => {
   test("single metric units work", () => {
-    expect(toSI("1 m")).toBeCloseTo(1);
-    expect(toSI("2 meter")).toBeCloseTo(2);
-    expect(toSI("3.5 meters")).toBeCloseTo(3.5);
-    expect(toSI("4 metre")).toBeCloseTo(4);
-    expect(toSI("-0.05 metres")).toBeCloseTo(-0.05, 4);
-    expect(toSI("1.23 km")).toBeCloseTo(1230);
-    expect(toSI("1.34 kilometer")).toBeCloseTo(1340);
-    expect(toSI("2.34 kilometers")).toBeCloseTo(2340);
-    expect(toSI("3.45 kilometre")).toBeCloseTo(3450);
-    expect(toSI("4.567 kilometres")).toBeCloseTo(4567);
-    expect(toSI("34.5 cm")).toBeCloseTo(0.345, 3);
-    expect(toSI("23 centimeter")).toBeCloseTo(0.23, 3);
-    expect(toSI("2 centimeters")).toBeCloseTo(0.02, 4);
-    expect(toSI("0.43 centimetre")).toBeCloseTo(0.0043, 5);
-    expect(toSI("0.001 centimetres")).toBeCloseTo(0.00001, 7);
-    expect(toSI("146 mm")).toBeCloseTo(0.146, 3);
-    expect(toSI("89 millimeter")).toBeCloseTo(0.089, 4);
-    expect(toSI("3 millimeters")).toBeCloseTo(0.003, 5);
-    expect(toSI("63 millimetre")).toBeCloseTo(0.063, 4);
-    expect(toSI("1 millimetres")).toBeCloseTo(0.001, 5);
+    expect(dist("1 m")).toBeCloseTo(1);
+    expect(dist("2 meter")).toBeCloseTo(2);
+    expect(dist("3.5 meters")).toBeCloseTo(3.5);
+    expect(dist("4 metre")).toBeCloseTo(4);
+    expect(dist("-0.05 metres")).toBeCloseTo(-0.05, 4);
+    expect(dist("1.23 km")).toBeCloseTo(1230);
+    expect(dist("1.34 kilometer")).toBeCloseTo(1340);
+    expect(dist("2.34 kilometers")).toBeCloseTo(2340);
+    expect(dist("3.45 kilometre")).toBeCloseTo(3450);
+    expect(dist("4.567 kilometres")).toBeCloseTo(4567);
+    expect(dist("34.5 cm")).toBeCloseTo(0.345, 3);
+    expect(dist("23 centimeter")).toBeCloseTo(0.23, 3);
+    expect(dist("2 centimeters")).toBeCloseTo(0.02, 4);
+    expect(dist("0.43 centimetre")).toBeCloseTo(0.0043, 5);
+    expect(dist("0.001 centimetres")).toBeCloseTo(0.00001, 7);
+    expect(dist("146 mm")).toBeCloseTo(0.146, 3);
+    expect(dist("89 millimeter")).toBeCloseTo(0.089, 4);
+    expect(dist("3 millimeters")).toBeCloseTo(0.003, 5);
+    expect(dist("63 millimetre")).toBeCloseTo(0.063, 4);
+    expect(dist("1 millimetres")).toBeCloseTo(0.001, 5);
   });
 
   test("single US units work", () => {
-    expect(toSI("2 inch")).toBeCloseTo(0.0508, 4);
-    expect(toSI("3 inches")).toBeCloseTo(0.0762, 4);
-    expect(toSI("4 in")).toBeCloseTo(0.1016, 3);
-    expect(toSI('6"')).toBeCloseTo(0.1524, 3);
-    expect(toSI("3.5 foot")).toBeCloseTo(1.0668);
-    expect(toSI("2 feet")).toBeCloseTo(0.6096, 3);
-    expect(toSI("10 ft")).toBeCloseTo(3.048);
-    expect(toSI("4'")).toBeCloseTo(1.2192);
-    expect(toSI("0.4 yard")).toBeCloseTo(0.36576, 3);
-    expect(toSI("1.7 yards")).toBeCloseTo(1.55448);
-    expect(toSI("5 yd")).toBeCloseTo(4.572);
-    expect(toSI("1 barleycorn")).toBeCloseTo(0.00846667, 5);
-    expect(toSI("2 barleycorns")).toBeCloseTo(0.0169333, 4);
-    expect(toSI("3 furlong")).toBeCloseTo(603.504);
-    expect(toSI("4 furlongs")).toBeCloseTo(804.672);
-    expect(toSI("5 chain")).toBeCloseTo(100.584);
-    expect(toSI("6 chains")).toBeCloseTo(120.701);
-    expect(toSI("7 rod")).toBeCloseTo(35.204);
-    expect(toSI("8 rods")).toBeCloseTo(40.2336);
-    expect(toSI("9 link")).toBeCloseTo(1.809);
-    expect(toSI("10 links")).toBeCloseTo(2.01168);
-    expect(toSI("11 cubit")).toBeCloseTo(5.0292);
-    expect(toSI("12 cubits")).toBeCloseTo(5.4864);
-    expect(toSI("13 fathom")).toBeCloseTo(23.7744);
-    expect(toSI("14 fathoms")).toBeCloseTo(25.6032);
-    expect(toSI("15 league")).toBeCloseTo(83340);
-    expect(toSI("16 leagues")).toBeCloseTo(88896);
+    expect(dist("2 inch")).toBeCloseTo(0.0508, 4);
+    expect(dist("3 inches")).toBeCloseTo(0.0762, 4);
+    expect(dist("4 in")).toBeCloseTo(0.1016, 3);
+    expect(dist('6"')).toBeCloseTo(0.1524, 3);
+    expect(dist("3.5 foot")).toBeCloseTo(1.0668);
+    expect(dist("2 feet")).toBeCloseTo(0.6096, 3);
+    expect(dist("10 ft")).toBeCloseTo(3.048);
+    expect(dist("4'")).toBeCloseTo(1.2192);
+    expect(dist("0.4 yard")).toBeCloseTo(0.36576, 3);
+    expect(dist("1.7 yards")).toBeCloseTo(1.55448);
+    expect(dist("5 yd")).toBeCloseTo(4.572);
+    expect(dist("1 barleycorn")).toBeCloseTo(0.00846667, 5);
+    expect(dist("2 barleycorns")).toBeCloseTo(0.0169333, 4);
+    expect(dist("3 furlong")).toBeCloseTo(603.504);
+    expect(dist("4 furlongs")).toBeCloseTo(804.672);
+    expect(dist("5 chain")).toBeCloseTo(100.584);
+    expect(dist("6 chains")).toBeCloseTo(120.701);
+    expect(dist("7 rod")).toBeCloseTo(35.204);
+    expect(dist("8 rods")).toBeCloseTo(40.2336);
+    expect(dist("9 link")).toBeCloseTo(1.809);
+    expect(dist("10 links")).toBeCloseTo(2.01168);
+    expect(dist("11 cubit")).toBeCloseTo(5.0292);
+    expect(dist("12 cubits")).toBeCloseTo(5.4864);
+    expect(dist("13 fathom")).toBeCloseTo(23.7744);
+    expect(dist("14 fathoms")).toBeCloseTo(25.6032);
+    expect(dist("15 league")).toBeCloseTo(83340);
+    expect(dist("16 leagues")).toBeCloseTo(88896);
   });
 
   test("multiple units and non-spaced work", () => {
-    expect(toSI('1 ft 3"')).toBeCloseTo(0.381, 3);
+    expect(dist('1 ft 3"')).toBeCloseTo(0.381, 3);
   });
 
   test("illegal formats detected", () => {

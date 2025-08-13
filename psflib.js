@@ -29,9 +29,27 @@ SOFTWARE.
 /*
   ==== MEASUREMENT UNITS ====
 
-The toSI function encapsulates the conversion of various measurement
-units (e.g. US Customary and SI/metric) into the standard unit (meters)
-used internally.
+The dist function encapsulates the conversion of various units of
+distance (e.g. US Customary and SI/metric) into the standard unit
+used internally by psflib.
+
+Since different people in different countries and contexts prefer to
+specify distances using different units and different notations, it is very
+desirable for the dist() function to accept its inputs in a natural, uniform,
+easy-to-read way.  Rather than create complex syntax, this implementation
+simply accepts a string as its input.  The allowed format is fairly flexible,
+so for example the following are all acceptable inputs:
+
+  dist("1 ft");
+  dist("1 ft 2 in");  // multiple parts will be added together
+  dist("1ft2in";  // spacing is ignored
+  dist(`1' 2"`):  // the usual abbreviation, note the use of backticks
+                  // to avoid any need for escaping ' or "
+  dist(`${maxLen} ft`);  // backticks also allow variable interpolation
+  dist("4 m 23 cm");  // metric is also supported
+  dist("4.56 feet");  // decimal values are allowed
+  dist("-5 m");  // signed values are allowed
+  dist("+3 cm");  // plus signs are allowed
 
 */
 
@@ -97,7 +115,6 @@ function tokenize(input) {
     units: /^[a-z\'\"]+/,
     whitespace: /^\s+/,
   };
-
   while (index < input.length) {
     let matched = false;
     for (const type in regexes) {
@@ -119,8 +136,7 @@ function tokenize(input) {
   return tokens;
 }
 
-
-function toSI(stringRep) {
+function dist(stringRep) {
   const tokens = tokenize(stringRep.toLowerCase());
   if (tokens.length % 2 != 0) {
     throw new Error(`${stringRep} has odd number of tokens`);
@@ -294,7 +310,7 @@ class Reflect extends AffineTransformation {
 }
 
 module.exports = {
-  toSI: toSI,
+  dist: dist,
   Point: Point,
   AffineTransformation: AffineTransformation,
   Scale: Scale,
