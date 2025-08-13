@@ -27,30 +27,43 @@ SOFTWARE.
 // http://paperscissorsfun.com
 
 /*
-  ==== MEASUREMENT UNITS ====
+    ==== DISTANCE ====
 
-The dist function encapsulates the conversion of various units of
-distance (e.g. US Customary and SI/metric) into the standard unit
-used internally by psflib.
+The Distance class encapsulates the conversion of various units of
+distance (e.g. US Customary and SI/metric) into the single standard
+unit used internally by psflib.  (The standard unit happens to be "meter",
+but that is hidden inside the class.)  Having a specific class for
+distances also reinforces the conceptual distinction between dimensioned
+quantities like "12 feet" and dimensionless quantities like "12".
+It also enables code that manipulates distances to use "instanceof Distance"
+to verify that every distance has been properly converted, thus detecting
+accidental attempts to use an unconverted (and dimensionless) Number object.
+Note that distances can be used to specify both absolute position
+coordinates (e.g. for the Point constructor) as well as relative vector
+coordinates (e.g. for Point.move()).
 
-Since different people in different countries and contexts prefer to
-specify distances using different units and different notations, it is very
-desirable for the dist() function to accept its inputs in a natural, uniform,
-easy-to-read way.  Rather than create complex syntax, this implementation
-simply accepts a string as its input.  The allowed format is fairly flexible,
-so for example the following are all acceptable inputs:
+Since different people in different countries and different contexts prefer
+to specify distances using different units and different notations, it is
+very desirable for the Distance() constructor and other methods to
+accept their argument in a natural, uniform, easy-to-read way.  Rather
+than inventing complex new syntax, this implementation simply uses a
+string as the argument.  The allowed format is fairly flexible, so for
+example the following are all acceptable inputs:
 
-  dist("1 ft");
-  dist("1 ft 2 in");  // multiple parts will be added together
-  dist("1 ft 0 in"):  // zero is accepted
-  dist("1ft2in";  // spacing is ignored
-  dist(`1' 2"`):  // the usual abbreviation, note the use of backticks
-                  // to avoid any need for escaping ' or "
-  dist(`${maxLen} ft`);  // backticks also allow variable interpolation
-  dist("4 m 23 cm");  // metric is also supported
-  dist("4.56 feet");  // decimal values are allowed
-  dist("-5 m");  // signed values are allowed
-  dist("+3 cm");  // plus signs are allowed
+  "1 ft"       // double-quotes work fine
+  '1 ft'       // single-quotes also work fine
+  "1 ft 2 in"  // multiple parts will be added together
+  "1 ft 0 in"  // zero is allowed
+  "1ft2in"     // spacing is ignored
+  `1' 2"`      // the usual abbreviation, note the use of backticks
+               // to avoid any need for escaping ' or "
+  `${len} ft`  // backticks also allow variable interpolation
+  "4 m 23 cm"  // metric is supported
+  "4.56 feet"  // decimal values are allowed
+  "3 meters"   // plural units are allowed
+  "3 metre"    // alternate spellings are allowed
+  "-5 m"       // negative values are allowed
+  "+3 cm"      // a plus sign is redundant but allowed
 
 */
 
@@ -108,57 +121,102 @@ const MEASUREMENT_UNITS = {
   'leagues':     5556,
   };
 
-function tokenize(input) {
-  const tokens = [];
-  let index = 0;
-  const regexes = {
-    number: /^[0123456789\.\+\-]+/,
-    units: /^[a-z\'\"]+/,
-    whitespace: /^\s+/,
-  };
-  while (index < input.length) {
-    let matched = false;
-    for (const type in regexes) {
-      const match = input.substring(index).match(regexes[type]);
-      if (match) {
-        if (type !== 'whitespace') { // Ignore whitespace tokens
-          tokens.push({ type: type, value: match[0] });
+class Distance {
+  constructor(input) {
+    if (input instanceof Distance) {
+      // clone the input
+      this._value = input._value;
+      return;
+    }
+    if (input == undefined) {
+      // create an undefined Distance (mostly used inside class methods)
+      this._value = undefined;
+      return;
+    }
+    if ( typeof input != 'string') {
+      throw new Error("Distance.constructor(): arg must be string or Distance");
+    }
+
+    const tokens = this._tokenize(input);
+    if (tokens.length % 2 != 0) {
+      throw new Error(`${input} has odd number of tokens`);
+    }
+    this._value = this._parse(tokens);
+  }
+
+  _tokenize(input) {
+    // break the input into tokens
+    const stringRep = input.toLowerCase();
+    const tokens = [];
+    let index = 0;
+    const regexes = {
+      number: /^[0123456789\.\+\-]+/,
+      units: /^[a-z\'\"]+/,
+      whitespace: /^\s+/,
+    };
+    while (index < stringRep.length) {
+      let matched = false;
+      for (const type in regexes) {
+        const match = stringRep.substring(index).match(regexes[type]);
+        if (match) {
+          if (type !== 'whitespace') { // Ignore whitespace tokens
+            tokens.push({ type: type, value: match[0] });
+          }
+          index += match[0].length;
+          matched = true;
+          break;
         }
-        index += match[0].length;
-        matched = true;
-        break;
+      }
+      if (! matched) {
+        throw new Error('Distance.constructor(): ' +
+          `Unexpected character at index ${index}: ${stringRep[index]}`);
       }
     }
-    if (!matched) {
-      throw new Error(
-        `Unexpected character at index ${index}: ${input[index]}`);
-    }
+    return tokens;
   }
-  return tokens;
-}
 
-function dist(stringRep) {
-  const tokens = tokenize(stringRep.toLowerCase());
-  if (tokens.length % 2 != 0) {
-    throw new Error(`${stringRep} has odd number of tokens`);
-  }
-  let index = 0;
-  let value = 0;
-  while (index < tokens.length) {
-    const num = tokens[index].value;
-    index += 1;
-    const unit = tokens[index].value;
-    index += 1;
-    if (! MEASUREMENT_UNITS.hasOwnProperty(unit)) {
-      throw new Error(`invalid measurement unit ${unit}`);
+  _parse(tokens) {
+    // parse the tokens into an internal distance value
+
+    var index = 0;
+    let value = 0;
+    while (index < tokens.length) {
+      const num = tokens[index].value;
+      index += 1;
+      const unit = tokens[index].value;
+      index += 1;
+      if (! MEASUREMENT_UNITS.hasOwnProperty(unit)) {
+        throw new Error(`invalid measurement unit ${unit}`);
+      }
+      value += Number(num) * MEASUREMENT_UNITS[unit];
     }
-    value += Number(num) * MEASUREMENT_UNITS[unit];
+    return value;
   }
-  return value;
+
+  plus(addend) {
+    if (typeof addend == "string") {
+        addend = new Distance(addend);
+    }
+    if (! (addend instanceof Distance)) {
+      throw new Error("Distance.plus() arg must be string or Distance");
+    }
+    const result = new Distance(this);
+    result._value += addend._value;
+    return result;
+  }
+
+  times(multiplier) {
+    if (typeof multiplier != 'number') {
+      throw new Error("Distance.times() arg must be number");
+    }
+    const result = new Distance(this);
+    result._value *= multiplier;
+    return result;
+  }
 }
 
 /*
-  ==== POINT ====
+    ==== POINT ====
 
 The "Point" class encapsulates the representation of 2-D points using
 two different coordinate systems:
@@ -204,6 +262,15 @@ polygons.
 
 class Point {
   constructor(parent, inX, inY) {
+    if (typeof inX == 'string') {
+      inX = new Distance(inX);
+    }
+    if (typeof inY == 'string') {
+      inY = new Distance(inY);
+    }
+    if (! (inX instanceof Distance) | ! (inY instanceof Distance)) {
+      throw new Error("Point.constructor() args must be string or Distance");
+    }
     this._parent = parent;
     this._inX = inX;
     this._inY = inY;
@@ -220,14 +287,23 @@ class Point {
   }
 
   move(dx, dy) {
-    return new Point(this._parent, this._inX + dx, this._inY + dy);
+    if (typeof dx == 'string') {
+      dx = new Distance(dx);
+    }
+    if (typeof dy == 'string') {
+      dy = new Distance(dy);
+    }
+    if (! (dx instanceof Distance) | ! (dy instanceof Distance)) {
+      throw new Error("Point.move(): args must be strings or Distances");
+    }
+    return new Point(this._parent, this._inX.plus(dx), this._inY.plus(dy));
   }
 
   _applyTransforms() {
     if (this._outX == null) {
       // generate the "out" coordinates here
-      this._outX = 111;  // FIX ME
-      this._outY = 222;
+      this._outX = new Distance("111 m");  // FIX ME
+      this._outY = new Distance("222 m");
     }
   }
 
@@ -243,7 +319,7 @@ class Point {
 }
 
 /*
-  ==== AFFINE_TRANSFORMATION ====
+    ==== AFFINE_TRANSFORMATION ====
 
 There is a whole set of classes which define the transformations we
 might want to do on our coordinates.  The most obvious is that something
@@ -287,7 +363,7 @@ class Reflect extends AffineTransformation {
 }
 
 module.exports = {
-  dist: dist,
+  Distance: Distance,
   Point: Point,
   AffineTransformation: AffineTransformation,
   Scale: Scale,
