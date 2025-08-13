@@ -1,10 +1,10 @@
 TODO:
 
-- add lots of missing tests (multiples, spaceless, errors, move/plus/times)
-
 - add code to Transform classes to multiply matrix X matrix, and X vector/point
 	- Transform.compose(Transform) -> Transform
 	- Transform.apply(x, y) -> [x', y']
+
+- add "toString()" method to each class to help test/debug
 
 - create "psflib.js" with Component, Kit, Page, AffineTransformation, Point,
     Scale, Rotate, Reflect, Translate classes, all with unit tests

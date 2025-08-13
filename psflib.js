@@ -337,31 +337,49 @@ each type uses a limited subset of all available value combinations.
 
 class AffineTransformation {
   constructor(matrix) {
+    if (matrix.length != 3 | matrix[0].length != 3 |
+        matrix[1].length != 3 | matrix[2].length != 3) {
+      throw new Error(
+        "AffineTransformation.constructor: invalid matrix shape");
+    }
     this._matrix = matrix;
   }
 }
 
 class Scale extends AffineTransformation {
-  constructor() {
-    super();
+  constructor(factor) {
+    super([[factor, 0, 0], [0, factor, 0], [0, 0, 1]]);
   }
 }
 
 class Translate extends AffineTransformation {
-  constructor() {
-    super();
+  constructor(dx, dy) {
+    dx = distantize(dx);
+    dy = distantize(dy);
+    super([[0, 0, dx._value], [0, 0, dy._value], [0, 0, 1]]);
   }
 }
+
+const ROT90 = 90;
+const ROT180 = 180;
+const ROT270 = 270;
 
 class Rotate extends AffineTransformation {
-  constructor() {
-    super();
-  }
-}
-
-class Reflect extends AffineTransformation {
-  constructor() {
-    super();
+  constructor(which) {
+    var m;
+    console.log(`IN: m = ${m}, which = ${which}`);
+    if (which == ROT90) {
+      m = [[0, -1, 0], [1, 0, 0], [0, 0, 1]];
+      console.log(`90: m = ${m}`);
+    } else if (which == ROT180) {
+      m = [[-1, 0, 0], [0, -1, 0], [0, 0, 1]];
+    } else if (which == ROT270) {
+      m = [[0, 1, 0], [-1, 0, 0], [0, 0, 0]];
+    } else {
+      throw new Error(`invalid rotation ${which}`);
+    }
+    console.log(`OUT: m = ${m}`);
+    super(m);
   }
 }
 
@@ -373,6 +391,8 @@ module.exports = {
   Scale: Scale,
   Translate: Translate,
   Rotate: Rotate,
-  Reflect: Reflect,
+  ROT90: ROT90,
+  ROT180: ROT180,
+  ROT270: ROT270,
 };
 

@@ -26,6 +26,13 @@ const psflib = require('./psflib');
 const Distance = psflib.Distance;
 const SCALE_FACTORS = psflib.SCALE_FACTORS;
 const Point = psflib.Point;
+const AffineTransformation = psflib.AffineTransformation;
+const Scale = psflib.Scale;
+const Translate = psflib.Translate;
+const Rotate = psflib.Rotate;
+const ROT90 = psflib.ROT90;
+const ROT180 = psflib.ROT180;
+const ROT270 = psflib.ROT270;
 
 function expectDV(s) {
   return expect(new Distance(s)._value);
@@ -193,6 +200,49 @@ describe("Point", () => {
     expect(() => (new Point(null, 5))).toThrow();
     expect(() => (p1.move())).toThrow();
     expect(() => (p1.move(1, 2, 3))).toThrow();
+  });
+});
+
+describe("AffineTransformation", () => {
+  test("AffineTransformation.constructor", () => {
+    var m = [];
+    expect(() => (new AffineTransformation(m))).toThrow();
+    m = [[1, 2], [1, 2, 3], [1, 2, 3]];
+    expect(() => (new AffineTransformation(m))).toThrow();
+    m = [[1, 2, 3], [1, 2], [1, 2, 3]];
+    expect(() => (new AffineTransformation(m))).toThrow();
+    m = [[1, 2, 3], [1, 2, 3], [1, 2]];
+    expect(() => (new AffineTransformation(m))).toThrow();
+    m = [[11, 22, 33], [44, 55, 66], [77, 88, 99]];
+    const x = new AffineTransformation(m)._matrix;
+    expect(x[0][0]).toBe(11);
+    expect(x[0][1]).toBe(22);
+    expect(x[0][2]).toBe(33);
+    expect(x[1][0]).toBe(44);
+    expect(x[1][1]).toBe(55);
+    expect(x[1][2]).toBe(66);
+    expect(x[2][0]).toBe(77);
+    expect(x[2][1]).toBe(88);
+    expect(x[2][2]).toBe(99);
+  });
+
+  test("Scale.constructor", () => {
+    const result = new Scale(10)._matrix;
+    expect(result).toStrictEqual([[10, 0, 0], [0, 10, 0], [0, 0, 1]]);
+  });
+
+  test("Translate.constructor", () => {
+    const result = new Translate("3 m", "5 m")._matrix;
+    expect(result).toStrictEqual([[0, 0, 3], [0, 0, 5], [0, 0, 1]]);
+  });
+
+  test("Rotate.constructor", () => {
+    var result = new Rotate(ROT90)._matrix;
+    expect(result).toStrictEqual([[0, -1, 0], [1, 0, 0], [0, 0, 1]]);
+    result = new Rotate(ROT180)._matrix;
+    expect(result).toStrictEqual([[-1, 0, 0], [0, -1, 0], [0, 0, 1]]);
+    result = new Rotate(ROT270)._matrix;
+    expect(result).toStrictEqual([[0, 1, 0], [-1, 0, 0], [0, 0, 0]]);
   });
 });
 
