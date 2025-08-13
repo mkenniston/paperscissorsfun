@@ -42,6 +42,7 @@ so for example the following are all acceptable inputs:
 
   dist("1 ft");
   dist("1 ft 2 in");  // multiple parts will be added together
+  dist("1 ft 0 in"):  // zero is accepted
   dist("1ft2in";  // spacing is ignored
   dist(`1' 2"`):  // the usual abbreviation, note the use of backticks
                   // to avoid any need for escaping ' or "
@@ -202,20 +203,8 @@ polygons.
 */
 
 class Point {
-  constructor() {
-    var inX, inY;
-    if (arguments.length == 3) {
-      // inches
-      inX = arguments[1];
-      inY = arguments[2];
-    } else if (arguments.length == 5) {
-      // feet-and-inches
-      inX = arguments[1] * 12 + arguments[2];
-      inY = arguments[3] * 12 + arguments[4];
-    } else {
-      throw new Error(`invalid ${arguments.length} args to ctor()`);
-    }
-    this._parent = arguments[0];
+  constructor(parent, inX, inY) {
+    this._parent = parent;
     this._inX = inX;
     this._inY = inY;
     this._outX = null;
@@ -230,19 +219,7 @@ class Point {
     return this._inY;
   }
 
-  move() {
-    var dx, dy;
-    if (arguments.length == 2) {
-      // inches
-      dx = arguments[0];
-      dy = arguments[1];
-    } else if (arguments.length == 4) {
-      // feet-and-inches
-      dx = arguments[0] * 12 + arguments[1];
-      dy = arguments[2] * 12 + arguments[3];
-    } else {
-      throw new Error(`invalid ${arguments.length} args to move()`);
-    }
+  move(dx, dy) {
     return new Point(this._parent, this._inX + dx, this._inY + dy);
   }
 

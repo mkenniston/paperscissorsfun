@@ -90,33 +90,33 @@ describe("dist", () => {
 
 
 describe("Point", () => {
-  const p1 = new Point(null, 10, 20);
-  const p2 = new Point(null, 3, 5, 1, 7);
+  const p1 = new Point(null, dist("10 in"), dist("20 in"));
+  const p2 = new Point(null, dist("3 ft 5 in"), dist("1 ft 7 in"));
 
   test("point is created", () => {
     expect(p1).toBeInstanceOf(Point);
   });
 
   test("input coordinates available", () => {
-    expect(p1.inX()).toBe(10);
-    expect(p1.inY()).toBe(20);
+    expect(p1.inX()).toBeCloseTo(0.254, 4);
+    expect(p1.inY()).toBeCloseTo(0.508, 4);
   });
 
   test("feet-and-inches working", () => {
-    expect(p2.inX()).toBe(41);
-    expect(p2.inY()).toBe(19);
-    var p3 = p1.move(3, -2, 4, 0);
-    expect(p3.inX()).toBe(44);
-    expect(p3.inY()).toBe(68);
+    expect(p2.inX()).toBeCloseTo(1.0414, 3);
+    expect(p2.inY()).toBeCloseTo(0.4826, 4);
+    var p3 = p1.move(dist("3 ft -2 in"), dist("4 ft 0 in"));
+    expect(p3.inX()).toBeCloseTo(1.1176, 3);
+    expect(p3.inY()).toBeCloseTo(1.7272);
   });
 
   test("move() produces correct new Point", () => {
-    var p3 = p1.move(33, 48);
-    expect(p3.inX()).toBe(43);
-    expect(p3.inY()).toBe(68);
-    var p4 = p1.move(-4, -12);
-    expect(p4.inX()).toBe(6);
-    expect(p4.inY()).toBe(8);
+    var p3 = p1.move(dist("33 in"), dist("48 in"));
+    expect(p3.inX()).toBeCloseTo(1.0922, 3);
+    expect(p3.inY()).toBeCloseTo(1.7272, 3);
+    var p4 = p1.move(dist("-4 in"), dist("-12 in"));
+    expect(p4.inX()).toBeCloseTo(0.1524, 4);
+    expect(p4.inY()).toBeCloseTo(0.2032, 4);
     expect(p3._parent).toBe(p4._parent);
   });
 
