@@ -24,13 +24,14 @@ SOFTWARE.
 
 const psflib = require('./psflib');
 const Distance = psflib.Distance;
+const SCALE_FACTORS = psflib.SCALE_FACTORS;
 const Point = psflib.Point;
 
 function expectDist(s) {
   return expect(new Distance(s)._value);
 }
 
-describe("dist", () => {
+describe("Distance", () => {
   test("single metric units work", () => {
     expectDist("1 m").toBeCloseTo(1, 3);
     expectDist("2 meter").toBeCloseTo(2, 3);
@@ -92,6 +93,25 @@ describe("dist", () => {
   });
 });
 
+describe("SCALE_FACTORS", () => {
+  function checkEntry(key, ratio) {
+    const entry = SCALE_FACTORS[key];
+      expect(entry.ratio).toBe(ratio);
+      expect(typeof entry.description).toBe('string');
+  }
+
+  test("scale factors are correct", () => {
+    checkEntry("1:1", 1);
+    checkEntry("G", 22.5);
+    checkEntry("O", 48);
+    checkEntry("S", 64);
+    checkEntry("HO", 87.1);
+    checkEntry("TT", 120);
+    checkEntry("N", 160);
+    checkEntry("Z", 220);
+    checkEntry("T", 450);
+  });
+});
 
 describe("Point", () => {
   const p1 = new Point(null, "10 in", "20 in");

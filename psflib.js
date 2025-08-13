@@ -121,6 +121,18 @@ const MEASUREMENT_UNITS = {
   'leagues':     5556,
   };
 
+const SCALE_FACTORS = {
+  "1:1": {ratio: 1,    description: "full size"},
+  "G":   {ratio: 22.5, description: "German LGB scale"},
+  "O":   {ratio: 48,   description: "O scale"},
+  "S":   {ratio: 64,   description: "S scale"},
+  "HO":  {ratio: 87.1, description: "HO scale"},
+  "TT":  {ratio: 120,  description: "TT scale"},
+  "N":   {ratio: 160,  description: "N scale"},
+  "Z":   {ratio: 220,  description: "Z scale"},
+  "T":   {ratio: 450,  description: "T scale"},
+};
+
 class Distance {
   constructor(input) {
     if (input instanceof Distance) {
@@ -364,6 +376,7 @@ class Reflect extends AffineTransformation {
 
 module.exports = {
   Distance: Distance,
+  SCALE_FACTORS: SCALE_FACTORS,
   Point: Point,
   AffineTransformation: AffineTransformation,
   Scale: Scale,

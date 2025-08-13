@@ -1,7 +1,5 @@
 TODO:
 
-- add scale factors (HO etc.)
-
 - add lots of missing tests (multiples, spaceless, errors, move/plus/times)
 
 - add code to Transform classes to multiply matrix X matrix, and X vector/point
