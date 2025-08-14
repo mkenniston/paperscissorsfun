@@ -278,5 +278,46 @@ describe("AffineTransformation", () => {
     expect(result.x).toBeCloseTo(5, 3);
     expect(result.y).toBeCloseTo(-3, 3);
   });
+
+  test("AffineTransformation.compose() works", () => {
+    function checkOneMultiply(mat1, mat2, mat3) {
+      const at1 = new AffineTransformation(mat1);
+      const at2 = new AffineTransformation(mat2);
+      const at3 = at1.compose(at2);
+      expect(at3._matrix).toStrictEqual(mat3);
+    }
+
+    var mat1 = [ [2, 1, 3], [3, 4, 1], [5, 2, 3] ];
+    var mat2 = [ [1, 2, 0], [4, 1, 2], [3, 2, 1] ];
+    var mat3 = [ [15, 11, 5], [22, 12, 9], [22, 18, 7] ];
+    checkOneMultiply(mat1, mat2, mat3);
+
+    mat3 = [ [ 8, 9, 5], [21, 12, 19], [17, 13, 14] ];
+    checkOneMultiply(mat2, mat1, mat3);
+
+    mat1 = [ [-2, 3, 4], [2, -3, 5], [0, 3, -4] ];
+    mat2 = [ [4, 2, -2], [1, 4, 3], [2, 5, 3] ];
+    mat3 = [ [3, 28, 25], [15, 17, 2], [-5, -8, -3] ];
+    checkOneMultiply(mat1, mat2, mat3);
+
+    mat1 = [ [3, -2, -1], [3, -3, 2], [2, 1, -5] ];
+    mat2 = [ [-2, 3, 0], [3, 2, 1], [1, 2, -2] ];
+    mat3 = [ [-13, 3, 0], [-13, 7, -7], [-6, -2, 11] ];
+    checkOneMultiply(mat1, mat2, mat3);
+
+    const p1 = new Point(comp, "3 m", "5 m");
+    const scale2 = new Scale(2);
+    const translate21 = new Translate("-2 m", "+1 m");
+    var results = scale2.compose(translate21).apply(p1);
+    expect(results.x).toBeCloseTo(2, 3);
+    expect(results.y).toBeCloseTo(12, 3);
+
+    results = translate21.compose(scale2).apply(p1);
+    expect(results.x).toBeCloseTo(4, 3);
+    expect(results.y).toBeCloseTo(11, 3);
+
+    expect(() => (translate21.compose(p1))).toThrow();
+  });
+
 });
 
