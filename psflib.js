@@ -160,6 +160,10 @@ class Distance {
     this._value = this._parse(tokens);
   }
 
+  toString() {
+    return `Distance("${this._value} m")`;
+  }
+
   _tokenize(input) {
     // break the input into tokens
     const stringRep = input.toLowerCase();
@@ -293,6 +297,10 @@ class Point {
     this._outY = null;
   }
 
+  toString() {
+    return `Point(${this._inX.toString()}, ${this._inY.toString()})`;
+  }
+
   inX() {
     return this._inX;
   }
@@ -347,6 +355,10 @@ class AffineTransformation {
         "AffineTransformation.constructor: invalid matrix shape");
     }
     this._matrix = matrix;
+  }
+
+  toString() {
+    return `AffineTransformation(${this._matrix})`;
   }
 
   apply(pt) {
@@ -427,6 +439,10 @@ class Rotate extends AffineTransformation {
 class Component {
   constructor(xform) {
     this._xform = xform;
+  }
+
+  toString() {
+    return "Component()";
   }
 }
 

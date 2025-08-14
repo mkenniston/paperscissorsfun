@@ -109,6 +109,7 @@ describe("Distance", () => {
   test("variations on forms", () => {
     expectDV(new Distance("387 m")).toBeCloseTo(387);
     expectDV(undefined).toBe(undefined);
+    expect((new Distance("1 in")).toString()).toEqual('Distance("0.0254 m")');
   });
 
   test("Distance.plus() works", () => {
@@ -175,6 +176,8 @@ describe("Point", () => {
     expect(p1.inY()._value).toBeCloseTo(0.508, 4);
     expect(p1._outX).toBe(null);
     expect(p1._outY).toBe(null);
+    expect(p1.toString()).toEqual(
+      'Point(Distance("3.048 m"), Distance("0.508 m"))');
   });
 
   test("Point.move() works", () => {
@@ -219,7 +222,8 @@ describe("AffineTransformation", () => {
     m = [[1, 2, 3], [1, 2, 3], [1, 2]];
     expect(() => (new AffineTransformation(m))).toThrow();
     m = [[11, 22, 33], [44, 55, 66], [77, 88, 99]];
-    const x = new AffineTransformation(m)._matrix;
+    transform = new AffineTransformation(m);
+    const x = transform._matrix;
     expect(x[0][0]).toBe(11);
     expect(x[0][1]).toBe(22);
     expect(x[0][2]).toBe(33);
@@ -229,6 +233,8 @@ describe("AffineTransformation", () => {
     expect(x[2][0]).toBe(77);
     expect(x[2][1]).toBe(88);
     expect(x[2][2]).toBe(99);
+    expect(transform.toString()).toEqual(
+      "AffineTransformation(11,22,33,44,55,66,77,88,99)");
   });
 
   test("Scale.constructor", () => {
