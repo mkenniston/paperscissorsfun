@@ -1,34 +1,26 @@
 TODO:
 
-- add code to Transform classes to multiply matrix X matrix, and X vector/point
-	- Transform.compose(Transform) -> Transform
-	- Transform.apply(x, y) -> [x', y']
-
-- add "toString()" method to each class to help test/debug
-
-- create "psflib.js" with Component, Kit, Page, AffineTransformation, Point,
-    Scale, Rotate, Reflect, Translate classes, all with unit tests
-- include lots of comments explaining "world" vs "rendered" coord systems
+- add a component that will display an "ell" shape, with scaling, rotation,
+	and translation, and generate the PDF for it.
+	- add Ell, ReflectOnX, Kit, Page classes as needed
+	- add code to assign components to positions on pages
 
 - create a "generate.js" file and a "generate.html" file, each with
     bare-minimum code to load the libraries, create a kit, and render it,
     make sure works correctly both ways
+
+- expand the example into a simple house
 
 - get simple HTML and JS hosted on XNet,
     figure out how URLs work to make it testable from local copy
 
 - add input-options mechanism for setting params from either
     the web interface or the API level (includes scale/HO, etc.)
-- add trivial graphics code to hello.js (and saved to pdf)
-- add coord-translation to position components
 
 - figure out how to fill w/ a "texture" (code)
-- figure out how to crop texture filling
+	- figure out how to crop texture filling
 
 - add a bunch of color capability
-
-- add code to assign components to positions on pages
-    (use very simple to start with)
 
 
 DONE:
@@ -58,5 +50,7 @@ DONE:
 - added Distance class (with tests) to enforce measurement consistency
 - started adding Point code for plus() and times()
 - added scale factors (HO etc.)
-
+- added transform.apply() code and tests
+- added transform.compose() code and tests
+- added toString() methods
 

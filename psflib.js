@@ -247,7 +247,7 @@ The "Point" class encapsulates the representation of 2-D points using
 two different coordinate systems:
 
 - The "in" coordinates (X and Y) are the "world" coordinates, e.g. the
-height and width of a door in feet/inches or meters.
+width and height of a real-world door in feet/inches or meters.
 To maintain consistency with mathematics, this uses standard Cartesian
 coordinates:
   - The origin is at the lower left corner of the page.
@@ -256,7 +256,7 @@ coordinates:
 
 - The "out" coordinates (X and Y) are the "rendering" coordinates, i.e.
 the place on the PDF page where the door appears, which is later the
-place on a piece of paper where image of the door is printed.
+place on a piece of paper where the image of the door is printed.
 The jsPdf library dictates that we use a different coordinate system,
 similiar to rows and columns but measuring instead of counting:
   - The origin is at the upper left corner of the page.
