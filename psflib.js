@@ -210,7 +210,7 @@ class Distance {
   }
 
   plus(addend) {
-    addend = distantize(addend);
+    addend = distancize(addend);
     const result = new Distance(this);
     result._value += addend._value;
     return result;
@@ -226,7 +226,7 @@ class Distance {
   }
 }
 
-function distantize(arg) {
+function distancize(arg) {
   if (typeof arg == 'string') {
     return new Distance(arg);
   }
@@ -282,11 +282,14 @@ polygons.
 */
 
 class Point {
-  constructor(parent, inX, inY) {
-    this._parent = parent;
-    this._inX = distantize(inX);
-    this._inY = distantize(inY);
-    this._outX = null;
+  constructor(comp, inX, inY) {
+    if (!(comp instanceof Component)) {
+      throw new Error("Point.constructor() must be given a Component");
+    }
+    this._comp = comp;
+    this._inX = distancize(inX);  // "in" fields are class Distance
+    this._inY = distancize(inY);
+    this._outX = null;            // "out" fields are type Number
     this._outY = null;
   }
 
@@ -299,14 +302,15 @@ class Point {
   }
 
   move(dx, dy) {
-    return new Point(this._parent, this._inX.plus(dx), this._inY.plus(dy));
+    return new Point(this._comp, this._inX.plus(dx), this._inY.plus(dy));
   }
 
   _applyTransforms() {
     if (this._outX == null) {
-      // generate the "out" coordinates here
-      this._outX = new Distance("111 m");  // FIX ME
-      this._outY = new Distance("222 m");
+      // skip if "out" values have already been generated
+      const result = this._comp._xform.apply(this)
+      this._outX = result.x;
+      this._outY = result.y;
     }
   }
 
@@ -344,6 +348,19 @@ class AffineTransformation {
     }
     this._matrix = matrix;
   }
+
+  apply(pt) {
+    const a = this._matrix;
+    const b = [pt.inX()._value, pt.inY()._value, 1];
+    const result =
+      [ a[0][0]*b[0] + a[0][1]*b[1] + a[0][2]*b[2],
+        a[1][0]*b[0] + a[1][1]*b[1] + a[1][2]*b[2],
+        a[2][0]*b[0] + a[2][1]*b[1] + a[2][2]*b[2] ];
+    return {x: result[0], y: result[1]};
+  }
+
+  compose(xform2) {
+  }
 }
 
 class Scale extends AffineTransformation {
@@ -354,9 +371,9 @@ class Scale extends AffineTransformation {
 
 class Translate extends AffineTransformation {
   constructor(dx, dy) {
-    dx = distantize(dx);
-    dy = distantize(dy);
-    super([[0, 0, dx._value], [0, 0, dy._value], [0, 0, 1]]);
+    dx = distancize(dx);
+    dy = distancize(dy);
+    super([[1, 0, dx._value], [0, 1, dy._value], [0, 0, 1]]);
   }
 }
 
@@ -367,10 +384,8 @@ const ROT270 = 270;
 class Rotate extends AffineTransformation {
   constructor(which) {
     var m;
-    console.log(`IN: m = ${m}, which = ${which}`);
     if (which == ROT90) {
       m = [[0, -1, 0], [1, 0, 0], [0, 0, 1]];
-      console.log(`90: m = ${m}`);
     } else if (which == ROT180) {
       m = [[-1, 0, 0], [0, -1, 0], [0, 0, 1]];
     } else if (which == ROT270) {
@@ -378,10 +393,24 @@ class Rotate extends AffineTransformation {
     } else {
       throw new Error(`invalid rotation ${which}`);
     }
-    console.log(`OUT: m = ${m}`);
     super(m);
   }
 }
+
+/*
+    ==== COMPONENT ====
+
+*/
+
+class Component {
+  constructor(xform) {
+    this._xform = xform;
+  }
+}
+
+/*
+     ==== EXPORTS ====
+*/
 
 module.exports = {
   Distance: Distance,
@@ -394,5 +423,6 @@ module.exports = {
   ROT90: ROT90,
   ROT180: ROT180,
   ROT270: ROT270,
+  Component: Component,
 };
 

@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+
+echo "Running jshint ..."
+jshint psflib.test.js
+echo "Running jest ..."
+jest psflib.test.js
+echo "Done."
+

@@ -33,6 +33,7 @@ const Rotate = psflib.Rotate;
 const ROT90 = psflib.ROT90;
 const ROT180 = psflib.ROT180;
 const ROT270 = psflib.ROT270;
+const Component = psflib.Component;
 
 function expectDV(s) {
   return expect(new Distance(s)._value);
@@ -162,13 +163,14 @@ describe("SCALE_FACTORS", () => {
 });
 
 describe("Point", () => {
-  const p1 = new Point("dummy", "10 ft", "20 in");
-  const p2 = new Point(null, new Distance("3 ft 5 in"),
+  const comp = new Component(new Scale(1));
+  const p1 = new Point(comp, "10 ft", "20 in");
+  const p2 = new Point(comp, new Distance("3 ft 5 in"),
                              new Distance( "1 ft 7 in"));
 
   test("Point.constructor works", () => {
     expect(p1).toBeInstanceOf(Point);
-    expect(p1._parent).toBe("dummy");
+    expect(p1._comp).toBe(comp);
     expect(p1.inX()._value).toBeCloseTo(3.048, 3);
     expect(p1.inY()._value).toBeCloseTo(0.508, 4);
     expect(p1._outX).toBe(null);
@@ -187,16 +189,17 @@ describe("Point", () => {
     var p4 = p1.move(new Distance("-4 in"), new Distance( "-12 in"));
     expect(p4.inX()._value).toBeCloseTo(2.9464, 3);
     expect(p4.inY()._value).toBeCloseTo(0.2032, 4);
-    expect(p3._parent).toBe(p4._parent);
+    expect(p3._comp).toBe(p4._comp);
   });
 
   test("output coordinates available", () => {  // FIX ME
-    expect(p1.outX()._value).toBe(111);
-    expect(p1.outY()._value).toBe(222);
+    expect(p1.outX()).toBeCloseTo(3.048, 3);
+    expect(p1.outY()).toBeCloseTo(0.508, 4);
   });
 
   test("bad arguments detected", () => {
     expect(() => (new Point())).toThrow();
+    expect(() => (new Point("x", "3 m", "2 m"))).toThrow();
     expect(() => (new Point(null, 5))).toThrow();
     expect(() => (p1.move())).toThrow();
     expect(() => (p1.move(1, 2, 3))).toThrow();
@@ -204,6 +207,8 @@ describe("Point", () => {
 });
 
 describe("AffineTransformation", () => {
+  const comp = new Component(new Scale(1));
+
   test("AffineTransformation.constructor", () => {
     var m = [];
     expect(() => (new AffineTransformation(m))).toThrow();
@@ -233,7 +238,7 @@ describe("AffineTransformation", () => {
 
   test("Translate.constructor", () => {
     const result = new Translate("3 m", "5 m")._matrix;
-    expect(result).toStrictEqual([[0, 0, 3], [0, 0, 5], [0, 0, 1]]);
+    expect(result).toStrictEqual([[1, 0, 3], [0, 1, 5], [0, 0, 1]]);
   });
 
   test("Rotate.constructor", () => {
@@ -243,6 +248,35 @@ describe("AffineTransformation", () => {
     expect(result).toStrictEqual([[-1, 0, 0], [0, -1, 0], [0, 0, 1]]);
     result = new Rotate(ROT270)._matrix;
     expect(result).toStrictEqual([[0, 1, 0], [-1, 0, 0], [0, 0, 0]]);
+  });
+
+  test("AffineTransformation.apply() works", () => {
+    const pt = new Point(comp, "3 m", "5 m");
+
+    var xform = new Scale(2);
+    var result = xform.apply(pt);
+    expect(result.x).toBeCloseTo(6, 3);
+    expect(result.y).toBeCloseTo(10, 3);
+
+    xform = new Translate("-1 m", "2 m");
+    result = xform.apply(pt);
+    expect(result.x).toBeCloseTo(2, 3);
+    expect(result.y).toBeCloseTo(7, 3);
+
+    xform = new Rotate(ROT90);
+    result = xform.apply(pt);
+    expect(result.x).toBeCloseTo(-5, 3);
+    expect(result.y).toBeCloseTo(3, 3);
+
+    xform = new Rotate(ROT180);
+    result = xform.apply(pt);
+    expect(result.x).toBeCloseTo(-3, 3);
+    expect(result.y).toBeCloseTo(-5, 3);
+
+    xform = new Rotate(ROT270);
+    result = xform.apply(pt);
+    expect(result.x).toBeCloseTo(5, 3);
+    expect(result.y).toBeCloseTo(-3, 3);
   });
 });
 
