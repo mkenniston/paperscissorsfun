@@ -33,6 +33,7 @@ const Rotate = psflib.Rotate;
 const ROT90 = psflib.ROT90;
 const ROT180 = psflib.ROT180;
 const ROT270 = psflib.ROT270;
+const ReflectAroundXAxis = psflib.ReflectAroundXAxis;
 const Component = psflib.Component;
 
 function expectDV(s) {
@@ -222,7 +223,7 @@ describe("AffineTransformation", () => {
     m = [[1, 2, 3], [1, 2, 3], [1, 2]];
     expect(() => (new AffineTransformation(m))).toThrow();
     m = [[11, 22, 33], [44, 55, 66], [77, 88, 99]];
-    transform = new AffineTransformation(m);
+    const transform = new AffineTransformation(m);
     const x = transform._matrix;
     expect(x[0][0]).toBe(11);
     expect(x[0][1]).toBe(22);
@@ -256,33 +257,37 @@ describe("AffineTransformation", () => {
     expect(result).toStrictEqual([[0, 1, 0], [-1, 0, 0], [0, 0, 0]]);
   });
 
+  test("ReflectAroundXAxis.constructor", () => {
+    const result = new ReflectAroundXAxis()._matrix;
+    expect(result).toStrictEqual([[1, 0, 0], [0, -1, 0], [0, 0, 1]]);
+  });
+
   test("AffineTransformation.apply() works", () => {
     const pt = new Point(comp, "3 m", "5 m");
 
-    var xform = new Scale(2);
-    var result = xform.apply(pt);
+    var result = (new Scale(2)).apply(pt);
     expect(result.x).toBeCloseTo(6, 3);
     expect(result.y).toBeCloseTo(10, 3);
 
-    xform = new Translate("-1 m", "2 m");
-    result = xform.apply(pt);
+    result = (new Translate("-1 m", "2 m")).apply(pt);
     expect(result.x).toBeCloseTo(2, 3);
     expect(result.y).toBeCloseTo(7, 3);
 
-    xform = new Rotate(ROT90);
-    result = xform.apply(pt);
+    result = (new Rotate(ROT90)).apply(pt);
     expect(result.x).toBeCloseTo(-5, 3);
     expect(result.y).toBeCloseTo(3, 3);
 
-    xform = new Rotate(ROT180);
-    result = xform.apply(pt);
+    result = (new Rotate(ROT180)).apply(pt);
     expect(result.x).toBeCloseTo(-3, 3);
     expect(result.y).toBeCloseTo(-5, 3);
 
-    xform = new Rotate(ROT270);
-    result = xform.apply(pt);
+    result = (new Rotate(ROT270)).apply(pt);
     expect(result.x).toBeCloseTo(5, 3);
     expect(result.y).toBeCloseTo(-3, 3);
+
+    result = (new ReflectAroundXAxis()).apply(pt);
+    expect(result.x).toBeCloseTo(3);
+    expect(result.y).toBeCloseTo(-5);
   });
 
   test("AffineTransformation.compose() works", () => {

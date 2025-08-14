@@ -1,8 +1,10 @@
 #!/usr/bin/bash
 
 echo "Running jshint ..."
-jshint psflib.test.js
-echo "Running jest ..."
-jest psflib.test.js
+jshint psflib.js psflib.test.js
+if [ $? -eq 0 ]; then
+  echo "Running jest ..."
+  jest pslib.js psflib.test.js
+fi
 echo "Done."
 

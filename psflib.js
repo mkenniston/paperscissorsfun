@@ -316,7 +316,7 @@ class Point {
   _applyTransforms() {
     if (this._outX == null) {
       // skip if "out" values have already been generated
-      const result = this._comp._xform.apply(this)
+      const result = this._comp._xform.apply(this);
       this._outX = result.x;
       this._outY = result.y;
     }
@@ -431,6 +431,12 @@ class Rotate extends AffineTransformation {
   }
 }
 
+class ReflectAroundXAxis extends AffineTransformation {
+  constructor() {
+    super([[1, 0, 0], [0, -1, 0], [0, 0, 1]]);
+  }
+}
+
 /*
     ==== COMPONENT ====
 
@@ -461,6 +467,7 @@ module.exports = {
   ROT90: ROT90,
   ROT180: ROT180,
   ROT270: ROT270,
+  ReflectAroundXAxis: ReflectAroundXAxis,
   Component: Component,
 };
 
