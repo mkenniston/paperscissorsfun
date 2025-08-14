@@ -56,4 +56,5 @@ DONE:
 - fixed up "doit" script to run tests only if jshint succeeds
 - added ReflectAroundXAxis
 - looked up bin-packing, found some JS code on github, downloaded it
+- wired "bin-pack" package into psflib code, and added a sanity test
 
