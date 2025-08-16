@@ -35,6 +35,8 @@ const ROT180 = psflib.ROT180;
 const ROT270 = psflib.ROT270;
 const ReflectAroundXAxis = psflib.ReflectAroundXAxis;
 const Component = psflib.Component;
+const Page = psflib.Page;
+const Kit = psflib.Kit;
 
 function expectDV(s) {
   return expect(new Distance(s)._value);
@@ -330,6 +332,27 @@ describe("AffineTransformation", () => {
     expect(results.y).toBeCloseTo(11, 3);
 
     expect(() => (translate21.compose(p1))).toThrow();
+  });
+});
+
+describe("Component", () => {
+  test("Component.constructor", () => {
+    const c = new Component(new Scale(1));
+    expect(c).toBeInstanceOf(Component);
+  });
+});
+
+describe("Page", () => {
+  test("Page.constructor", () => {
+    const p = new Page();
+    expect(p).toBeInstanceOf(Page);
+  });
+});
+
+describe("Kit", () => {
+  test("Kit.constructor", () => {
+    const k = new Kit();
+    expect(k).toBeInstanceOf(Kit);
   });
 });
 

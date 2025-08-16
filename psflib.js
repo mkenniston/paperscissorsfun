@@ -474,6 +474,34 @@ class Component {
 }
 
 /*
+    ==== PAGE ====
+
+*/
+
+class Page {
+  constructor() {
+  }
+
+  toString() {
+    return "Page()";
+  }
+}
+
+/*
+    ==== Kit ====
+
+*/
+
+class Kit {
+  constructor() {
+  }
+
+  toString() {
+    return "Kit()";
+  }
+}
+
+/*
      ==== EXPORTS ====
 */
 
@@ -490,5 +518,7 @@ module.exports = {
   ROT270: ROT270,
   ReflectAroundXAxis: ReflectAroundXAxis,
   Component: Component,
+  Page: Page,
+  Kit: Kit,
 };
 
