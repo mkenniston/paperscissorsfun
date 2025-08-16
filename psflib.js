@@ -39,8 +39,8 @@ It also enables code that manipulates distances to use "instanceof Distance"
 to verify that every distance has been properly converted, thus detecting
 accidental attempts to use an unconverted (and dimensionless) Number object.
 Note that distances can be used to specify both absolute position
-coordinates (e.g. for the Point constructor) as well as relative vector
-coordinates (e.g. for Point.move()).
+coordinates (e.g. for creating points) as well as relative vector
+coordinates (e.g. as the argument to DP.plus()).
 
 Since different people in different countries and different contexts prefer
 to specify distances using different units and different notations, it is
@@ -214,7 +214,7 @@ class Distance {
   }
 
   plus(addend) {
-    addend = distancize(addend);
+    addend = distancify(addend);
     const result = new Distance(this);
     result._value += addend._value;
     return result;
@@ -230,7 +230,7 @@ class Distance {
   }
 }
 
-function distancize(arg) {
+function distancify(arg) {
   if (typeof arg == 'string') {
     return new Distance(arg);
   }
@@ -241,10 +241,20 @@ function distancize(arg) {
 }
 
 /*
-    ==== POINT ====
+    ==== DISTANCE PAIR ====
 
-The "Point" class encapsulates the representation of 2-D points using
-two different coordinate systems:
+The "DistancePair" class is used so much that we abbreviate it "DP".
+
+The "DP" class is just a pair of Distance objects.  They are used for
+three distinct purposes:
+  (1) Represent a point.  This is the most common use.
+  (2) Represent a vector (direction and length).  For example, you
+    can add a vector to a point to get a new point.
+  (3) Represent a size.
+To match the usual mathematical convention, "X" (width) always comes first,
+followed by "Y" (height).
+
+We use two different 2-D coordinate systems:
 
 - The "in" coordinates (X and Y) are the "world" coordinates, e.g. the
 width and height of a real-world door in feet/inches or meters.
@@ -274,34 +284,39 @@ the data structure which represents our whole kit, we cannot decide
 where on the page to put things until after we know what all the
 components are.  (This gives us at least a chance of packing the different
 components onto pages with some degree of efficiency.)
-Rather than add the complexity of keeping track of all the Points that
-exist, we just let each Point take care of transforming itself the
+Rather than add the complexity of keeping track of all the points that
+exist, we just let each point take care of transforming itself the
 first time somebody asks for an "outX" or "outY".
 
-The Point.move() method is for convenience:  it starts at the invoking
-Point, then moves a specified distance and direction, and returns a
-new Point at the ending location.  This is very handy for creating
+The DP.plus() method treats its argument as a vector which is to be
+added to a point, i.e. it means "move()": start at the invoking
+point, then move a specified distance and direction, and return a
+new point at the ending location.  This is very handy for creating
 polygons.
 
 */
 
-class Point {
+class DistancePair {
   constructor(comp, inX, inY) {
     if (!(comp instanceof Component)) {
-      throw new Error("Point.constructor() must be given a Component");
+      throw new Error("DistancePair.constructor() must be given a Component");
     }
     this._comp = comp;
-    this._inX = distancize(inX);  // "in" fields are class Distance
-    this._inY = distancize(inY);
+    this._inX = distancify(inX);  // "in" fields are class Distance
+    this._inY = distancify(inY);
     this._outX = null;            // "out" fields are type Number
     this._outY = null;
   }
 
   toString() {
-    return `Point(${this._inX.toString()}, ${this._inY.toString()})`;
+    return `DistancePair(${this._inX.toString()}, ${this._inY.toString()})`;
   }
 
   inX() {
+    return this._inX;
+  }
+
+  inWidth() {
     return this._inX;
   }
 
@@ -309,8 +324,12 @@ class Point {
     return this._inY;
   }
 
-  move(dx, dy) {
-    return new Point(this._comp, this._inX.plus(dx), this._inY.plus(dy));
+  inHeight() {
+    return this._inY;
+  }
+
+  plus(dx, dy) {
+    return new DistancePair(this._comp, this._inX.plus(dx), this._inY.plus(dy));
   }
 
   _applyTransforms() {
@@ -332,6 +351,8 @@ class Point {
     return this._outY;
   }
 }
+
+const DP = DistancePair;  // to make code more concise and save typing
 
 /*
     ==== AFFINE_TRANSFORMATION ====
@@ -405,8 +426,8 @@ class Scale extends AffineTransformation {
 
 class Translate extends AffineTransformation {
   constructor(dx, dy) {
-    dx = distancize(dx);
-    dy = distancize(dy);
+    dx = distancify(dx);
+    dy = distancify(dy);
     super([[1, 0, dx._value], [0, 1, dy._value], [0, 0, 1]]);
   }
 }
@@ -459,7 +480,7 @@ class Component {
 module.exports = {
   Distance: Distance,
   SCALE_FACTORS: SCALE_FACTORS,
-  Point: Point,
+  DP: DP,
   AffineTransformation: AffineTransformation,
   Scale: Scale,
   Translate: Translate,

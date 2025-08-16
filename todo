@@ -1,5 +1,9 @@
 TODO:
 
+- add class Component
+- add class Page
+- add class Kit
+
 - add a component that will display an "ell" shape, with scaling, rotation,
 	and translation, and generate the PDF for it.
 	- add Ell, Kit, Page classes as needed
@@ -57,4 +61,4 @@ DONE:
 - added ReflectAroundXAxis
 - looked up bin-packing, found some JS code on github, downloaded it
 - wired "bin-pack" package into psflib code, and added a sanity test
-
+- changed "Point" to "DP" ("DistancePair"), use for pt, vector, size
