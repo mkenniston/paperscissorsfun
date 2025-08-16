@@ -4,7 +4,7 @@ echo "Running jshint ..."
 jshint psflib.js psflib.test.js
 if [ $? -eq 0 ]; then
   echo "Running jest ..."
-  jest pslib.js psflib.test.js
+  jest psflib.test.js bin-pack.test.js
 fi
 echo "Done."
 

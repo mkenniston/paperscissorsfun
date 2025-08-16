@@ -62,3 +62,5 @@ DONE:
 - looked up bin-packing, found some JS code on github, downloaded it
 - wired "bin-pack" package into psflib code, and added a sanity test
 - changed "Point" to "DP" ("DistancePair"), use for pt, vector, size
+- split tests for 3rd-party "bin-sort" into separate file for isolation
+
