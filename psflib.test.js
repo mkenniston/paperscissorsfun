@@ -339,6 +339,7 @@ describe("Component", () => {
   test("Component.constructor", () => {
     const c = new Component(new Scale(1));
     expect(c).toBeInstanceOf(Component);
+    expect(c.toString()).toEqual("Component()");
   });
 });
 
@@ -346,6 +347,7 @@ describe("Page", () => {
   test("Page.constructor", () => {
     const p = new Page();
     expect(p).toBeInstanceOf(Page);
+    expect(p.toString()).toEqual("Page()");
   });
 });
 
@@ -353,6 +355,46 @@ describe("Kit", () => {
   test("Kit.constructor", () => {
     const k = new Kit();
     expect(k).toBeInstanceOf(Kit);
+    expect(k.toString()).toEqual("Kit()");
+    expect(k._options).toEqual({});
+  });
+
+  const dummyOptions = {
+    "color": "blue",
+    "number": 5,
+   };
+
+  class DummyKit extends Kit {
+    getDefaultOptions() {
+      return dummyOptions;
+    }
+    build() {
+      this.addPiece(new Component());
+      this.addPiece(new Component());
+      this.addPiece(new Component());
+    }
+  }
+
+  test("Kit.constructor sets initial values", () => {
+    const k = new DummyKit();
+    expect(k.toString()).toEqual("DummyKit()");
+    expect(k.getDefaultOptions()).toEqual(dummyOptions);
+  });
+
+  test("Kit.build updates options()", () => {
+    const k = new DummyKit();
+    expect(k.getDefaultOptions()).toEqual(dummyOptions);
+    k.generate({"color": "red"});
+    expect(k.getOptionValue("color")).toEqual("red");
+    expect(k.getOptionValue("number")).toEqual(5);
+  });
+
+  test("Kit.generate() invokes build()", () => {
+    const k = new DummyKit();
+    expect(k._pieceList.length).toBe(0);
+    k.generate({"planet": "Earth"});
+    expect(k._pieceList.length).toBe(3);
+    expect(k.getOptionValue("planet")).toEqual("Earth");
   });
 });
 

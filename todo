@@ -1,8 +1,10 @@
 TODO:
 
-- add code for class Component
-- add code for class Page
-- add code for class Kit
+- change DummyKit components to "box" with varying sizes
+- add code for Kit.pack() and class Page
+- add code for Kit.render()
+
+- add code for nested Components
 
 - add a component that will display an "ell" shape, with scaling, rotation,
 	and translation, and generate the PDF for it.
@@ -64,4 +66,5 @@ DONE:
 - changed "Point" to "DP" ("DistancePair"), use for pt, vector, size
 - split tests for 3rd-party "bin-sort" into separate file for isolation
 - added initial bones for Page, Kit
+- added basic logic for Kit
 

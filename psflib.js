@@ -488,16 +488,75 @@ class Page {
 }
 
 /*
-    ==== Kit ====
+    ==== KIT ====
+
+A "kit" is a collection of "Pieces" (which are just top-level Components)
+which are all printed on the same set of pages.  The class "Kit" is
+intended as a parent class, for example:
+
+class SimpleHouse extends Kit {
+  getDefaultOptions() {
+    return {
+      "houseWidth": "20 ft",
+      "houseDepth": "35 ft",
+      "roofPitch":  0.5,
+    };
+  }
+
+  generate() {
+    ... create all the Components here ...
+  }
+}
 
 */
 
 class Kit {
-  constructor() {
+  constructor() {  // This should NOT be overridden.
+    this._options = this.getDefaultOptions();
+    this._pieceList = [];
+    this._pageList = [];
   }
 
-  toString() {
-    return "Kit()";
+  toString() {  // This should NOT be overridden.
+    return `${this.constructor.name}()`;
+  }
+
+  // "getDefaultOptions" returns a list of all available user-selectable
+  // options and their default values.  This is needed when using the
+  // web interface, so the browser code can set up selection
+  // boxes/pulldowns/checkboxes.  When running from node, this method
+  // can be skipped.
+
+  getDefaultOptions() {  // OVERRIDE this.
+    return {};
+  }
+
+  getOptionValue(key) {  // This should NOT be overriden.
+    return this._options[key];
+  }
+
+  generate(options) {  // This should NOT be overridden.
+    for (const key in options) {
+      if (options.hasOwnProperty(key)) {
+        this._options[key] = options[key];
+      }
+    }
+    this.build();
+    this.pack();
+    this.render();
+  }
+
+  addPiece(comp) {  // This should NOT be overridden.
+    this._pieceList.push(comp);
+  }
+
+  build() {  // OVERRIDE this.
+  }
+
+  pack() { // This should NOT be overridden.
+  }
+
+  render() {  // This should NOT be overridden.
   }
 }
 
