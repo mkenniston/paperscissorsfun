@@ -26,6 +26,8 @@ SOFTWARE.
 // which are "kits" to build paper models.  For more info see
 // http://paperscissorsfun.com
 
+const bpjs = require('./bin-pack.js');
+
 /*
     ==== DISTANCE ====
 
@@ -471,6 +473,10 @@ class Component {
   toString() {
     return "Component()";
   }
+
+  getWidth() {}  // OVERRIDE this.
+
+  getHeight() {}  // OVERRIDE this.
 }
 
 /*
@@ -513,8 +519,6 @@ class SimpleHouse extends Kit {
 class Kit {
   constructor() {  // This should NOT be overridden.
     this._options = this.getDefaultOptions();
-    this._pieceList = [];
-    this._pageList = [];
   }
 
   toString() {  // This should NOT be overridden.
@@ -541,7 +545,9 @@ class Kit {
         this._options[key] = options[key];
       }
     }
+    this._pieceList = [];
     this.build();
+    this._pageList = [];
     this.pack();
     this.render();
   }
@@ -553,7 +559,27 @@ class Kit {
   build() {  // OVERRIDE this.
   }
 
+
   pack() { // This should NOT be overridden.
+    // For now, assume US letter-size paper.
+    // https://github.com/parallax/jsPDF/blob/ddbfc0f0250ca908f8061a72fa057116b7613e78/jspdf.js#L59
+    const pageWidth = (612/72) * 0.0254 * 87.1;  // convert points to meters
+    const pageHeight = (792/72) * 0.0254 * 87.1;  // for now always use HO scale
+    for (const comp of this._pieceList) {
+      comp.width = distancify(comp.getWidth())._value;
+      comp.height = distancify(comp.getHeight())._value;
+      comp.area = comp.width * comp.height;
+    }
+    var notYetPacked = this._pieceList;
+
+    while (notYetPacked.length > 0) {
+      var bp = bpjs.BinPack();
+      bp.binWidth(pageWidth).binHeight(pageHeight);
+      bp.sort((a, b) => b.area - a.area);
+      bp.addAll(notYetPacked);
+      this._pageList.push(bp.positioned);
+      notYetPacked = bp.unpositioned;
+    }
   }
 
   render() {  // This should NOT be overridden.

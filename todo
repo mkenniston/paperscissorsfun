@@ -1,7 +1,5 @@
 TODO:
 
-- change DummyKit components to "box" with varying sizes
-- add code for Kit.pack() and class Page
 - add code for Kit.render()
 
 - add code for nested Components
@@ -27,6 +25,7 @@ TODO:
 	- figure out how to crop texture filling
 
 - add a bunch of color capability
+- maybe add "option" to select different paper sizes
 
 
 DONE:
@@ -67,4 +66,5 @@ DONE:
 - split tests for 3rd-party "bin-sort" into separate file for isolation
 - added initial bones for Page, Kit
 - added basic logic for Kit
+- added basic logic for page-packing
 

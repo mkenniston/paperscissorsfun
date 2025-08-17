@@ -364,14 +364,31 @@ describe("Kit", () => {
     "number": 5,
    };
 
+  class Box extends Component {
+    constructor(xform, width, height) {
+      super(xform);
+      this._width = width;
+      this._height = height;
+    }
+    getWidth() {
+      return this._width;
+    }
+    getHeight() {
+      return this._height;
+    }
+  }
+
   class DummyKit extends Kit {
     getDefaultOptions() {
       return dummyOptions;
     }
     build() {
-      this.addPiece(new Component());
-      this.addPiece(new Component());
-      this.addPiece(new Component());
+      this.addPiece(new Box(null, "17 m", "5 m"));
+      this.addPiece(new Box(null, "7 m", "5 m"));
+      this.addPiece(new Box(null, "18 m", "11 m"));
+      this.addPiece(new Box(null, "11 m", "13 m"));
+      this.addPiece(new Box(null, "9 m", "12 m"));
+      this.addPiece(new Box(null, "6 m", "18 m"));
     }
   }
 
@@ -391,10 +408,26 @@ describe("Kit", () => {
 
   test("Kit.generate() invokes build()", () => {
     const k = new DummyKit();
-    expect(k._pieceList.length).toBe(0);
     k.generate({"planet": "Earth"});
-    expect(k._pieceList.length).toBe(3);
+    expect(k._pieceList.length).toEqual(6);
     expect(k.getOptionValue("planet")).toEqual("Earth");
+  });
+
+  test("Kit.generate() invokes pack()", () => {
+    const k = new DummyKit();
+    k.generate({});
+    expect(k._pieceList.length).toEqual(6);
+    expect(k._pageList.length).toEqual(2);
+    const p0 = k._pageList[0];
+    expect(p0.length).toBe(3);
+    expect([p0[0].x, p0[0].y]).toEqual([0, 0]);
+    expect([p0[1].x, p0[1].y]).toEqual([0, 11]);
+    expect([p0[2].x, p0[2].y]).toEqual([11, 11]);
+    const p1 = k._pageList[1];
+    expect(p1.length).toBe(3);
+    expect([p1[0].x, p1[0].y]).toEqual([0, 0]);
+    expect([p1[1].x, p1[1].y]).toEqual([9, 0]);
+    expect([p1[2].x, p1[2].y]).toEqual([0, 18]);
   });
 });
 
