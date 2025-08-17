@@ -82,6 +82,10 @@ describe("Distance", () => {
     expectDV("2 barleycorns").toBeCloseTo(0.0169333, 5);
     expectDV("3 furlong").toBeCloseTo(603.504);
     expectDV("4 furlongs").toBeCloseTo(804.672);
+    expectDV("17 point").toBeCloseTo(0.00599722, 6);
+    expectDV("18 points").toBeCloseTo(0.00635, 6);
+    expectDV("19 pica").toBeCloseTo(0.0804333333, 5);
+    expectDV("20 picas").toBeCloseTo(0.0846666667, 5);
     expectDV("5 chain").toBeCloseTo(100.584);
     expectDV("6 chains").toBeCloseTo(120.701);
     expectDV("7 rod").toBeCloseTo(35.204);
