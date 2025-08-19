@@ -1,5 +1,6 @@
 TODO:
 
+- fix all code (esp. tests) to use "mm" instead of "m" as internal base unit
 - add code for Kit.render()
     - create Component.factory for point (and maybe vector and size?)
     - rework DP to *not* use parent pointer and lazy-eval, instead do
@@ -84,4 +85,5 @@ DONE:
 - added basic logic for page-packing
 - added a couple more Distance units
 - added code for class Page and initial code for render()
+- added framework for annotation (to preserve creation data)
 

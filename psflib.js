@@ -673,7 +673,31 @@ class Kit {
   }
 
   render() {  // This should NOT be overridden.
-    const pdf = new jsPDF({format:"letter"});
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "letter",
+    });
+    const timestamp = (new Date()).toUTCString();
+    const testOptions = {
+      animal: "dog",
+      name: "Rover",
+      ears: "floppy",
+      tail: "wags",
+      size: "giant",
+      };
+
+    pdf.createAnnotation({
+      type: 'text',
+      title: 'Origination Data',
+      bounds: {x: 1, y: 1, w: 50, h: 50 },
+      contents: `File created at ${timestamp}\n` +
+        `with class ${this.constructor.name} using these options:\n` +
+        JSON.stringify(testOptions, null, 2) +
+        '\nSee http://paperscissorsfun.com for more information.',
+      color: "#FF0000",
+      open: false // Set to true to open the pop-up by default
+    });
     console.log("rendering...");
     const numPages = this._pageList.length;
     console.log(`numPages = ${numPages}`);
