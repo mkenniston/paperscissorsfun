@@ -156,7 +156,7 @@ class Distance {
       this._value = undefined;
       return;
     }
-    if ( typeof input != 'string') {
+    if (typeof input != 'string') {
       throw new Error("Distance.constructor(): arg must be string or Distance");
     }
 
@@ -227,22 +227,39 @@ class Distance {
     return result;
   }
 
-  times(multiplier) {
-    if (typeof multiplier != 'number') {
-      throw new Error("Distance.times() arg must be number");
-    }
+  minus(subtrahend) {
+    subtrahend = distancify(subtrahend);
     const result = new Distance(this);
-    result._value *= multiplier;
+    result._value -= subtrahend._value;
     return result;
+  }
+
+  times(factor) {
+    if (typeof factor == 'number') {
+      const result = new Distance(this);
+      result._value *= factor;
+      return result;
+    }
+    throw new Error("Distance.times() factor must be number");
+  }
+
+  divideBy(divisor) {
+    if (typeof divisor == 'number') {
+      const result = new Distance(this);
+      result._value /= divisor;
+      return result;
+    }
+    divisor = distancify(divisor);
+    return this._value / divisor._value;  // dimensionless ratio
   }
 }
 
 function distancify(arg) {
-  if (typeof arg == 'string') {
-    return new Distance(arg);
-  }
   if (arg instanceof Distance) {
     return arg;
+  }
+  if (typeof arg == 'string') {
+    return new Distance(arg);
   }
   throw new Error(`found ${arg} where string or Distance expected`);
 }
@@ -304,11 +321,7 @@ polygons.
 */
 
 class DistancePair {
-  constructor(comp, inX, inY) {
-    if (!(comp instanceof Component)) {
-      throw new Error("DistancePair.constructor() must be given a Component");
-    }
-    this._comp = comp;
+  constructor(inX, inY) {
     this._inX = distancify(inX);  // "in" fields are class Distance
     this._inY = distancify(inY);
     this._outX = null;            // "out" fields are type Number
@@ -335,26 +348,70 @@ class DistancePair {
     return this._inY;
   }
 
-  plus(dx, dy) {
-    return new DistancePair(this._comp, this._inX.plus(dx), this._inY.plus(dy));
+  plus() {
+    if (arguments.length == 2) {
+      const [dx, dy] = arguments;
+      return new DistancePair(
+        this._inX.plus(dx),
+        this._inY.plus(dy));
+    }
+    if (arguments.length == 1) {
+      const delta = arguments[0];
+      if (delta instanceof DistancePair) {
+        return new DistancePair(
+          this._inX.plus(delta._inX),
+          this._inY.plus(delta._inY));
+      }
+    }
+    throw new Error("DistancePair.plus arg must be 1 DP or 2 Distances");
   }
 
-  _applyTransforms() {
+  minus() {
+    if (arguments.length == 2) {
+      const [dx, dy] = arguments;
+      return new DistancePair(
+        this._inX.minus(dx),
+        this._inY.minus(dy));
+    }
+    if (arguments.length == 1) {
+      const delta = arguments[0];
+      if (delta instanceof DistancePair) {
+        return new DistancePair(
+          this._inX.minus(delta._inX),
+          this._inY.minus(delta._inY));
+      }
+    }
+    throw new Error("DistancePair.minus arg must be 1 DP or 2 Distances");
+  }
+
+  times(factor) {
+    return new DistancePair(
+      this._inX.times(factor),
+      this._inY.times(factor));
+  }
+
+  divideBy(divisor) {
+    return new DistancePair(
+      this._inX.divideBy(divisor),
+      this._inY.divideBy(divisor));
+  }
+
+  _applyTransform(xform) {
     if (this._outX == null) {
       // skip if "out" values have already been generated
-      const result = this._comp._xform.apply(this);
+      const result = xform.apply(this);
       this._outX = result.x;
       this._outY = result.y;
     }
   }
 
-  outX() {
-    this._applyTransforms();
+  outX(transform) {
+    this._applyTransform(transform);
     return this._outX;
   }
 
-  outY() {
-    this._applyTransforms();
+  outY(transform) {
+    this._applyTransform(transform);
     return this._outY;
   }
 }
@@ -428,6 +485,12 @@ class AffineTransformation {
 class Scale extends AffineTransformation {
   constructor(factor) {
     super([[factor, 0, 0], [0, factor, 0], [0, 0, 1]]);
+  }
+}
+
+class Identity extends AffineTransformation {
+  constructor() {
+    super([[1, 0, 0], [0, 1, 0], [0, 0, 1]]);
   }
 }
 
@@ -783,6 +846,7 @@ module.exports = {
   DP,
   AffineTransformation,
   Scale,
+  Identity,
   Translate,
   Rotate,
   ROT90,

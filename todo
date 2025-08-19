@@ -107,4 +107,7 @@ DONE:
 - added code for class Page and initial code for render()
 - added framework for annotation (to preserve creation data)
 - added more code for rendering
+- got rid of parent(comp) link in DistancePair
+- fleshed out arithmetic functions on Distance and DistancePair, w/ tests
+- added Identity class for clarity (same as "Scale(1)")
 

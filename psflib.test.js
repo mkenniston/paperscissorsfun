@@ -28,6 +28,7 @@ const SCALE_FACTORS = psflib.SCALE_FACTORS;
 const DP = psflib.DP;
 const AffineTransformation = psflib.AffineTransformation;
 const Scale = psflib.Scale;
+const Identity = psflib.Identity;
 const Translate = psflib.Translate;
 const Rotate = psflib.Rotate;
 const ROT90 = psflib.ROT90;
@@ -125,7 +126,17 @@ describe("Distance", () => {
     const a = new Distance("  8   m   ");
     expect(p.plus(a)._value).toBeCloseTo(11);
     expect(p.plus(z)._value).toBeCloseTo(3);
+    expect(p.plus("2 m")._value).toBeCloseTo(5);
+    expect(p.plus("-10 m")._value).toBeCloseTo(-7);
     expect(() => (p.plus())).toThrow();
+    expect(() => (p.plus("xyz"))).toThrow();
+  });
+
+  test("Distance.minus() works", () => {
+    const p = new Distance("6 m");
+    const q = new Distance("7 m");
+    expect(p.minus(q)._value).toBeCloseTo(-1);
+    expect(p.minus("4 m")._value).toBeCloseTo(2);
   });
 
   test("Distance.times() works", () => {
@@ -136,6 +147,15 @@ describe("Distance", () => {
     expect(p.times(-2)._value).toBeCloseTo(-22);
     expect(() => (p.times("foo"))).toThrow();
     expect(() => (p.times())).toThrow();
+  });
+
+  test("Distance.divideBy() works", () => {
+    const p = new Distance("100 m");
+    const q = new Distance("20 m");
+    expect(p.divideBy(q)).toBeCloseTo(5);
+    expect(p.divideBy(40)._value).toBeCloseTo(2.5);
+    expect(p.divideBy("2 m")).toBeCloseTo(50);
+    expect(() => (p.divideBy("foo"))).toThrow();
   });
 
   test("illegal formats detected", () => {
@@ -171,14 +191,13 @@ describe("SCALE_FACTORS", () => {
 });
 
 describe("DP", () => {
-  const comp = new Component(new Scale(1));
-  const p1 = new DP(comp, "10 ft", "20 in");
-  const p2 = new DP(comp, new Distance("3 ft 5 in"),
+  const p1 = new DP("10 ft", "20 in");
+  const p2 = new DP(new Distance("3 ft 5 in"),
                              new Distance( "1 ft 7 in"));
+  const id = new Identity();
 
   test("DP.constructor works", () => {
     expect(p1).toBeInstanceOf(DP);
-    expect(p1._comp).toBe(comp);
     expect(p1.inX()._value).toBeCloseTo(3.048, 3);
     expect(p1.inY()._value).toBeCloseTo(0.508, 4);
     expect(p1.inWidth()._value).toBeCloseTo(3.048, 3);
@@ -198,29 +217,54 @@ describe("DP", () => {
     p3 = p1.plus("33 in", "48 in");
     expect(p3.inX()._value).toBeCloseTo(3.8862, 3);
     expect(p3.inY()._value).toBeCloseTo(1.7272, 3);
+    p3 = p1.plus(new DP("3 ft -2 in", "4 ft 0 in"));
+    expect(p3.inX()._value).toBeCloseTo(3.9116, 3);
+    expect(p3.inY()._value).toBeCloseTo(1.7272);
     var p4 = p1.plus(new Distance("-4 in"), new Distance( "-12 in"));
     expect(p4.inX()._value).toBeCloseTo(2.9464, 3);
     expect(p4.inY()._value).toBeCloseTo(0.2032, 4);
     expect(p3._comp).toBe(p4._comp);
+    expect(() => (p3.plus("foo"))).toThrow();
+  });
+
+  test("DP.minus() works", () => {
+    var p3 = p1.minus("5 ft", "10 in");
+    expect(p3.inX()._value).toBeCloseTo(1.524, 3);
+    expect(p3.inY()._value).toBeCloseTo(0.254, 4);
+    p3 = p1.minus(new DP("5 ft", "10 in"));
+    expect(p3.inX()._value).toBeCloseTo(1.524, 3);
+    expect(p3.inY()._value).toBeCloseTo(0.254, 4);
+    expect(() => (p3.minus("bar"))).toThrow();
+  });
+
+  test("DP.times() works", () => {
+    var p3 = p1.times(2);
+    expect(p3.inX()._value).toBeCloseTo(6.096, 3);
+    expect(p3.inY()._value).toBeCloseTo(1.016, 3);
+    expect(() => (p3.times("zebra"))).toThrow();
+  });
+
+  test("DP.divideBy() works", () => {
+    var p3 = p1.divideBy(2);
+    expect(p3.inX()._value).toBeCloseTo(1.524, 3);
+    expect(p3.inY()._value).toBeCloseTo(0.254,4);
+    expect(() => (p3.times("lions"))).toThrow();
   });
 
   test("output coordinates available", () => {  // FIX ME
-    expect(p1.outX()).toBeCloseTo(3.048, 3);
-    expect(p1.outY()).toBeCloseTo(0.508, 4);
+    expect(p1.outX(id)).toBeCloseTo(3.048, 3);
+    expect(p1.outY(id)).toBeCloseTo(0.508, 4);
   });
 
   test("bad arguments detected", () => {
     expect(() => (new DP())).toThrow();
-    expect(() => (new DP("x", "3 m", "2 m"))).toThrow();
-    expect(() => (new DP(null, 5))).toThrow();
+    expect(() => (new DP(5))).toThrow();
     expect(() => (p1.plus())).toThrow();
     expect(() => (p1.plus(1, 2, 3))).toThrow();
   });
 });
 
 describe("AffineTransformation", () => {
-  const comp = new Component(new Scale(1));
-
   test("AffineTransformation.constructor", () => {
     var m = [];
     expect(() => (new AffineTransformation(m))).toThrow();
@@ -271,7 +315,7 @@ describe("AffineTransformation", () => {
   });
 
   test("AffineTransformation.apply() works", () => {
-    const pt = new DP(comp, "3 m", "5 m");
+    const pt = new DP("3 m", "5 m");
 
     var result = (new Scale(2)).apply(pt);
     expect(result.x).toBeCloseTo(6, 3);
@@ -324,7 +368,7 @@ describe("AffineTransformation", () => {
     mat3 = [ [-13, 3, 0], [-13, 7, -7], [-6, -2, 11] ];
     checkOneMultiply(mat1, mat2, mat3);
 
-    const p1 = new DP(comp, "3 m", "5 m");
+    const p1 = new DP("3 m", "5 m");
     const scale2 = new Scale(2);
     const translate21 = new Translate("-2 m", "+1 m");
     var results = scale2.compose(translate21).apply(p1);
