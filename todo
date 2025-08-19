@@ -1,21 +1,29 @@
 TODO:
 
 - add code for Kit.render()
-
+    - create Component.factory for point (and maybe vector and size?)
+    - rework DP to *not* use parent pointer and lazy-eval, instead do
+        final transform inside draw* methods
+    - use Component.draw* (Lines, OpenPolygon, ClosedPolygon,
+	FilledPolygon, etc)
+    - use a rectangle "box" with diag lines crossing and color fill
+	and interior up-arrow
 - add code for nested Components
+	test with translate, scale, rotate of subcomponents
 
-- add a component that will display an "ell" shape, with scaling, rotation,
-	and translation, and generate the PDF for it.
-	- add Ell, Kit, Page classes as needed
-	- add code to assign components to positions on pages
+- learn to mock pdf class, write appropriate tests
 
+- create a BasicHouse class to demonstrate/test all the main features
+- add in-line doc to every function explaining the args
+
+- add a feature to Component so it knows its own bounding box, and
+    auto-verifies that all drawing stays "inside the lines", and
+    all sub-components stay inside the bounding box.
 - create a "generate.js" file and a "generate.html" file, each with
     bare-minimum code to load the libraries, create a kit, and render it,
     make sure works correctly both ways
 
-- expand the example into a simple house
-
-- get simple HTML and JS hosted on XNet,
+- get simple HTML and JS hosted on XNet (or Google Drive/Blogger/?)
     figure out how URLs work to make it testable from local copy
 
 - add input-options mechanism for setting params from either
@@ -25,7 +33,14 @@ TODO:
 	- figure out how to crop texture filling
 
 - add a bunch of color capability
+- figure out how to do "annotations" embedded in PDF file (to record
+	creation-date and all options, i.e. how to reproduce this file).
 - maybe add "option" to select different paper sizes
+- add "themes" for collections of Kits
+- consider making special code to do comples roof hips, design roofs as
+	seaparate Pieces that are glued on top of roof "rafters"
+- consider having a way to save options in a file and reload later
+	(esp. in web interface, reset defaults in web page)
 
 
 DONE:
@@ -67,4 +82,6 @@ DONE:
 - added initial bones for Page, Kit
 - added basic logic for Kit
 - added basic logic for page-packing
+- added a couple more Distance units
+- added code for class Page and initial code for render()
 

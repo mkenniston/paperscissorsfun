@@ -27,6 +27,7 @@ SOFTWARE.
 // http://paperscissorsfun.com
 
 const bpjs = require('./bin-pack.js');
+const { jsPDF } = require("jspdf");
 
 /*
     ==== DISTANCE ====
@@ -467,20 +468,79 @@ class ReflectAroundXAxis extends AffineTransformation {
 /*
     ==== COMPONENT ====
 
+The Component class is intended to be used as a parent class.
+Each separate part (or sub-part) of a model should have its own
+class which extends Component.
+
+The "build()" method should be overridden by each child class.
+It is used only to figure out the size of each component, so that
+the library can figure out what page to put it on and where on the
+page it will fit.  The build() method should also create any
+sub-components, so that they can be found later.
+
+The "render()" method should also be overridden.  This is where
+the code should actually draw lines, paint colors, etc.  This need
+only be done for top-level components, as the library will automatially
+call "render()" on all the sub-components.
+
+Each component must be created and drawn as if it has its own
+coordinate system, with the component representation drawn in the
+first quadrant (positive x and y) and nestled against the origin.
+The library will automatically take care of mapping as needed.
+
 */
 
 class Component {
   constructor(xform) {
     this._xform = xform;
+    this._width = null;
+    this._height = null;
   }
 
   toString() {
     return "Component()";
   }
 
-  getWidth() {}  // OVERRIDE this.
+  setPDF(pdf) { // This should NOT be overridden.
+    this._pdf = pdf;
+  }
 
-  getHeight() {}  // OVERRIDE this.
+  getWidth() {  // This should NOT be overridden.
+    return this._width;
+  }
+
+  getHeight() {  // This should NOT be overridden.
+    return this._height;
+  }
+
+  build() {  // OVERRIDE this.
+    // compute size and store it
+    // create any subcomponents, and position them
+  }
+
+  render() {  // OVERRIDE this.
+    // draw all the shapes (but not the sub-components)
+  }
+
+  drawPolygon(points) {  // This should NOT be overridden.
+    if (points.length < 2) {
+      throw new Error("drawPolygon needs at least 2 points");
+    }
+    const rawPoints = [];
+    // FIX ME -- just for intial dev & test
+    const rx0 = 0.02;  const ry0 = 0.02;
+    const rx1 = 0.05;  const ry1 = 0.08;
+    const rx2 = 0.06;  const ry2 = 0.10;
+    const fooPoints = [[rx0, ry0], [rx0, ry2], [rx1, ry1],
+                       [rx2, ry2], [rx2, ry0]];
+    for (const p of fooPoints) {
+      const rawX = p[0];
+      const rawY = p[1];
+      rawPoints.push([rawX, rawY]);
+    }
+    this._pdf.setFillColor(255, 255, 0);
+    this._pdf.lines(rawPoints, null, 'FD', true);
+  }
 }
 
 /*
@@ -490,10 +550,24 @@ class Component {
 
 class Page {
   constructor() {
+    this._positionedPieceList = [];
   }
 
   toString() {
     return "Page()";
+  }
+
+  addPositionedPiece(record) {
+    // convert the output of bin-pack to a more convenient form
+    this._positionedPieceList.push( {
+      "outX": record.x,
+      "outY": record.y,
+      "component": record.datum,
+    });
+  }
+
+  allPieces() {
+    return this._positionedPieceList;
   }
 }
 
@@ -575,18 +649,46 @@ class Kit {
       comp.area = comp.width * comp.height;
     }
     var notYetPacked = this._pieceList;
+    // console.log("PACK TRACE:");
 
     while (notYetPacked.length > 0) {
       var bp = bpjs.BinPack();
       bp.binWidth(pageWidth).binHeight(pageHeight);
       bp.sort((a, b) => b.area - a.area);
       bp.addAll(notYetPacked);
-      this._pageList.push(bp.positioned);
-      notYetPacked = bp.unpositioned;
+      // console.log(`POSIT: ${JSON.stringify(bp.positioned)}`);
+      // console.log(`UN-POSIT: ${JSON.stringify(bp.unpositioned)}`);
+      const page = new Page();
+      for (const rec of bp.positioned) {
+        page.addPositionedPiece(rec);
+      }
+      this._pageList.push(page);
+      notYetPacked = [];
+      for (const item of bp.unpositioned) {
+        // console.log(JSON.stringify(`item = ${item}`));
+        notYetPacked.push(item.datum);
+      }
+      // console.log(`UN-POSIT-NEXT: ${JSON.stringify(notYetPacked)}`);
     }
   }
 
   render() {  // This should NOT be overridden.
+    const pdf = new jsPDF({format:"letter"});
+    console.log("rendering...");
+    const numPages = this._pageList.length;
+    console.log(`numPages = ${numPages}`);
+    const page = this._pageList[0];
+    console.log(`PAGELIST[0] = ${JSON.stringify(this._pageList[0])}`);
+    const numPieces = page.length;
+    console.log(`numPieces = ${numPieces}`);
+    for (const page of this._pageList) {
+      for (const record of page.allPieces()) {
+        const piece = record.component;
+        piece.setPDF(pdf);
+        piece.render();
+      }
+    }
+    pdf.save("dummy.pdf");
   }
 }
 
@@ -595,19 +697,19 @@ class Kit {
 */
 
 module.exports = {
-  Distance: Distance,
-  SCALE_FACTORS: SCALE_FACTORS,
-  DP: DP,
-  AffineTransformation: AffineTransformation,
-  Scale: Scale,
-  Translate: Translate,
-  Rotate: Rotate,
-  ROT90: ROT90,
-  ROT180: ROT180,
-  ROT270: ROT270,
-  ReflectAroundXAxis: ReflectAroundXAxis,
-  Component: Component,
-  Page: Page,
-  Kit: Kit,
+  Distance,
+  SCALE_FACTORS,
+  DP,
+  AffineTransformation,
+  Scale,
+  Translate,
+  Rotate,
+  ROT90,
+  ROT180,
+  ROT270,
+  ReflectAroundXAxis,
+  Component,
+  Page,
+  Kit,
 };
 

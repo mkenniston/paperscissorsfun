@@ -380,6 +380,11 @@ describe("Kit", () => {
     getHeight() {
       return this._height;
     }
+    build() {
+      // no sub-components, so nothing to do
+    }
+    render() {
+    }
   }
 
   class DummyKit extends Kit {
@@ -423,15 +428,22 @@ describe("Kit", () => {
     expect(k._pieceList.length).toEqual(6);
     expect(k._pageList.length).toEqual(2);
     const p0 = k._pageList[0];
-    expect(p0.length).toBe(3);
-    expect([p0[0].x, p0[0].y]).toEqual([0, 0]);
-    expect([p0[1].x, p0[1].y]).toEqual([0, 11]);
-    expect([p0[2].x, p0[2].y]).toEqual([11, 11]);
+    var pieces = p0.allPieces();
+    expect(pieces.length).toBe(3);
+    expect([pieces[0].outX, pieces[0].outY]).toEqual([0, 0]);
+    expect([pieces[1].outX, pieces[1].outY]).toEqual([0, 11]);
+    expect([pieces[2].outX, pieces[2].outY]).toEqual([11, 11]);
     const p1 = k._pageList[1];
-    expect(p1.length).toBe(3);
-    expect([p1[0].x, p1[0].y]).toEqual([0, 0]);
-    expect([p1[1].x, p1[1].y]).toEqual([9, 0]);
-    expect([p1[2].x, p1[2].y]).toEqual([0, 18]);
+    pieces = p1.allPieces();
+    expect(pieces.length).toBe(3);
+    expect([pieces[0].outX, pieces[0].outY]).toEqual([0, 0]);
+    expect([pieces[1].outX, pieces[1].outY]).toEqual([9, 0]);
+    expect([pieces[2].outX, pieces[2].outY]).toEqual([0, 18]);
+  });
+
+  test("Kit.generate() invokes render()", () => {
+    // const k = new DummyKit();
+    // k.generate();
   });
 });
 

@@ -306,6 +306,6 @@ function BinPack() {
 }
 
 module.exports = {
-  BinPack: BinPack,
+  BinPack,
 };
 
