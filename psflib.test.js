@@ -360,7 +360,7 @@ describe("Kit", () => {
     const k = new Kit();
     expect(k).toBeInstanceOf(Kit);
     expect(k.toString()).toEqual("Kit()");
-    expect(k._options).toEqual({});
+    expect(k._options).toEqual({format:"letter",scale:"HO"});
   });
 
   const dummyOptions = {
@@ -383,7 +383,10 @@ describe("Kit", () => {
     build() {
       // no sub-components, so nothing to do
     }
-    render() {
+    render(board) {
+      console.log(`rendering box ${this.width}, ${this.height}`);
+      const pen = board.getPen(null);
+      pen.polygon([null, null]);
     }
   }
 

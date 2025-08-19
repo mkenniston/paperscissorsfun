@@ -518,28 +518,9 @@ class Component {
     // create any subcomponents, and position them
   }
 
-  render() {  // OVERRIDE this.
+  render(board) {  // OVERRIDE this.
+    board = board;
     // draw all the shapes (but not the sub-components)
-  }
-
-  drawPolygon(points) {  // This should NOT be overridden.
-    if (points.length < 2) {
-      throw new Error("drawPolygon needs at least 2 points");
-    }
-    const rawPoints = [];
-    // FIX ME -- just for intial dev & test
-    const rx0 = 0.02;  const ry0 = 0.02;
-    const rx1 = 0.05;  const ry1 = 0.08;
-    const rx2 = 0.06;  const ry2 = 0.10;
-    const fooPoints = [[rx0, ry0], [rx0, ry2], [rx1, ry1],
-                       [rx2, ry2], [rx2, ry0]];
-    for (const p of fooPoints) {
-      const rawX = p[0];
-      const rawY = p[1];
-      rawPoints.push([rawX, rawY]);
-    }
-    this._pdf.setFillColor(255, 255, 0);
-    this._pdf.lines(rawPoints, null, 'FD', true);
   }
 }
 
@@ -572,6 +553,81 @@ class Page {
 }
 
 /*
+    ==== DRAWING BOARD ====
+
+A DrawingBoard is basically a wrapper around the jsPDF object, with
+some extra useful information tagging along for the ride.
+
+Note the use of the factory method to create DrawingPen objects.  There is
+only single DrawingBoard object for an entire Kit, but there is a
+new DrawingPen object created for each Component because each Component
+has its own xform (AffineTransformation).
+
+*/
+
+class DrawingBoard {
+  constructor(pdf, width, height) {
+    this._pdf = pdf;
+    this._width = width;  // maximum value allowed for drawing on a page
+    this._height = height;
+  }
+
+  getPen(xform) {
+    return new DrawingPen(this, xform);
+  }
+}
+
+/*
+    ==== DRAWING PEN ====
+
+When you want to actually lay down digital ink, you use a DrawingPen
+to add the ink to a DrawingBoard.
+
+A DrawingPen is basically a wrapper around the jsPDF methods, and the
+pen is where the transformation matrix is finally applied to the
+actual coordinates.  This matrix contains all the information needed
+about the shapes and sizes of graphics in a Comnponent, the locations
+of subComponents, the scaling necessary (O, HO, N, Z, etc.), the
+conversion from internal units ("m") to pdf units ("mm"), and the
+inversion of the Y-axis to make Y go up instead of down.
+The beauty of the matrix is that everything is wrapped into a single
+(matrix X vector) multiplication.
+
+*/
+
+class DrawingPen {
+  constructor(board, xform) {
+    this._board = board;
+    this._xform = xform;
+  }
+
+  polygon(points) {
+    if (points.length < 2) {
+      throw new Error("DrawingPen.polygon needs at least 2 points");
+    }
+    // FIX ME -- just for intial dev & test
+    const rx0 = 20;  const ry0 = 20;
+    const rx1 = 50;  const ry1 = 50;
+    const rx2 = 60;  const ry2 = 70;
+    const fooPoints = [[rx0, ry0], [rx0 , ry1], [rx1, ry2],
+                       [rx2, ry1], [rx2, ry0]];
+    const rawPoints = [];
+    for (let i = 1; i < fooPoints.length; i++ ) {
+      const p = fooPoints[i];
+      const last = fooPoints[i-1];
+      const rawX = p[0] - last[0];  // jsPDF wants deltas, not points
+      const rawY = p[1] - last[1];
+      rawPoints.push([rawX, rawY]);
+    }
+    console.log(JSON.stringify(rawPoints));
+    const pdf = this._board._pdf;
+    // pdf.setFillColor(255, 255, 0);
+    pdf.setFillColor("#00FFFF");
+    pdf.lines(rawPoints, fooPoints[0][0], fooPoints[0][1], null, 'FD', true);
+  }
+}
+
+/*
     ==== KIT ====
 
 A "kit" is a collection of "Pieces" (which are just top-level Components)
@@ -596,7 +652,12 @@ class SimpleHouse extends Kit {
 
 class Kit {
   constructor() {  // This should NOT be overridden.
-    this._options = this.getDefaultOptions();
+    // A few options are essential for internal needs.
+    this._options = {
+      format: "letter",
+      scale:  "HO",
+    };
+    Object.assign(this._options, this.getDefaultOptions());
   }
 
   toString() {  // This should NOT be overridden.
@@ -623,6 +684,16 @@ class Kit {
         this._options[key] = options[key];
       }
     }
+
+    const format = this._options.format;
+    if (format != "letter") {
+      throw new Error(`format "${format}" not yet implemented`);
+    }
+    // For now, assume US letter-size paper.
+    // https://github.com/parallax/jsPDF/blob/ddbfc0f0250ca908f8061a72fa057116b7613e78/jspdf.js#L59
+    this._pageWidth = (612/72) * 0.0254 * 87.1;  // convert points to meters
+    this._pageHeight = (792/72) * 0.0254 * 87.1;  // for now always use HO scale
+
     this._pieceList = [];
     this.build();
     this._pageList = [];
@@ -637,27 +708,19 @@ class Kit {
   build() {  // OVERRIDE this.
   }
 
-
   pack() { // This should NOT be overridden.
-    // For now, assume US letter-size paper.
-    // https://github.com/parallax/jsPDF/blob/ddbfc0f0250ca908f8061a72fa057116b7613e78/jspdf.js#L59
-    const pageWidth = (612/72) * 0.0254 * 87.1;  // convert points to meters
-    const pageHeight = (792/72) * 0.0254 * 87.1;  // for now always use HO scale
     for (const comp of this._pieceList) {
       comp.width = distancify(comp.getWidth())._value;
       comp.height = distancify(comp.getHeight())._value;
       comp.area = comp.width * comp.height;
     }
     var notYetPacked = this._pieceList;
-    // console.log("PACK TRACE:");
 
     while (notYetPacked.length > 0) {
       var bp = bpjs.BinPack();
-      bp.binWidth(pageWidth).binHeight(pageHeight);
+      bp.binWidth(this._pageWidth).binHeight(this._pageHeight);
       bp.sort((a, b) => b.area - a.area);
       bp.addAll(notYetPacked);
-      // console.log(`POSIT: ${JSON.stringify(bp.positioned)}`);
-      // console.log(`UN-POSIT: ${JSON.stringify(bp.unpositioned)}`);
       const page = new Page();
       for (const rec of bp.positioned) {
         page.addPositionedPiece(rec);
@@ -665,10 +728,8 @@ class Kit {
       this._pageList.push(page);
       notYetPacked = [];
       for (const item of bp.unpositioned) {
-        // console.log(JSON.stringify(`item = ${item}`));
         notYetPacked.push(item.datum);
       }
-      // console.log(`UN-POSIT-NEXT: ${JSON.stringify(notYetPacked)}`);
     }
   }
 
@@ -678,6 +739,7 @@ class Kit {
       unit: "mm",
       format: "letter",
     });
+    this._pdf = pdf;
     const timestamp = (new Date()).toUTCString();
     const testOptions = {
       animal: "dog",
@@ -698,18 +760,13 @@ class Kit {
       color: "#FF0000",
       open: false // Set to true to open the pop-up by default
     });
+    const board = new DrawingBoard(pdf, this._pageWidth, this._pageHeight);
     console.log("rendering...");
-    const numPages = this._pageList.length;
-    console.log(`numPages = ${numPages}`);
-    const page = this._pageList[0];
-    console.log(`PAGELIST[0] = ${JSON.stringify(this._pageList[0])}`);
-    const numPieces = page.length;
-    console.log(`numPieces = ${numPieces}`);
     for (const page of this._pageList) {
       for (const record of page.allPieces()) {
         const piece = record.component;
         piece.setPDF(pdf);
-        piece.render();
+        piece.render(board);
       }
     }
     pdf.save("dummy.pdf");

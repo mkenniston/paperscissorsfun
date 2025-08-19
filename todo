@@ -1,10 +1,13 @@
 TODO:
 
-- fix all code (esp. tests) to use "mm" instead of "m" as internal base unit
+- learn to mock pdf class, write appropriate tests
+
 - add code for Kit.render()
     - create Component.factory for point (and maybe vector and size?)
     - rework DP to *not* use parent pointer and lazy-eval, instead do
-        final transform inside draw* methods
+        final transform inside draw* methods (but can still use lazy-eval
+	at that time -- or maybe don't bother and just recompute every
+	time; there aren't that many points and PCs are fast)
     - use Component.draw* (Lines, OpenPolygon, ClosedPolygon,
 	FilledPolygon, etc)
     - use a rectangle "box" with diag lines crossing and color fill
@@ -12,8 +15,13 @@ TODO:
 - add code for nested Components
 	test with translate, scale, rotate of subcomponents
 
-- learn to mock pdf class, write appropriate tests
-
+- figure out how to discover the size of the pdf page, and allow the
+	paper size to be selected with an option
+- always include a Ruler Component (to allow verification that it is
+	printed as the correct size)
+- figure out how to discover margins on pdf page (area not physically
+	reachable by printers) and arrange to avoid them
+	(maybe use options printerMargin, printerLeftMargin, etec.)
 - create a BasicHouse class to demonstrate/test all the main features
 - add in-line doc to every function explaining the args
 
@@ -33,11 +41,23 @@ TODO:
 - figure out how to fill w/ a "texture" (code)
 	- figure out how to crop texture filling
 
+- figure out a way to partition/divide Pieces that are too big to
+	fit on a standard sheet of paper
+- add a feature where you can include signs in your components (being
+	careful to get rotation of text to match everything else)
+- when we do tabs, figure out a reasonable way to choose the "tab width"
+	and "number of tab divisions", and also how to number them so
+	you can match pieces up correctly  (numbers must be assigned
+	dynamically)
+- allow kits to include other kits
+
 - add a bunch of color capability
 - figure out how to do "annotations" embedded in PDF file (to record
 	creation-date and all options, i.e. how to reproduce this file).
 - maybe add "option" to select different paper sizes
-- add "themes" for collections of Kits
+- add "themes" for collections of Kits, e.g. New England Village,
+	Wild West Frontier Town, Modern Subdivision, Old Factories,
+	Santa's North Pole Workshop, also rolling stock and track
 - consider making special code to do comples roof hips, design roofs as
 	seaparate Pieces that are glued on top of roof "rafters"
 - consider having a way to save options in a file and reload later
@@ -86,4 +106,5 @@ DONE:
 - added a couple more Distance units
 - added code for class Page and initial code for render()
 - added framework for annotation (to preserve creation data)
+- added more code for rendering
 
