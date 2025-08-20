@@ -151,8 +151,11 @@ class Distance {
       this._value = input._value;
       return;
     }
+    if (input == "0") {  // includes number 0
+      this._value = 0;
+      return;
+    }
     if (input == undefined) {
-      // create an undefined Distance (mostly used inside class methods)
       this._value = undefined;
       return;
     }
@@ -258,7 +261,7 @@ function distancify(arg) {
   if (arg instanceof Distance) {
     return arg;
   }
-  if (typeof arg == 'string') {
+  if (typeof arg == 'string' | arg == 0) {
     return new Distance(arg);
   }
   throw new Error(`found ${arg} where string or Distance expected`);
@@ -554,18 +557,13 @@ The library will automatically take care of mapping as needed.
 */
 
 class Component {
-  constructor(xform) {
-    this._xform = xform;
+  constructor() {  // OVERRIDE this.
     this._width = null;
     this._height = null;
   }
 
-  toString() {
+  toString() {  // This may optionally be overridden.
     return "Component()";
-  }
-
-  setPDF(pdf) { // This should NOT be overridden.
-    this._pdf = pdf;
   }
 
   getWidth() {  // This should NOT be overridden.
@@ -578,11 +576,11 @@ class Component {
 
   build() {  // OVERRIDE this.
     // compute size and store it
-    // create any subcomponents, and position them
+    // create any subcomponents, and position them in parents
   }
 
-  render(board) {  // OVERRIDE this.
-    board = board;
+  render(board, xform) {  // OVERRIDE this.
+    xform = xform; // shush jshint
     // draw all the shapes (but not the sub-components)
   }
 }
@@ -604,9 +602,9 @@ class Page {
   addPositionedPiece(record) {
     // convert the output of bin-pack to a more convenient form
     this._positionedPieceList.push( {
-      "outX": record.x,
-      "outY": record.y,
-      "component": record.datum,
+      x: distancify(`${record.x} m`),
+      y: distancify(`${record.y} m`),
+      component: record.datum,
     });
   }
 
@@ -629,10 +627,8 @@ has its own xform (AffineTransformation).
 */
 
 class DrawingBoard {
-  constructor(pdf, width, height) {
+  constructor(pdf) {
     this._pdf = pdf;
-    this._width = width;  // maximum value allowed for drawing on a page
-    this._height = height;
   }
 
   getPen(xform) {
@@ -664,29 +660,32 @@ class DrawingPen {
     this._xform = xform;
   }
 
+  set(props) {
+    if (props.hasOwnProperty("fillColor")) {
+      this._board._pdf.setFillColor(props.fillColor);
+    }
+  }
+
   polygon(points) {
     if (points.length < 2) {
       throw new Error("DrawingPen.polygon needs at least 2 points");
     }
-    // FIX ME -- just for intial dev & test
-    const rx0 = 20;  const ry0 = 20;
-    const rx1 = 50;  const ry1 = 50;
-    const rx2 = 60;  const ry2 = 70;
-    const fooPoints = [[rx0, ry0], [rx0 , ry1], [rx1, ry2],
-                       [rx2, ry1], [rx2, ry0]];
-    const rawPoints = [];
-    for (let i = 1; i < fooPoints.length; i++ ) {
-      const p = fooPoints[i];
-      const last = fooPoints[i-1];
-      const rawX = p[0] - last[0];  // jsPDF wants deltas, not points
-      const rawY = p[1] - last[1];
-      rawPoints.push([rawX, rawY]);
+    // convert from world coordinates to PDF coordinates
+    const pdfPoints = [];
+    for (const point of points) {
+      pdfPoints.push(this._xform.apply(point));
     }
-    console.log(JSON.stringify(rawPoints));
+    const x = pdfPoints[0].x;
+    const y = pdfPoints[0].y;
+    const pdfDiffs = [];
+    for (let i = 1; i < points.length; i++ ) {
+      // jsPDF wants deltas, not points
+      const cur = pdfPoints[i];
+      const prev = pdfPoints[i-1];
+      pdfDiffs.push([cur.x - prev.x, cur.y - prev.y]);
+    }
     const pdf = this._board._pdf;
-    // pdf.setFillColor(255, 255, 0);
-    pdf.setFillColor("#00FFFF");
-    pdf.lines(rawPoints, fooPoints[0][0], fooPoints[0][1], null, 'FD', true);
+    pdf.lines(pdfDiffs, x, y, null, 'FD', true);
   }
 }
 
@@ -721,6 +720,9 @@ class Kit {
       scale:  "HO",
     };
     Object.assign(this._options, this.getDefaultOptions());
+
+    // For other valid formats, see:
+    // https://github.com/parallax/jsPDF/blob/ddbfc0f0250ca908f8061a72fa057116b7613e78/jspdf.js#L59
   }
 
   toString() {  // This should NOT be overridden.
@@ -748,20 +750,35 @@ class Kit {
       }
     }
 
-    const format = this._options.format;
-    if (format != "letter") {
-      throw new Error(`format "${format}" not yet implemented`);
-    }
-    // For now, assume US letter-size paper.
-    // https://github.com/parallax/jsPDF/blob/ddbfc0f0250ca908f8061a72fa057116b7613e78/jspdf.js#L59
-    this._pageWidth = (612/72) * 0.0254 * 87.1;  // convert points to meters
-    this._pageHeight = (792/72) * 0.0254 * 87.1;  // for now always use HO scale
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: this._options.format,
+    });
+    this._pdf = pdf;
+    // convert PDF "mm" to world "m"
+    const ratio = SCALE_FACTORS[this._options.scale].ratio;
+    const adjust = ratio / 1000;
+ 
+    // computer size of page in real-world meters
+    const rawWidth = pdf.internal.pageSize.getWidth();  // in PDF "mm"
+    this._pageWidth = new Distance(`${rawWidth * adjust} m`);  // in world "m"
+    const rawHeight = pdf.internal.pageSize.getHeight();  // in PDF "mm"
+    this._pageHeight = new Distance(`${rawHeight * adjust} m`);  // in world "m"
+
+    // invert Y-axis
+    const flip = new ReflectAroundXAxis();
+    // slide from 4th quandrant back to 1st
+    const shift = new Translate(0, this._pageHeight);
+    // convert world "m" to PDF "mm"
+    const shrink = new Scale(1000 / ratio);
+    const masterXform = shrink.compose(shift).compose(flip);
 
     this._pieceList = [];
     this.build();
     this._pageList = [];
     this.pack();
-    this.render();
+    this.render(masterXform);
   }
 
   addPiece(comp) {  // This should NOT be overridden.
@@ -781,10 +798,14 @@ class Kit {
 
     while (notYetPacked.length > 0) {
       var bp = bpjs.BinPack();
-      bp.binWidth(this._pageWidth).binHeight(this._pageHeight);
+      bp.binWidth(this._pageWidth._value);
+      bp.binHeight(this._pageHeight._value);
       bp.sort((a, b) => b.area - a.area);
       bp.addAll(notYetPacked);
       const page = new Page();
+      if (bp.positioned.length == 0) {
+        throw new Error("at least one piece is too big to fit on page");
+      }
       for (const rec of bp.positioned) {
         page.addPositionedPiece(rec);
       }
@@ -796,13 +817,7 @@ class Kit {
     }
   }
 
-  render() {  // This should NOT be overridden.
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "letter",
-    });
-    this._pdf = pdf;
+  render(xform) {  // This should NOT be overridden.
     const timestamp = (new Date()).toUTCString();
     const testOptions = {
       animal: "dog",
@@ -812,7 +827,7 @@ class Kit {
       size: "giant",
       };
 
-    pdf.createAnnotation({
+    this._pdf.createAnnotation({
       type: 'text',
       title: 'Origination Data',
       bounds: {x: 1, y: 1, w: 50, h: 50 },
@@ -823,16 +838,21 @@ class Kit {
       color: "#FF0000",
       open: false // Set to true to open the pop-up by default
     });
-    const board = new DrawingBoard(pdf, this._pageWidth, this._pageHeight);
-    console.log("rendering...");
+    const board = new DrawingBoard(this._pdf);
+    var first = true;
     for (const page of this._pageList) {
+      if (first) {
+        first = false;
+      } else {
+        this._pdf.addPage(this._options.format, "portrait");
+      }
       for (const record of page.allPieces()) {
         const piece = record.component;
-        piece.setPDF(pdf);
-        piece.render(board);
+        const shift = new Translate(record.x, record.y);
+        piece.render(board, xform.compose(shift));
       }
     }
-    pdf.save("dummy.pdf");
+    this._pdf.save("dummy.pdf");
   }
 }
 

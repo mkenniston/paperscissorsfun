@@ -117,6 +117,8 @@ describe("Distance", () => {
   test("variations on forms", () => {
     expectDV(new Distance("387 m")).toBeCloseTo(387);
     expectDV(undefined).toBe(undefined);
+    expectDV(new Distance(0)).toEqual(0);
+    expectDV(new Distance("0")).toEqual(0);
     expect((new Distance("1 in")).toString()).toEqual('Distance("0.0254 m")');
   });
 
@@ -413,10 +415,11 @@ describe("Kit", () => {
    };
 
   class Box extends Component {
-    constructor(xform, width, height) {
-      super(xform);
+    constructor(width, height, color) {
+      super();
       this._width = width;
       this._height = height;
+      this._color = color;
     }
     getWidth() {
       return this._width;
@@ -427,10 +430,16 @@ describe("Kit", () => {
     build() {
       // no sub-components, so nothing to do
     }
-    render(board) {
-      console.log(`rendering box ${this.width}, ${this.height}`);
-      const pen = board.getPen(null);
-      pen.polygon([null, null]);
+    render(board, xform) {
+      const pen = board.getPen(xform);
+      const x0 = "0 m"; const x1 = this._width;
+      const y0 = "0 m"; const y1 = this._height;
+      const ptA = new DP(x0, y0);
+      const ptB = new DP(x0, y1);
+      const ptC = new DP(x1, y1);
+      const ptD = new DP(x1, y0);
+      pen.set({"fillColor": this._color});
+      pen.polygon([ptA, ptB, ptC, ptD]);
     }
   }
 
@@ -439,12 +448,12 @@ describe("Kit", () => {
       return dummyOptions;
     }
     build() {
-      this.addPiece(new Box(null, "17 m", "5 m"));
-      this.addPiece(new Box(null, "7 m", "5 m"));
-      this.addPiece(new Box(null, "18 m", "11 m"));
-      this.addPiece(new Box(null, "11 m", "13 m"));
-      this.addPiece(new Box(null, "9 m", "12 m"));
-      this.addPiece(new Box(null, "6 m", "18 m"));
+      this.addPiece(new Box("17 m", "5 m", "yellow"));
+      this.addPiece(new Box("7 m", "5 m", "orange"));
+      this.addPiece(new Box("18 m", "11 m", "red"));
+      this.addPiece(new Box("11 m", "13 m", "purple"));
+      this.addPiece(new Box("9 m", "12 m", "blue"));
+      this.addPiece(new Box("6 m", "18 m", "green"));
     }
   }
 
@@ -477,20 +486,21 @@ describe("Kit", () => {
     const p0 = k._pageList[0];
     var pieces = p0.allPieces();
     expect(pieces.length).toBe(3);
-    expect([pieces[0].outX, pieces[0].outY]).toEqual([0, 0]);
-    expect([pieces[1].outX, pieces[1].outY]).toEqual([0, 11]);
-    expect([pieces[2].outX, pieces[2].outY]).toEqual([11, 11]);
+    expect([pieces[0].x._value, pieces[0].y._value]).toEqual([0, 0]);
+    expect([pieces[1].x._value, pieces[1].y._value]).toEqual([0, 11]);
+    expect([pieces[2].x._value, pieces[2].y._value]).toEqual([11, 11]);
     const p1 = k._pageList[1];
     pieces = p1.allPieces();
     expect(pieces.length).toBe(3);
-    expect([pieces[0].outX, pieces[0].outY]).toEqual([0, 0]);
-    expect([pieces[1].outX, pieces[1].outY]).toEqual([9, 0]);
-    expect([pieces[2].outX, pieces[2].outY]).toEqual([0, 18]);
+    expect([pieces[0].x._value, pieces[0].y._value]).toEqual([0, 0]);
+    expect([pieces[1].x._value, pieces[1].y._value]).toEqual([9, 0]);
+    expect([pieces[2].x._value, pieces[2].y._value]).toEqual([0, 18]);
   });
 
   test("Kit.generate() invokes render()", () => {
-    // const k = new DummyKit();
-    // k.generate();
+    const k = new DummyKit();
+    k.generate({});
+    // FIX ME - add some tests here to verify graphics calls to pdf
   });
 });
 

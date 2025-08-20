@@ -1,6 +1,15 @@
 TODO:
 
+- do NOT cache xformed Points, much safer to let point be immutable,
+	just recalc x and y when needed
+- create a "Piece" class to handle xlation from bin-pack, and get() methods
+- set up Options class to handle defaults-and-sets intuitively
+	(and make sure annotation displays them correctly)
+- get Box to show outline and cross-lines
+- try just comp.render(pen), so user never sees board and xform
+- add options to pen (for color, closed, etc.)
 - learn to mock pdf class, write appropriate tests
+- allow specification of filename (default <ClassName.pdf> else "option")
 
 - add code for Kit.render()
     - create Component.factory for point (and maybe vector and size?)
@@ -8,6 +17,7 @@ TODO:
         final transform inside draw* methods (but can still use lazy-eval
 	at that time -- or maybe don't bother and just recompute every
 	time; there aren't that many points and PCs are fast)
+	do we even still need outX() and outY() ?
     - use Component.draw* (Lines, OpenPolygon, ClosedPolygon,
 	FilledPolygon, etc)
     - use a rectangle "box" with diag lines crossing and color fill
@@ -15,8 +25,6 @@ TODO:
 - add code for nested Components
 	test with translate, scale, rotate of subcomponents
 
-- figure out how to discover the size of the pdf page, and allow the
-	paper size to be selected with an option
 - always include a Ruler Component (to allow verification that it is
 	printed as the correct size)
 - figure out how to discover margins on pdf page (area not physically
@@ -25,6 +33,13 @@ TODO:
 - create a BasicHouse class to demonstrate/test all the main features
 - add in-line doc to every function explaining the args
 
+- improve bin-packing
+	(1) quick-and-dirty, do it in both portrait and landscape modes,
+		pick the one that works best
+    	(2) try having both portrait and landscape pages, assign to best match
+	(3) do a best-fit but try each piece both normal and rotated
+
+- add a check to see if last row of xform matrix is *ever* not 0,0,1
 - add a feature to Component so it knows its own bounding box, and
     auto-verifies that all drawing stays "inside the lines", and
     all sub-components stay inside the bounding box.
@@ -41,6 +56,8 @@ TODO:
 - figure out how to fill w/ a "texture" (code)
 	- figure out how to crop texture filling
 
+- automatically add cutting-margins around each Piece, and overlap
+	those intelligently with edge-of-page margins
 - figure out a way to partition/divide Pieces that are too big to
 	fit on a standard sheet of paper
 - add a feature where you can include signs in your components (being
@@ -57,7 +74,8 @@ TODO:
 - maybe add "option" to select different paper sizes
 - add "themes" for collections of Kits, e.g. New England Village,
 	Wild West Frontier Town, Modern Subdivision, Old Factories,
-	Santa's North Pole Workshop, also rolling stock and track
+	Santa's North Pole Workshop, also rolling stock and track,
+	dollhouses, trees & shrubs, swimming pools, etc.
 - consider making special code to do comples roof hips, design roofs as
 	seaparate Pieces that are glued on top of roof "rafters"
 - consider having a way to save options in a file and reload later
@@ -110,4 +128,8 @@ DONE:
 - got rid of parent(comp) link in DistancePair
 - fleshed out arithmetic functions on Distance and DistancePair, w/ tests
 - added Identity class for clarity (same as "Scale(1)")
+- discover PDF page size progammatically, to allow various "format" values
+- cleaned up handling of the pdf variable
+- pass xform via render-chain, generated a colored-boxes PDF w/ pages!
+- fixed translation of Pieces, so boxes are displayed in correct places
 
