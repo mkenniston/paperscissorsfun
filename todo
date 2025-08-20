@@ -132,4 +132,5 @@ DONE:
 - cleaned up handling of the pdf variable
 - pass xform via render-chain, generated a colored-boxes PDF w/ pages!
 - fixed translation of Pieces, so boxes are displayed in correct places
+- cleanup: don't quote dictionary keys
 

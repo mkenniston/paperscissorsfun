@@ -410,8 +410,8 @@ describe("Kit", () => {
   });
 
   const dummyOptions = {
-    "color": "blue",
-    "number": 5,
+    color: "blue",
+    number: 5,
    };
 
   class Box extends Component {
@@ -438,7 +438,7 @@ describe("Kit", () => {
       const ptB = new DP(x0, y1);
       const ptC = new DP(x1, y1);
       const ptD = new DP(x1, y0);
-      pen.set({"fillColor": this._color});
+      pen.set({fillColor: this._color});
       pen.polygon([ptA, ptB, ptC, ptD]);
     }
   }
@@ -466,14 +466,14 @@ describe("Kit", () => {
   test("Kit.build updates options()", () => {
     const k = new DummyKit();
     expect(k.getDefaultOptions()).toEqual(dummyOptions);
-    k.generate({"color": "red"});
+    k.generate({color: "red"});
     expect(k.getOptionValue("color")).toEqual("red");
     expect(k.getOptionValue("number")).toEqual(5);
   });
 
   test("Kit.generate() invokes build()", () => {
     const k = new DummyKit();
-    k.generate({"planet": "Earth"});
+    k.generate({planet: "Earth"});
     expect(k._pieceList.length).toEqual(6);
     expect(k.getOptionValue("planet")).toEqual("Earth");
   });
