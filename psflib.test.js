@@ -24,7 +24,7 @@ SOFTWARE.
 
 const psflib = require('./psflib');
 const Distance = psflib.Distance;
-const SCALE_FACTORS = psflib.SCALE_FACTORS;
+const ConversionFactor = psflib.ConversionFactor;
 const DPair = psflib.DPair;
 const AffineTransformation = psflib.AffineTransformation;
 const distancify = psflib.distancify;
@@ -91,14 +91,14 @@ describe("Distance", () => {
     expectDV("6 chains").toBeCloseTo(120.701);
     expectDV("7 rod").toBeCloseTo(35.204);
     expectDV("8 rods").toBeCloseTo(40.2336);
-    expectDV("9 link").toBeCloseTo(1.809, 3);
-    expectDV("10 links").toBeCloseTo(2.01, 3);
+    expectDV("9 link").toBeCloseTo(1.810512, 3);
+    expectDV("10 links").toBeCloseTo(2.01168, 3);
     expectDV("11 cubit").toBeCloseTo(5.0292, 3);
     expectDV("12 cubits").toBeCloseTo(5.4864, 3);
     expectDV("13 fathom").toBeCloseTo(23.7744);
     expectDV("14 fathoms").toBeCloseTo(25.6032);
-    expectDV("15 league").toBeCloseTo(83340);
-    expectDV("16 leagues").toBeCloseTo(88896);
+    expectDV("15 league").toBeCloseTo(72420.6, 0);
+    expectDV("16 leagues").toBeCloseTo(77248.6, 0);
   });
 
   test("example syntactic forms from doc all work", () => {
@@ -172,18 +172,23 @@ describe("Distance", () => {
   });
 });
 
-describe("SCALE_FACTORS", () => {
+describe("ConversionFactor.SCALE", () => {
   function checkEntry(key, ratio) {
-    const entry = SCALE_FACTORS[key];
+    const entry = ConversionFactor.SCALE[key];
       expect(entry.ratio).toBe(ratio);
       expect(typeof entry.description).toBe('string');
   }
 
   test("scale factors are correct", () => {
     checkEntry("1:1", 1);
+    checkEntry("F", 20.3);
     checkEntry("G", 22.5);
+    checkEntry("#3", 22.5);
+    checkEntry("#2", 29);
+    checkEntry("#1", 32);
     checkEntry("O", 48);
     checkEntry("S", 64);
+    checkEntry("OO", 76.2);
     checkEntry("HO", 87.1);
     checkEntry("TT", 120);
     checkEntry("N", 160);
@@ -203,8 +208,9 @@ describe("DPair", () => {
     expect(p1.inY()._value).toBeCloseTo(0.508, 4);
     expect(p1.inWidth()._value).toBeCloseTo(3.048, 3);
     expect(p1.inHeight()._value).toBeCloseTo(0.508, 4);
-    expect(p1.toString()).toEqual(
-      'DistancePair(Distance("3.048 m"), Distance("0.508 m"))');
+    const p3 = new DPair("17 m 3 cm", "38 mm");
+    expect(p3.toString()).toEqual(
+      'DistancePair(Distance("17.03 m"), Distance("0.038 m"))');
   });
 
   test("DPair.plus() works", () => {
