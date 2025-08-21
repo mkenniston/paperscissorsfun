@@ -6,7 +6,6 @@ TODO:
 	just recalc x and y when needed
 - create a "Piece" class to handle xlation from bin-pack, and get() methods
 - try just comp.render(pen), so user never sees board and xform
-- allow specification of filename (default <ClassName.pdf> else "option")
 
 - learn to mock pdf class, write appropriate tests
 
@@ -129,4 +128,5 @@ DONE:
 - put arrows in Box class, split polygon/openPath, added styles
 - changed DP to DPair for clarity
 - got rid of outX() and outY()
+- allow specification of PDF filename (default <ClassName.pdf>)
 

@@ -718,6 +718,7 @@ class Kit {
     this._options = {
       format: "letter",
       scale:  "HO",
+      pdfFileName: `${this.constructor.name}.pdf`,
     };
     Object.assign(this._options, this.getDefaultOptions());
 
@@ -778,7 +779,7 @@ class Kit {
     this.build();
     this._pageList = [];
     this.pack();
-    this.render(masterXform);
+    this.render(masterXform, this._options.pdfFileName);
   }
 
   addPiece(comp) {  // This should NOT be overridden.
@@ -817,7 +818,7 @@ class Kit {
     }
   }
 
-  render(xform) {  // This should NOT be overridden.
+  render(xform, pdfFileName) {  // This should NOT be overridden.
     const timestamp = (new Date()).toUTCString();
     const testOptions = {
       animal: "dog",
@@ -852,7 +853,7 @@ class Kit {
         piece.render(board, xform.compose(shift));
       }
     }
-    this._pdf.save("dummy.pdf");
+    this._pdf.save(pdfFileName);
   }
 }
 

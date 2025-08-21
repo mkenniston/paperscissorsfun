@@ -398,7 +398,8 @@ describe("Kit", () => {
     const k = new Kit();
     expect(k).toBeInstanceOf(Kit);
     expect(k.toString()).toEqual("Kit()");
-    expect(k._options).toEqual({format:"letter",scale:"HO"});
+    expect(k._options.format).toEqual("letter");
+    expect(k._options.scale).toEqual("HO");
   });
 
   const dummyOptions = {
