@@ -1,5 +1,8 @@
 TODO:
 
+- set up Options class to handle defaults-and-sets intuitively
+	(and make sure annotation displays them correctly)
+
 - do we still need inX() and inY() ??
 - add "Notes on measurements and coordinate systems" that explains
 	"World" coords vs. "Printer" coords.
@@ -12,9 +15,6 @@ TODO:
 - try just comp.render(pen), so user never sees board and xform
 - add code for nested Components
 	test with translate, scale, rotate of subcomponents
-- add a check to see if last row of xform matrix is *ever* not 0,0,1
-- set up Options class to handle defaults-and-sets intuitively
-	(and make sure annotation displays them correctly)
 - create a BasicHouse class to demonstrate/test all the main features
 	use a separate BasicHouse.js file
 
@@ -133,4 +133,8 @@ DONE:
 - got rid of outX() and outY()
 - allow specification of PDF filename (default <ClassName.pdf>)
 - researched class constants, converted all to ConversionFactor class
+- added a check to see if last row of xform matrix is *ever* not 0,0,1,
+    it's not, and you can prove it, but optimizing would muddle the
+    code for a probably insignificant speed gain, so decided to leave
+    the matrix math fully standard, at least for now.
 

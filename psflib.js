@@ -493,6 +493,14 @@ class AffineTransformation {
     return `AffineTransformation(${this._matrix})`;
   }
 
+  /*
+    Because we know that all matrixes start with final row [0,0,1] and
+    all vectors are padded to [x,y,1], we could eliminate about
+    half of all the multiplications in apply() and compose().
+    That would be a tiny bit faster, but it would make the code much
+    harder to read, understand, and verify, so we don't do that.
+  */
+
   apply(pt) {
     const a = this._matrix;
     const b = [pt.inX()._value, pt.inY()._value, 1];
