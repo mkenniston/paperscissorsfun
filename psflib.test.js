@@ -29,7 +29,6 @@ const DPair = psflib.DPair;
 const AffineTransformation = psflib.AffineTransformation;
 const distancify = psflib.distancify;
 const Scale = psflib.Scale;
-const Identity = psflib.Identity;
 const Translate = psflib.Translate;
 const Rotate = psflib.Rotate;
 const ROT90 = psflib.ROT90;
@@ -197,16 +196,13 @@ describe("DPair", () => {
   const p1 = new DPair("10 ft", "20 in");
   const p2 = new DPair(new Distance("3 ft 5 in"),
                              new Distance( "1 ft 7 in"));
-  const id = new Identity();
-
+  
   test("DPair.constructor works", () => {
     expect(p1).toBeInstanceOf(DPair);
     expect(p1.inX()._value).toBeCloseTo(3.048, 3);
     expect(p1.inY()._value).toBeCloseTo(0.508, 4);
     expect(p1.inWidth()._value).toBeCloseTo(3.048, 3);
     expect(p1.inHeight()._value).toBeCloseTo(0.508, 4);
-    expect(p1._outX).toBe(null);
-    expect(p1._outY).toBe(null);
     expect(p1.toString()).toEqual(
       'DistancePair(Distance("3.048 m"), Distance("0.508 m"))');
   });
@@ -252,11 +248,6 @@ describe("DPair", () => {
     expect(p3.inX()._value).toBeCloseTo(1.524, 3);
     expect(p3.inY()._value).toBeCloseTo(0.254,4);
     expect(() => (p3.times("lions"))).toThrow();
-  });
-
-  test("output coordinates available", () => {  // FIX ME
-    expect(p1.outX(id)).toBeCloseTo(3.048, 3);
-    expect(p1.outY(id)).toBeCloseTo(0.508, 4);
   });
 
   test("bad arguments detected", () => {

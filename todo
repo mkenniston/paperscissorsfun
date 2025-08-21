@@ -2,7 +2,6 @@ TODO:
 
 - add "Notes on measurements and coordinate systems" that explains
 	"World" coords vs. "Printer" coords.
-- get rid of outX() and outY()
 - do NOT cache xformed Points, much safer to let point be immutable,
 	just recalc x and y when needed
 - create a "Piece" class to handle xlation from bin-pack, and get() methods
@@ -129,4 +128,5 @@ DONE:
 - cleanup: don't quote dictionary keys
 - put arrows in Box class, split polygon/openPath, added styles
 - changed DP to DPair for clarity
+- got rid of outX() and outY()
 

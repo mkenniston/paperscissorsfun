@@ -305,9 +305,7 @@ similiar to rows and columns but measuring instead of counting:
   - Y increases as you move toward the bottom edge of the page.
 
 We always use the "in" coordinates when defining the sizes and positions
-of various shapes which we want to appear in the final PDF.  The "out"
-coordinates are used only at the point where we call jsPdf methods
-to add things to the actual PDF file.
+of various shapes which we want to appear in the final PDF.
 
 We use "lazy evaluation" to do the actual transformation of coordinates
 between the two systems.  This is because when we are originally building
@@ -315,9 +313,6 @@ the data structure which represents our whole kit, we cannot decide
 where on the page to put things until after we know what all the
 components are.  (This gives us at least a chance of packing the different
 components onto pages with some degree of efficiency.)
-Rather than add the complexity of keeping track of all the points that
-exist, we just let each point take care of transforming itself the
-first time somebody asks for an "outX" or "outY".
 
 The DPair.plus() method treats its argument as a vector which is to be
 added to a point, i.e. it means "move": start at the invoking
@@ -331,8 +326,6 @@ class DistancePair {
   constructor(inX, inY) {
     this._inX = distancify(inX);  // "in" fields are class Distance
     this._inY = distancify(inY);
-    this._outX = null;            // "out" fields are type Number
-    this._outY = null;
   }
 
   toString() {
@@ -401,25 +394,6 @@ class DistancePair {
     return new DistancePair(
       this._inX.divideBy(divisor),
       this._inY.divideBy(divisor));
-  }
-
-  _applyTransform(xform) {
-    if (this._outX == null) {
-      // skip if "out" values have already been generated
-      const result = xform.apply(this);
-      this._outX = result.x;
-      this._outY = result.y;
-    }
-  }
-
-  outX(transform) {
-    this._applyTransform(transform);
-    return this._outX;
-  }
-
-  outY(transform) {
-    this._applyTransform(transform);
-    return this._outY;
   }
 }
 
