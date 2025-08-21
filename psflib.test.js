@@ -27,6 +27,7 @@ const Distance = psflib.Distance;
 const SCALE_FACTORS = psflib.SCALE_FACTORS;
 const DP = psflib.DP;
 const AffineTransformation = psflib.AffineTransformation;
+const distancify = psflib.distancify;
 const Scale = psflib.Scale;
 const Identity = psflib.Identity;
 const Translate = psflib.Translate;
@@ -415,31 +416,46 @@ describe("Kit", () => {
    };
 
   class Box extends Component {
-    constructor(width, height, color) {
+    constructor(width, height, drawColor, fillColor) {
       super();
-      this._width = width;
-      this._height = height;
-      this._color = color;
+      this._width = distancify(width);
+      this._height = distancify(height);
+      this._drawColor = drawColor;
+      this._fillColor = fillColor;
     }
-    getWidth() {
-      return this._width;
-    }
-    getHeight() {
-      return this._height;
-    }
+
     build() {
       // no sub-components, so nothing to do
     }
     render(board, xform) {
       const pen = board.getPen(xform);
-      const x0 = "0 m"; const x1 = this._width;
-      const y0 = "0 m"; const y1 = this._height;
+      const inc = distancify("1 m");
+
+      const x0 = distancify(0);
+      const x2 = x0.plus(this._width.times(0.5));
+      const x1 = x2.minus(inc);
+      const x3 = x2.plus(inc);
+      const x4 = x0.plus(this._width);
+
+      const y0 = distancify(0);
+      const y1 = y0.plus(this._height.times(0.25));
+      const y3 = y0.plus(this._height.times(0.75));
+      const y2 = y3.minus(inc);
+      const y4 = y0.plus(this._height);
+
       const ptA = new DP(x0, y0);
-      const ptB = new DP(x0, y1);
-      const ptC = new DP(x1, y1);
-      const ptD = new DP(x1, y0);
-      pen.set({fillColor: this._color});
-      pen.polygon([ptA, ptB, ptC, ptD]);
+      const ptB = new DP(x0, y4);
+      const ptC = new DP(x4, y4);
+      const ptD = new DP(x4, y0);
+      const ptE = new DP(x2, y1);
+      const ptF = new DP(x1, y2);
+      const ptG = new DP(x2, y3);
+      const ptH = new DP(x3, y2);
+
+      pen.set({drawColor: "black", fillColor: this._fillColor});
+      pen.polygon([ptA, ptB, ptC, ptD], "fillAndStroke");
+      pen.set({drawColor: this._drawColor});
+      pen.openPath([ptE, ptG, ptF, ptG, ptH]);
     }
   }
 
@@ -448,12 +464,12 @@ describe("Kit", () => {
       return dummyOptions;
     }
     build() {
-      this.addPiece(new Box("17 m", "5 m", "yellow"));
-      this.addPiece(new Box("7 m", "5 m", "orange"));
-      this.addPiece(new Box("18 m", "11 m", "red"));
-      this.addPiece(new Box("11 m", "13 m", "purple"));
-      this.addPiece(new Box("9 m", "12 m", "blue"));
-      this.addPiece(new Box("6 m", "18 m", "green"));
+      this.addPiece(new Box("17 m", "5 m", "black", "yellow"));
+      this.addPiece(new Box("7 m", "5 m", "black", "orange"));
+      this.addPiece(new Box("18 m", "11 m", "black", "red"));
+      this.addPiece(new Box("11 m", "13 m", "white", "purple"));
+      this.addPiece(new Box("9 m", "12 m", "white", "blue"));
+      this.addPiece(new Box("6 m", "18 m", "white", "green"));
     }
   }
 

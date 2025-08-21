@@ -274,9 +274,13 @@ The "DistancePair" class is used so much that we abbreviate it "DP".
 
 The "DP" class is just a pair of Distance objects.  They are used for
 three distinct purposes:
-  (1) Represent a point.  This is the most common use.
+  (1) Represent a point, using standard Cartesian coordinates.  This
+    is the most common use.
   (2) Represent a vector (direction and length).  For example, you
-    can add a vector to a point to get a new point.
+    can add a vector to a point to get a new point.  You can also
+    add two vectors with the intuitive result.  (But note that
+    a point "P" is really just the place that the vector "P" ends up
+    when it starts from the origin, so the two uses are closely related.)
   (3) Represent a size.
 To match the usual mathematical convention, "X" (width) always comes first,
 followed by "Y" (height).
@@ -664,12 +668,34 @@ class DrawingPen {
     if (props.hasOwnProperty("fillColor")) {
       this._board._pdf.setFillColor(props.fillColor);
     }
+    if (props.hasOwnProperty("drawColor")) {
+      this._board._pdf.setDrawColor(props.drawColor);
+    }
   }
 
-  polygon(points) {
+  openPath(points) {
+    if (points.length < 2) {
+      throw new Error("DrawingPen.openPath needs at least 2 points");
+    }
+    this._lines(points, 'S', false);
+  }
+
+  polygon(points, style) {
     if (points.length < 2) {
       throw new Error("DrawingPen.polygon needs at least 2 points");
     }
+    if (style == "stroke") {
+      this._lines(points, 'S', true);
+    } else if (style == "fill") {
+      this._lines(points, 'F', true);
+    } else if (style == "fillAndStroke") {
+      this._lines(points, 'FD', true);
+    } else {
+      throw new Error(`invalid style ${style} in DrawingPen.polygon()`);
+    }
+  }
+
+  _lines(points, style, closed) {
     // convert from world coordinates to PDF coordinates
     const pdfPoints = [];
     for (const point of points) {
@@ -685,7 +711,7 @@ class DrawingPen {
       pdfDiffs.push([cur.x - prev.x, cur.y - prev.y]);
     }
     const pdf = this._board._pdf;
-    pdf.lines(pdfDiffs, x, y, null, 'FD', true);
+    pdf.lines(pdfDiffs, x, y, null, style, closed);
   }
 }
 
@@ -864,6 +890,7 @@ module.exports = {
   Distance,
   SCALE_FACTORS,
   DP,
+  distancify,
   AffineTransformation,
   Scale,
   Identity,

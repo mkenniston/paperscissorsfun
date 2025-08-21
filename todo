@@ -1,27 +1,22 @@
 TODO:
 
+- add "Notes on measurements and coordinate systems" that explains
+	"World" coords vs. "Printer" coords.
+- change DP to DPair
+- get rid of outX() and outY()
 - do NOT cache xformed Points, much safer to let point be immutable,
 	just recalc x and y when needed
 - create a "Piece" class to handle xlation from bin-pack, and get() methods
-- set up Options class to handle defaults-and-sets intuitively
-	(and make sure annotation displays them correctly)
-- get Box to show outline and cross-lines
 - try just comp.render(pen), so user never sees board and xform
-- add options to pen (for color, closed, etc.)
-- learn to mock pdf class, write appropriate tests
 - allow specification of filename (default <ClassName.pdf> else "option")
 
-- add code for Kit.render()
-    - create Component.factory for point (and maybe vector and size?)
-    - rework DP to *not* use parent pointer and lazy-eval, instead do
-        final transform inside draw* methods (but can still use lazy-eval
-	at that time -- or maybe don't bother and just recompute every
-	time; there aren't that many points and PCs are fast)
-	do we even still need outX() and outY() ?
-    - use Component.draw* (Lines, OpenPolygon, ClosedPolygon,
-	FilledPolygon, etc)
-    - use a rectangle "box" with diag lines crossing and color fill
-	and interior up-arrow
+- learn to mock pdf class, write appropriate tests
+
+- set up Options class to handle defaults-and-sets intuitively
+	(and make sure annotation displays them correctly)
+- add options to pen (for color, closed, etc.)
+- try just comp.render(pen), so user never sees board and xform
+
 - add code for nested Components
 	test with translate, scale, rotate of subcomponents
 
@@ -133,4 +128,5 @@ DONE:
 - pass xform via render-chain, generated a colored-boxes PDF w/ pages!
 - fixed translation of Pieces, so boxes are displayed in correct places
 - cleanup: don't quote dictionary keys
+- put arrows in Box class, split polygon/openPath, added styles
 
