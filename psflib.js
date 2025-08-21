@@ -43,7 +43,7 @@ to verify that every distance has been properly converted, thus detecting
 accidental attempts to use an unconverted (and dimensionless) Number object.
 Note that distances can be used to specify both absolute position
 coordinates (e.g. for creating points) as well as relative vector
-coordinates (e.g. as the argument to DP.plus()).
+coordinates (e.g. as the argument to DPair.plus()).
 
 Since different people in different countries and different contexts prefer
 to specify distances using different units and different notations, it is
@@ -270,9 +270,9 @@ function distancify(arg) {
 /*
     ==== DISTANCE PAIR ====
 
-The "DistancePair" class is used so much that we abbreviate it "DP".
+The "DistancePair" class is used so much that we abbreviate it "DPair".
 
-The "DP" class is just a pair of Distance objects.  They are used for
+The "DPair" class is just a pair of Distance objects.  They are used for
 three distinct purposes:
   (1) Represent a point, using standard Cartesian coordinates.  This
     is the most common use.
@@ -319,7 +319,7 @@ Rather than add the complexity of keeping track of all the points that
 exist, we just let each point take care of transforming itself the
 first time somebody asks for an "outX" or "outY".
 
-The DP.plus() method treats its argument as a vector which is to be
+The DPair.plus() method treats its argument as a vector which is to be
 added to a point, i.e. it means "move": start at the invoking
 point, then move a specified distance and direction, and return a
 new point at the ending location.  This can be very handy for creating
@@ -370,7 +370,7 @@ class DistancePair {
           this._inY.plus(delta._inY));
       }
     }
-    throw new Error("DistancePair.plus arg must be 1 DP or 2 Distances");
+    throw new Error("DistancePair.plus arg must be 1 DPair or 2 Distances");
   }
 
   minus() {
@@ -388,7 +388,7 @@ class DistancePair {
           this._inY.minus(delta._inY));
       }
     }
-    throw new Error("DistancePair.minus arg must be 1 DP or 2 Distances");
+    throw new Error("DistancePair.minus arg must be 1 DPair or 2 Distances");
   }
 
   times(factor) {
@@ -423,7 +423,7 @@ class DistancePair {
   }
 }
 
-const DP = DistancePair;  // to make code more concise and save typing
+const DPair = DistancePair;  // to make code more concise and save typing
 
 /*
     ==== AFFINE_TRANSFORMATION ====
@@ -889,7 +889,7 @@ class Kit {
 module.exports = {
   Distance,
   SCALE_FACTORS,
-  DP,
+  DPair,
   distancify,
   AffineTransformation,
   Scale,

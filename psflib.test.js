@@ -25,7 +25,7 @@ SOFTWARE.
 const psflib = require('./psflib');
 const Distance = psflib.Distance;
 const SCALE_FACTORS = psflib.SCALE_FACTORS;
-const DP = psflib.DP;
+const DPair = psflib.DPair;
 const AffineTransformation = psflib.AffineTransformation;
 const distancify = psflib.distancify;
 const Scale = psflib.Scale;
@@ -193,14 +193,14 @@ describe("SCALE_FACTORS", () => {
   });
 });
 
-describe("DP", () => {
-  const p1 = new DP("10 ft", "20 in");
-  const p2 = new DP(new Distance("3 ft 5 in"),
+describe("DPair", () => {
+  const p1 = new DPair("10 ft", "20 in");
+  const p2 = new DPair(new Distance("3 ft 5 in"),
                              new Distance( "1 ft 7 in"));
   const id = new Identity();
 
-  test("DP.constructor works", () => {
-    expect(p1).toBeInstanceOf(DP);
+  test("DPair.constructor works", () => {
+    expect(p1).toBeInstanceOf(DPair);
     expect(p1.inX()._value).toBeCloseTo(3.048, 3);
     expect(p1.inY()._value).toBeCloseTo(0.508, 4);
     expect(p1.inWidth()._value).toBeCloseTo(3.048, 3);
@@ -211,7 +211,7 @@ describe("DP", () => {
       'DistancePair(Distance("3.048 m"), Distance("0.508 m"))');
   });
 
-  test("DP.plus() works", () => {
+  test("DPair.plus() works", () => {
     expect(p2.inX()._value).toBeCloseTo(1.0414, 3);
     expect(p2.inY()._value).toBeCloseTo(0.4826, 4);
     var p3 = p1.plus("3 ft -2 in", "4 ft 0 in");
@@ -220,7 +220,7 @@ describe("DP", () => {
     p3 = p1.plus("33 in", "48 in");
     expect(p3.inX()._value).toBeCloseTo(3.8862, 3);
     expect(p3.inY()._value).toBeCloseTo(1.7272, 3);
-    p3 = p1.plus(new DP("3 ft -2 in", "4 ft 0 in"));
+    p3 = p1.plus(new DPair("3 ft -2 in", "4 ft 0 in"));
     expect(p3.inX()._value).toBeCloseTo(3.9116, 3);
     expect(p3.inY()._value).toBeCloseTo(1.7272);
     var p4 = p1.plus(new Distance("-4 in"), new Distance( "-12 in"));
@@ -230,24 +230,24 @@ describe("DP", () => {
     expect(() => (p3.plus("foo"))).toThrow();
   });
 
-  test("DP.minus() works", () => {
+  test("DPair.minus() works", () => {
     var p3 = p1.minus("5 ft", "10 in");
     expect(p3.inX()._value).toBeCloseTo(1.524, 3);
     expect(p3.inY()._value).toBeCloseTo(0.254, 4);
-    p3 = p1.minus(new DP("5 ft", "10 in"));
+    p3 = p1.minus(new DPair("5 ft", "10 in"));
     expect(p3.inX()._value).toBeCloseTo(1.524, 3);
     expect(p3.inY()._value).toBeCloseTo(0.254, 4);
     expect(() => (p3.minus("bar"))).toThrow();
   });
 
-  test("DP.times() works", () => {
+  test("DPair.times() works", () => {
     var p3 = p1.times(2);
     expect(p3.inX()._value).toBeCloseTo(6.096, 3);
     expect(p3.inY()._value).toBeCloseTo(1.016, 3);
     expect(() => (p3.times("zebra"))).toThrow();
   });
 
-  test("DP.divideBy() works", () => {
+  test("DPair.divideBy() works", () => {
     var p3 = p1.divideBy(2);
     expect(p3.inX()._value).toBeCloseTo(1.524, 3);
     expect(p3.inY()._value).toBeCloseTo(0.254,4);
@@ -260,8 +260,8 @@ describe("DP", () => {
   });
 
   test("bad arguments detected", () => {
-    expect(() => (new DP())).toThrow();
-    expect(() => (new DP(5))).toThrow();
+    expect(() => (new DPair())).toThrow();
+    expect(() => (new DPair(5))).toThrow();
     expect(() => (p1.plus())).toThrow();
     expect(() => (p1.plus(1, 2, 3))).toThrow();
   });
@@ -318,7 +318,7 @@ describe("AffineTransformation", () => {
   });
 
   test("AffineTransformation.apply() works", () => {
-    const pt = new DP("3 m", "5 m");
+    const pt = new DPair("3 m", "5 m");
 
     var result = (new Scale(2)).apply(pt);
     expect(result.x).toBeCloseTo(6, 3);
@@ -371,7 +371,7 @@ describe("AffineTransformation", () => {
     mat3 = [ [-13, 3, 0], [-13, 7, -7], [-6, -2, 11] ];
     checkOneMultiply(mat1, mat2, mat3);
 
-    const p1 = new DP("3 m", "5 m");
+    const p1 = new DPair("3 m", "5 m");
     const scale2 = new Scale(2);
     const translate21 = new Translate("-2 m", "+1 m");
     var results = scale2.compose(translate21).apply(p1);
@@ -443,14 +443,14 @@ describe("Kit", () => {
       const y2 = y3.minus(inc);
       const y4 = y0.plus(this._height);
 
-      const ptA = new DP(x0, y0);
-      const ptB = new DP(x0, y4);
-      const ptC = new DP(x4, y4);
-      const ptD = new DP(x4, y0);
-      const ptE = new DP(x2, y1);
-      const ptF = new DP(x1, y2);
-      const ptG = new DP(x2, y3);
-      const ptH = new DP(x3, y2);
+      const ptA = new DPair(x0, y0);
+      const ptB = new DPair(x0, y4);
+      const ptC = new DPair(x4, y4);
+      const ptD = new DPair(x4, y0);
+      const ptE = new DPair(x2, y1);
+      const ptF = new DPair(x1, y2);
+      const ptG = new DPair(x2, y3);
+      const ptH = new DPair(x3, y2);
 
       pen.set({drawColor: "black", fillColor: this._fillColor});
       pen.polygon([ptA, ptB, ptC, ptD], "fillAndStroke");
