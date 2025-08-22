@@ -3,7 +3,6 @@ TODO:
 - set up Options class to handle defaults-and-sets intuitively
 	(and make sure annotation displays them correctly)
 
-- do we still need inX() and inY() ??
 - add "Notes on measurements and coordinate systems" that explains
 	"World" coords vs. "Printer" coords.
 - do NOT cache xformed Points, much safer to let point be immutable,
@@ -137,4 +136,5 @@ DONE:
     it's not, and you can prove it, but optimizing would muddle the
     code for a probably insignificant speed gain, so decided to leave
     the matrix math fully standard, at least for now.
+- changed inX/inY to x/y, and removed inWidth/inHeight (no longer needed)
 

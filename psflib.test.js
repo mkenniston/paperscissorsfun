@@ -204,55 +204,53 @@ describe("DPair", () => {
   
   test("DPair.constructor works", () => {
     expect(p1).toBeInstanceOf(DPair);
-    expect(p1.inX()._value).toBeCloseTo(3.048, 3);
-    expect(p1.inY()._value).toBeCloseTo(0.508, 4);
-    expect(p1.inWidth()._value).toBeCloseTo(3.048, 3);
-    expect(p1.inHeight()._value).toBeCloseTo(0.508, 4);
+    expect(p1.x()._value).toBeCloseTo(3.048, 3);
+    expect(p1.y()._value).toBeCloseTo(0.508, 4);
     const p3 = new DPair("17 m 3 cm", "38 mm");
     expect(p3.toString()).toEqual(
       'DistancePair(Distance("17.03 m"), Distance("0.038 m"))');
   });
 
   test("DPair.plus() works", () => {
-    expect(p2.inX()._value).toBeCloseTo(1.0414, 3);
-    expect(p2.inY()._value).toBeCloseTo(0.4826, 4);
+    expect(p2.x()._value).toBeCloseTo(1.0414, 3);
+    expect(p2.y()._value).toBeCloseTo(0.4826, 4);
     var p3 = p1.plus("3 ft -2 in", "4 ft 0 in");
-    expect(p3.inX()._value).toBeCloseTo(3.9116, 3);
-    expect(p3.inY()._value).toBeCloseTo(1.7272);
+    expect(p3.x()._value).toBeCloseTo(3.9116, 3);
+    expect(p3.y()._value).toBeCloseTo(1.7272);
     p3 = p1.plus("33 in", "48 in");
-    expect(p3.inX()._value).toBeCloseTo(3.8862, 3);
-    expect(p3.inY()._value).toBeCloseTo(1.7272, 3);
+    expect(p3.x()._value).toBeCloseTo(3.8862, 3);
+    expect(p3.y()._value).toBeCloseTo(1.7272, 3);
     p3 = p1.plus(new DPair("3 ft -2 in", "4 ft 0 in"));
-    expect(p3.inX()._value).toBeCloseTo(3.9116, 3);
-    expect(p3.inY()._value).toBeCloseTo(1.7272);
+    expect(p3.x()._value).toBeCloseTo(3.9116, 3);
+    expect(p3.y()._value).toBeCloseTo(1.7272);
     var p4 = p1.plus(new Distance("-4 in"), new Distance( "-12 in"));
-    expect(p4.inX()._value).toBeCloseTo(2.9464, 3);
-    expect(p4.inY()._value).toBeCloseTo(0.2032, 4);
+    expect(p4.x()._value).toBeCloseTo(2.9464, 3);
+    expect(p4.y()._value).toBeCloseTo(0.2032, 4);
     expect(p3._comp).toBe(p4._comp);
     expect(() => (p3.plus("foo"))).toThrow();
   });
 
   test("DPair.minus() works", () => {
     var p3 = p1.minus("5 ft", "10 in");
-    expect(p3.inX()._value).toBeCloseTo(1.524, 3);
-    expect(p3.inY()._value).toBeCloseTo(0.254, 4);
+    expect(p3.x()._value).toBeCloseTo(1.524, 3);
+    expect(p3.y()._value).toBeCloseTo(0.254, 4);
     p3 = p1.minus(new DPair("5 ft", "10 in"));
-    expect(p3.inX()._value).toBeCloseTo(1.524, 3);
-    expect(p3.inY()._value).toBeCloseTo(0.254, 4);
+    expect(p3.x()._value).toBeCloseTo(1.524, 3);
+    expect(p3.y()._value).toBeCloseTo(0.254, 4);
     expect(() => (p3.minus("bar"))).toThrow();
   });
 
   test("DPair.times() works", () => {
     var p3 = p1.times(2);
-    expect(p3.inX()._value).toBeCloseTo(6.096, 3);
-    expect(p3.inY()._value).toBeCloseTo(1.016, 3);
+    expect(p3.x()._value).toBeCloseTo(6.096, 3);
+    expect(p3.y()._value).toBeCloseTo(1.016, 3);
     expect(() => (p3.times("zebra"))).toThrow();
   });
 
   test("DPair.divideBy() works", () => {
     var p3 = p1.divideBy(2);
-    expect(p3.inX()._value).toBeCloseTo(1.524, 3);
-    expect(p3.inY()._value).toBeCloseTo(0.254,4);
+    expect(p3.x()._value).toBeCloseTo(1.524, 3);
+    expect(p3.y()._value).toBeCloseTo(0.254,4);
     expect(() => (p3.times("lions"))).toThrow();
   });
 

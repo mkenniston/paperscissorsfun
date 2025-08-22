@@ -389,44 +389,36 @@ polygons.
 */
 
 class DistancePair {
-  constructor(inX, inY) {
-    this._inX = distancify(inX);  // "in" fields are class Distance
-    this._inY = distancify(inY);
+  constructor(x, y) {
+    this._x = distancify(x);
+    this._y = distancify(y);
   }
 
   toString() {
-    return `DistancePair(${this._inX.toString()}, ${this._inY.toString()})`;
+    return `DistancePair(${this._x.toString()}, ${this._y.toString()})`;
   }
 
-  inX() {
-    return this._inX;
+  x() {
+    return this._x;
   }
 
-  inWidth() {
-    return this._inX;
-  }
-
-  inY() {
-    return this._inY;
-  }
-
-  inHeight() {
-    return this._inY;
+  y() {
+    return this._y;
   }
 
   plus() {
     if (arguments.length == 2) {
       const [dx, dy] = arguments;
       return new DistancePair(
-        this._inX.plus(dx),
-        this._inY.plus(dy));
+        this._x.plus(dx),
+        this._y.plus(dy));
     }
     if (arguments.length == 1) {
       const delta = arguments[0];
       if (delta instanceof DistancePair) {
         return new DistancePair(
-          this._inX.plus(delta._inX),
-          this._inY.plus(delta._inY));
+          this._x.plus(delta._x),
+          this._y.plus(delta._y));
       }
     }
     throw new Error("DistancePair.plus arg must be 1 DPair or 2 Distances");
@@ -436,15 +428,15 @@ class DistancePair {
     if (arguments.length == 2) {
       const [dx, dy] = arguments;
       return new DistancePair(
-        this._inX.minus(dx),
-        this._inY.minus(dy));
+        this._x.minus(dx),
+        this._y.minus(dy));
     }
     if (arguments.length == 1) {
       const delta = arguments[0];
       if (delta instanceof DistancePair) {
         return new DistancePair(
-          this._inX.minus(delta._inX),
-          this._inY.minus(delta._inY));
+          this._x.minus(delta._x),
+          this._y.minus(delta._y));
       }
     }
     throw new Error("DistancePair.minus arg must be 1 DPair or 2 Distances");
@@ -452,14 +444,14 @@ class DistancePair {
 
   times(factor) {
     return new DistancePair(
-      this._inX.times(factor),
-      this._inY.times(factor));
+      this._x.times(factor),
+      this._y.times(factor));
   }
 
   divideBy(divisor) {
     return new DistancePair(
-      this._inX.divideBy(divisor),
-      this._inY.divideBy(divisor));
+      this._x.divideBy(divisor),
+      this._y.divideBy(divisor));
   }
 }
 
@@ -503,7 +495,7 @@ class AffineTransformation {
 
   apply(pt) {
     const a = this._matrix;
-    const b = [pt.inX()._value, pt.inY()._value, 1];
+    const b = [pt.x()._value, pt.y()._value, 1];
     const result =
       [ a[0][0]*b[0] + a[0][1]*b[1] + a[0][2]*b[2],
         a[1][0]*b[0] + a[1][1]*b[1] + a[1][2]*b[2],
