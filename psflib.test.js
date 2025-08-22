@@ -24,10 +24,10 @@ SOFTWARE.
 
 const psflib = require('./psflib');
 const Distance = psflib.Distance;
+const distancify = psflib.distancify;
 const ConversionFactor = psflib.ConversionFactor;
 const DPair = psflib.DPair;
 const AffineTransformation = psflib.AffineTransformation;
-const distancify = psflib.distancify;
 const Scale = psflib.Scale;
 const Translate = psflib.Translate;
 const Rotate = psflib.Rotate;
@@ -217,7 +217,7 @@ describe("DPair", () => {
     var p3 = p1.plus("3 ft -2 in", "4 ft 0 in");
     expect(p3.x()._value).toBeCloseTo(3.9116, 3);
     expect(p3.y()._value).toBeCloseTo(1.7272);
-    p3 = p1.plus("33 in", "48 in");
+    p3 = p1.plus(new DPair(new Distance("33 in"), "48 in"));
     expect(p3.x()._value).toBeCloseTo(3.8862, 3);
     expect(p3.y()._value).toBeCloseTo(1.7272, 3);
     p3 = p1.plus(new DPair("3 ft -2 in", "4 ft 0 in"));
@@ -227,7 +227,9 @@ describe("DPair", () => {
     expect(p4.x()._value).toBeCloseTo(2.9464, 3);
     expect(p4.y()._value).toBeCloseTo(0.2032, 4);
     expect(p3._comp).toBe(p4._comp);
+    expect(() => (p3.plus())).toThrow();
     expect(() => (p3.plus("foo"))).toThrow();
+    expect(() => (p3.plus("foo", "bar", "baz"))).toThrow();
   });
 
   test("DPair.minus() works", () => {

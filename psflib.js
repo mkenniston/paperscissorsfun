@@ -407,48 +407,34 @@ class DistancePair {
   }
 
   plus() {
-    if (arguments.length == 2) {
-      const [dx, dy] = arguments;
-      return new DistancePair(
-        this._x.plus(dx),
-        this._y.plus(dy));
-    }
-    if (arguments.length == 1) {
-      const delta = arguments[0];
-      if (delta instanceof DistancePair) {
-        return new DistancePair(
-          this._x.plus(delta._x),
-          this._y.plus(delta._y));
-      }
-    }
-    throw new Error("DistancePair.plus arg must be 1 DPair or 2 Distances");
+    const delta = dPairify.apply(this, arguments);
+    return new DistancePair(
+      this._x.plus(delta._x),
+      this._y.plus(delta._y));
   }
 
   minus() {
-    if (arguments.length == 2) {
-      const [dx, dy] = arguments;
-      return new DistancePair(
-        this._x.minus(dx),
-        this._y.minus(dy));
-    }
-    if (arguments.length == 1) {
-      const delta = arguments[0];
-      if (delta instanceof DistancePair) {
-        return new DistancePair(
-          this._x.minus(delta._x),
-          this._y.minus(delta._y));
-      }
-    }
-    throw new Error("DistancePair.minus arg must be 1 DPair or 2 Distances");
+    const delta = dPairify.apply(this, arguments);
+    return new DistancePair(
+      this._x.minus(delta._x),
+      this._y.minus(delta._y));
   }
 
   times(factor) {
+    if (typeof factor != 'number') {
+      throw new Error(
+        `Distance.times(): found ${factor} where number expected`);
+    }
     return new DistancePair(
       this._x.times(factor),
       this._y.times(factor));
   }
 
   divideBy(divisor) {
+    if (typeof divisor != 'number') {
+      throw new Error(
+        `Distance.divideBy(): found ${divisor} where number expected`);
+    }
     return new DistancePair(
       this._x.divideBy(divisor),
       this._y.divideBy(divisor));
@@ -456,6 +442,23 @@ class DistancePair {
 }
 
 const DPair = DistancePair;  // to make code more concise and save typing
+
+function dPairify() {
+  const numArgs = arguments.length;
+  if (numArgs == 1) {
+    const dp = arguments[0];
+    if (dp instanceof DistancePair) {
+      return dp;
+    } else {
+      throw new Error(`found ${dp} where DistancePair expected`);
+    }
+  } else if (numArgs == 2) {
+    const x = arguments[0];
+    const y = arguments[1];
+    return new DPair(x, y);
+  }
+  throw new Error(`${numArgs} args found where 1 DPair or 2 Distances needed`);
+}
 
 /*
     ==== AFFINE_TRANSFORMATION ====
@@ -929,9 +932,9 @@ class Kit {
 
 module.exports = {
   Distance,
+  distancify,
   ConversionFactor,
   DPair,
-  distancify,
   AffineTransformation,
   Scale,
   Identity,

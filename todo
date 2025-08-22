@@ -1,5 +1,9 @@
 TODO:
 
+- create a "Piece" class to handle xlation from bin-pack, and get() methods
+	or maybe subclass of Component
+    - give Components a relative "offset" that can be set (when created, or
+	later when Pieces are located)
 - set up Options class to handle defaults-and-sets intuitively
 	(and make sure annotation displays them correctly)
 
@@ -7,10 +11,6 @@ TODO:
 	"World" coords vs. "Printer" coords.
 - do NOT cache xformed Points, much safer to let point be immutable,
 	just recalc x and y when needed
-- create a "Piece" class to handle xlation from bin-pack, and get() methods
-	or maybe subclass of Component
-    - give Components a relative "offset" that can be set (when created, or
-	later when Pieces are located)
 - try just comp.render(pen), so user never sees board and xform
 - add code for nested Components
 	test with translate, scale, rotate of subcomponents
@@ -137,4 +137,5 @@ DONE:
     code for a probably insignificant speed gain, so decided to leave
     the matrix math fully standard, at least for now.
 - changed inX/inY to x/y, and removed inWidth/inHeight (no longer needed)
+- created dPairify(args) as "dPairfy(dp)" or "dFairify(x, y)"
 
