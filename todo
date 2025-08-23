@@ -1,7 +1,5 @@
 TODO:
 
-- make last row [0,0,1] of transformation matrix added by parent not children
-- add "numberify()" for internal and testing use only
 - change scaleName 1:1 to fullSize, add parsing for <num>:<num>
 	- add very large and very small units (e.g. for maps, microbes)
 
@@ -152,4 +150,7 @@ DONE:
 - changed inX/inY to x/y, and removed inWidth/inHeight (no longer needed)
 - created dPairify(args) as "dPairfy(dp)" or "dFairify(x, y)"
 - created Piece class and cleaned up interface to bin-pack
+- decided not make last row [0,0,1] of xform matrix added by parent,
+    started coding it but discovered it was a bad idea
+- add "numberify()" for internal and testing use only, so stop using _value
 

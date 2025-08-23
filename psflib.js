@@ -333,6 +333,19 @@ function distancify(arg) {
   throw new Error(`found ${arg} where string or Distance expected`);
 }
 
+function numberify(arg) { // used ONLY internally, not part of API
+  if (typeof arg == 'number') {
+    return arg;
+  }
+  if (arg instanceof Distance) {
+    return arg._value;
+  }
+  if (typeof arg == 'string') {
+    return (new Distance(arg))._value;
+  }
+  throw new Error(`found ${arg} where number, Distance, or string expected`);
+}
+
 /*
     ==== DISTANCE PAIR ====
 
@@ -480,8 +493,8 @@ class Piece {
   constructor(comp) {
     // These fields are required or produced by the bin-pack code.
     // We omit leading underscores because the bin-pack lib wants it that way.
-    this.width = distancify(comp.getWidth())._value;
-    this.height = distancify(comp.getHeight())._value;
+    this.width = numberify(comp.getWidth());
+    this.height = numberify(comp.getHeight());
     this.x = null;  // gets filled in by the bin-packer
     this.y = null;  // gets filled in by the bin-packer
     this.area = this.width * this.height;
@@ -538,7 +551,7 @@ class AffineTransformation {
 
   apply(pt) {
     const a = this._matrix;
-    const b = [pt.x()._value, pt.y()._value, 1];
+    const b = [numberify(pt.x()), numberify(pt.y()), 1];
     const result =
       [ a[0][0]*b[0] + a[0][1]*b[1] + a[0][2]*b[2],
         a[1][0]*b[0] + a[1][1]*b[1] + a[1][2]*b[2],
@@ -586,9 +599,9 @@ class Identity extends AffineTransformation {
 
 class Translate extends AffineTransformation {
   constructor(dx, dy) {
-    dx = distancify(dx);
-    dy = distancify(dy);
-    super([[1, 0, dx._value], [0, 1, dy._value], [0, 0, 1]]);
+    dx = numberify(dx);
+    dy = numberify(dy);
+    super([[1, 0, dx], [0, 1, dy], [0, 0, 1]]);
   }
 }
 
@@ -897,8 +910,8 @@ class Kit {
     var notYetPacked = this._pieceList;
     while (notYetPacked.length > 0) {
       var bp = bpjs.BinPack();
-      bp.binWidth(this._pageWidth._value);
-      bp.binHeight(this._pageHeight._value);
+      bp.binWidth(numberify(this._pageWidth));
+      bp.binHeight(numberify(this._pageHeight));
       bp.sort((a, b) => b.area - a.area);
       bp.addAll(notYetPacked);
       if (bp.positioned.length == 0) {
@@ -963,6 +976,7 @@ class Kit {
 module.exports = {
   Distance,
   distancify,
+  numberify,
   ConversionFactor,
   DPair,
   AffineTransformation,

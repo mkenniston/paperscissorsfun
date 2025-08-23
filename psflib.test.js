@@ -25,6 +25,7 @@ SOFTWARE.
 const psflib = require('./psflib');
 const Distance = psflib.Distance;
 const distancify = psflib.distancify;
+const numberify = psflib.numberify;
 const ConversionFactor = psflib.ConversionFactor;
 const DPair = psflib.DPair;
 const AffineTransformation = psflib.AffineTransformation;
@@ -40,7 +41,7 @@ const Page = psflib.Page;
 const Kit = psflib.Kit;
 
 function expectDV(s) {
-  return expect(new Distance(s)._value);
+  return expect(numberify(new Distance(s)));
 }
 
 describe("Distance", () => {
@@ -126,10 +127,10 @@ describe("Distance", () => {
     const p = new Distance("3 m");
     const z = new Distance("0 m");
     const a = new Distance("  8   m   ");
-    expect(p.plus(a)._value).toBeCloseTo(11);
-    expect(p.plus(z)._value).toBeCloseTo(3);
-    expect(p.plus("2 m")._value).toBeCloseTo(5);
-    expect(p.plus("-10 m")._value).toBeCloseTo(-7);
+    expect(numberify(p.plus(a))).toBeCloseTo(11);
+    expect(numberify(p.plus(z))).toBeCloseTo(3);
+    expect(numberify(p.plus("2 m"))).toBeCloseTo(5);
+    expect(numberify(p.plus("-10 m"))).toBeCloseTo(-7);
     expect(() => (p.plus())).toThrow();
     expect(() => (p.plus("xyz"))).toThrow();
   });
@@ -137,16 +138,16 @@ describe("Distance", () => {
   test("Distance.minus() works", () => {
     const p = new Distance("6 m");
     const q = new Distance("7 m");
-    expect(p.minus(q)._value).toBeCloseTo(-1);
-    expect(p.minus("4 m")._value).toBeCloseTo(2);
+    expect(numberify(p.minus(q))).toBeCloseTo(-1);
+    expect(numberify(p.minus("4 m"))).toBeCloseTo(2);
   });
 
   test("Distance.times() works", () => {
     const p = new Distance("11 m");
-    expect(p.times(0)._value).toBe(0);
-    expect(p.times(1)._value).toBeCloseTo(11);
-    expect(p.times(10)._value).toBeCloseTo(110);
-    expect(p.times(-2)._value).toBeCloseTo(-22);
+    expect(numberify(p.times(0))).toBe(0);
+    expect(numberify(p.times(1))).toBeCloseTo(11);
+    expect(numberify(p.times(10))).toBeCloseTo(110);
+    expect(numberify(p.times(-2))).toBeCloseTo(-22);
     expect(() => (p.times("foo"))).toThrow();
     expect(() => (p.times())).toThrow();
   });
@@ -155,7 +156,7 @@ describe("Distance", () => {
     const p = new Distance("100 m");
     const q = new Distance("20 m");
     expect(p.divideBy(q)).toBeCloseTo(5);
-    expect(p.divideBy(40)._value).toBeCloseTo(2.5);
+    expect(numberify(p.divideBy(40))).toBeCloseTo(2.5);
     expect(p.divideBy("2 m")).toBeCloseTo(50);
     expect(() => (p.divideBy("foo"))).toThrow();
   });
@@ -204,28 +205,28 @@ describe("DPair", () => {
   
   test("DPair.constructor works", () => {
     expect(p1).toBeInstanceOf(DPair);
-    expect(p1.x()._value).toBeCloseTo(3.048, 3);
-    expect(p1.y()._value).toBeCloseTo(0.508, 4);
+    expect(numberify(p1.x())).toBeCloseTo(3.048, 3);
+    expect(numberify(p1.y())).toBeCloseTo(0.508, 4);
     const p3 = new DPair("17 m 3 cm", "38 mm");
     expect(p3.toString()).toEqual(
       'DistancePair(Distance("17.03 m"), Distance("0.038 m"))');
   });
 
   test("DPair.plus() works", () => {
-    expect(p2.x()._value).toBeCloseTo(1.0414, 3);
-    expect(p2.y()._value).toBeCloseTo(0.4826, 4);
+    expect(numberify(p2.x())).toBeCloseTo(1.0414, 3);
+    expect(numberify(p2.y())).toBeCloseTo(0.4826, 4);
     var p3 = p1.plus("3 ft -2 in", "4 ft 0 in");
-    expect(p3.x()._value).toBeCloseTo(3.9116, 3);
-    expect(p3.y()._value).toBeCloseTo(1.7272);
+    expect(numberify(p3.x())).toBeCloseTo(3.9116, 3);
+    expect(numberify(p3.y())).toBeCloseTo(1.7272);
     p3 = p1.plus(new DPair(new Distance("33 in"), "48 in"));
-    expect(p3.x()._value).toBeCloseTo(3.8862, 3);
-    expect(p3.y()._value).toBeCloseTo(1.7272, 3);
+    expect(numberify(p3.x())).toBeCloseTo(3.8862, 3);
+    expect(numberify(p3.y())).toBeCloseTo(1.7272, 3);
     p3 = p1.plus(new DPair("3 ft -2 in", "4 ft 0 in"));
-    expect(p3.x()._value).toBeCloseTo(3.9116, 3);
-    expect(p3.y()._value).toBeCloseTo(1.7272);
+    expect(numberify(p3.x())).toBeCloseTo(3.9116, 3);
+    expect(numberify(p3.y())).toBeCloseTo(1.7272);
     var p4 = p1.plus(new Distance("-4 in"), new Distance( "-12 in"));
-    expect(p4.x()._value).toBeCloseTo(2.9464, 3);
-    expect(p4.y()._value).toBeCloseTo(0.2032, 4);
+    expect(numberify(p4.x())).toBeCloseTo(2.9464, 3);
+    expect(numberify(p4.y())).toBeCloseTo(0.2032, 4);
     expect(p3._comp).toBe(p4._comp);
     expect(() => (p3.plus())).toThrow();
     expect(() => (p3.plus("foo"))).toThrow();
@@ -234,25 +235,25 @@ describe("DPair", () => {
 
   test("DPair.minus() works", () => {
     var p3 = p1.minus("5 ft", "10 in");
-    expect(p3.x()._value).toBeCloseTo(1.524, 3);
-    expect(p3.y()._value).toBeCloseTo(0.254, 4);
+    expect(numberify(p3.x())).toBeCloseTo(1.524, 3);
+    expect(numberify(p3.y())).toBeCloseTo(0.254, 4);
     p3 = p1.minus(new DPair("5 ft", "10 in"));
-    expect(p3.x()._value).toBeCloseTo(1.524, 3);
-    expect(p3.y()._value).toBeCloseTo(0.254, 4);
+    expect(numberify(p3.x())).toBeCloseTo(1.524, 3);
+    expect(numberify(p3.y())).toBeCloseTo(0.254, 4);
     expect(() => (p3.minus("bar"))).toThrow();
   });
 
   test("DPair.times() works", () => {
     var p3 = p1.times(2);
-    expect(p3.x()._value).toBeCloseTo(6.096, 3);
-    expect(p3.y()._value).toBeCloseTo(1.016, 3);
+    expect(numberify(p3.x())).toBeCloseTo(6.096, 3);
+    expect(numberify(p3.y())).toBeCloseTo(1.016, 3);
     expect(() => (p3.times("zebra"))).toThrow();
   });
 
   test("DPair.divideBy() works", () => {
     var p3 = p1.divideBy(2);
-    expect(p3.x()._value).toBeCloseTo(1.524, 3);
-    expect(p3.y()._value).toBeCloseTo(0.254,4);
+    expect(numberify(p3.x())).toBeCloseTo(1.524, 3);
+    expect(numberify(p3.y())).toBeCloseTo(0.254,4);
     expect(() => (p3.times("lions"))).toThrow();
   });
 
@@ -500,15 +501,15 @@ describe("Kit", () => {
     const p0 = k._pageList[0];
     var pieces = p0.allPieces();
     expect(pieces.length).toBe(3);
-    expect([pieces[0].x._value, pieces[0].y._value]).toEqual([0, 0]);
-    expect([pieces[1].x._value, pieces[1].y._value]).toEqual([0, 11]);
-    expect([pieces[2].x._value, pieces[2].y._value]).toEqual([11, 11]);
+    expect([numberify(pieces[0].x), numberify(pieces[0].y)]).toEqual([0, 0]);
+    expect([numberify(pieces[1].x), numberify(pieces[1].y)]).toEqual([0, 11]);
+    expect([numberify(pieces[2].x), numberify(pieces[2].y)]).toEqual([11, 11]);
     const p1 = k._pageList[1];
     pieces = p1.allPieces();
     expect(pieces.length).toBe(3);
-    expect([pieces[0].x._value, pieces[0].y._value]).toEqual([0, 0]);
-    expect([pieces[1].x._value, pieces[1].y._value]).toEqual([9, 0]);
-    expect([pieces[2].x._value, pieces[2].y._value]).toEqual([0, 18]);
+    expect([numberify(pieces[0].x), numberify(pieces[0].y)]).toEqual([0, 0]);
+    expect([numberify(pieces[1].x), numberify(pieces[1].y)]).toEqual([9, 0]);
+    expect([numberify(pieces[2].x), numberify(pieces[2].y)]).toEqual([0, 18]);
   });
 
   test("Kit.generate() invokes render()", () => {
