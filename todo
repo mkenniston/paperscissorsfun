@@ -13,7 +13,6 @@ TODO:
 - figure out how to add PNG pictures
 - add "Terminology" section of comments
 	- scale:  "scaleName"/"HO", "scaleRatio"/87.1, "Scale" class
-	- piece: no class, just top-level Component
 
 - add BezierControlPoint class, test it, explain it (w/ web refs)
 - try enhancement to packing
@@ -153,4 +152,5 @@ DONE:
 - decided not make last row [0,0,1] of xform matrix added by parent,
     started coding it but discovered it was a bad idea
 - add "numberify()" for internal and testing use only, so stop using _value
+- changed Scale to Resize to avoid confusion with things like "HO scale"
 

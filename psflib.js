@@ -585,7 +585,11 @@ class AffineTransformation {
   }
 }
 
-class Scale extends AffineTransformation {
+// A mathematician would call Resize "Scale", but we already use
+// that term for things like "HO scale".  Calling this class "Resize"
+// still has a clear, accurate meaning but avoids confusion.
+
+class Resize extends AffineTransformation {
   constructor(factor) {
     super([[factor, 0, 0], [0, factor, 0], [0, 0, 1]]);
   }
@@ -889,7 +893,7 @@ class Kit {
     // slide from 4th quandrant back to 1st
     const shift = new Translate(0, this._pageHeight);
     // convert world "m" to PDF "mm"
-    const shrink = new Scale(1000 / ratio);
+    const shrink = new Resize(1000 / ratio);
     const masterXform = shrink.compose(shift).compose(flip);
 
     this._pieceList = [];
@@ -980,7 +984,7 @@ module.exports = {
   ConversionFactor,
   DPair,
   AffineTransformation,
-  Scale,
+  Resize,
   Identity,
   Translate,
   Rotate,

@@ -29,7 +29,7 @@ const numberify = psflib.numberify;
 const ConversionFactor = psflib.ConversionFactor;
 const DPair = psflib.DPair;
 const AffineTransformation = psflib.AffineTransformation;
-const Scale = psflib.Scale;
+const Resize = psflib.Resize;
 const Translate = psflib.Translate;
 const Rotate = psflib.Rotate;
 const ROT90 = psflib.ROT90;
@@ -291,8 +291,8 @@ describe("AffineTransformation", () => {
       "AffineTransformation(11,22,33,44,55,66,77,88,99)");
   });
 
-  test("Scale.constructor", () => {
-    const result = new Scale(10)._matrix;
+  test("Resize.constructor", () => {
+    const result = new Resize(10)._matrix;
     expect(result).toStrictEqual([[10, 0, 0], [0, 10, 0], [0, 0, 1]]);
   });
 
@@ -318,7 +318,7 @@ describe("AffineTransformation", () => {
   test("AffineTransformation.apply() works", () => {
     const pt = new DPair("3 m", "5 m");
 
-    var result = (new Scale(2)).apply(pt);
+    var result = (new Resize(2)).apply(pt);
     expect(result.x).toBeCloseTo(6, 3);
     expect(result.y).toBeCloseTo(10, 3);
 
@@ -370,7 +370,7 @@ describe("AffineTransformation", () => {
     checkOneMultiply(mat1, mat2, mat3);
 
     const p1 = new DPair("3 m", "5 m");
-    const scale2 = new Scale(2);
+    const scale2 = new Resize(2);
     const translate21 = new Translate("-2 m", "+1 m");
     var results = scale2.compose(translate21).apply(p1);
     expect(results.x).toBeCloseTo(2, 3);
@@ -386,7 +386,7 @@ describe("AffineTransformation", () => {
 
 describe("Component", () => {
   test("Component.constructor", () => {
-    const c = new Component(new Scale(1));
+    const c = new Component(new Resize(1));
     expect(c).toBeInstanceOf(Component);
     expect(c.toString()).toEqual("Component()");
   });
