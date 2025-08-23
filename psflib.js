@@ -461,6 +461,46 @@ function dPairify() {
 }
 
 /*
+    ==== PIECE ====
+
+The Piece class is really just a wrapper around a top-level Component, i.e.
+something which can be shuffled around on a page to use the page more
+efficiently.  We put this functionality in its own class instead of just
+incorporating it into Component for two reasons:
+(1) Conceptual clarity -- Components which are not top-level don't
+need the extra stuff.
+(2) Clean interface -- because Piece interfaces with the external bin-sort
+library, it has to deal with measurements in "bare" Numbers (not Distances),
+and we don't want to pollute the library API (and the rest of the code)
+with bare Numbers, nor with the details of the bin-pack record formats.
+
+*/
+
+class Piece {
+  constructor(comp) {
+    // These fields are required or produced by the bin-pack code.
+    // We omit leading underscores because the bin-pack lib wants it that way.
+    this.width = distancify(comp.getWidth())._value;
+    this.height = distancify(comp.getHeight())._value;
+    this.x = null;  // gets filled in by the bin-packer
+    this.y = null;  // gets filled in by the bin-packer
+    this.area = this.width * this.height;
+    this.component = comp;
+  }
+
+  toString() {
+    return `Piece(${this.component})`;
+  }
+
+  static fromBinPackOutput(record) {
+    const piece = record.datum;
+    piece.x = distancify(`${record.x} m`);
+    piece.y = distancify(`${record.y} m`);
+    return piece;
+  }
+}
+
+/*
     ==== AFFINE_TRANSFORMATION ====
 
 There is a whole set of classes which define the transformations we
@@ -646,13 +686,8 @@ class Page {
     return "Page()";
   }
 
-  addPositionedPiece(record) {
-    // convert the output of bin-pack to a more convenient form
-    this._positionedPieceList.push( {
-      x: distancify(`${record.x} m`),
-      y: distancify(`${record.y} m`),
-      component: record.datum,
-    });
+  addPositionedPiece(piece) {
+    this._positionedPieceList.push(piece);
   }
 
   allPieces() {
@@ -852,37 +887,33 @@ class Kit {
   }
 
   addPiece(comp) {  // This should NOT be overridden.
-    this._pieceList.push(comp);
+    this._pieceList.push(new Piece(comp));
   }
 
   build() {  // OVERRIDE this.
   }
 
   pack() { // This should NOT be overridden.
-    for (const comp of this._pieceList) {
-      comp.width = distancify(comp.getWidth())._value;
-      comp.height = distancify(comp.getHeight())._value;
-      comp.area = comp.width * comp.height;
-    }
     var notYetPacked = this._pieceList;
-
     while (notYetPacked.length > 0) {
       var bp = bpjs.BinPack();
       bp.binWidth(this._pageWidth._value);
       bp.binHeight(this._pageHeight._value);
       bp.sort((a, b) => b.area - a.area);
       bp.addAll(notYetPacked);
-      const page = new Page();
       if (bp.positioned.length == 0) {
         throw new Error("at least one piece is too big to fit on page");
       }
-      for (const rec of bp.positioned) {
-        page.addPositionedPiece(rec);
+      const page = new Page();
+      for (const record of bp.positioned) {
+        const piece = Piece.fromBinPackOutput(record);
+        page.addPositionedPiece(piece);
       }
       this._pageList.push(page);
       notYetPacked = [];
-      for (const item of bp.unpositioned) {
-        notYetPacked.push(item.datum);
+      for (const record of bp.unpositioned) {
+        const piece = Piece.fromBinPackOutput(record);
+        notYetPacked.push(piece);
       }
     }
   }
@@ -916,10 +947,9 @@ class Kit {
       } else {
         this._pdf.addPage(this._options.format, "portrait");
       }
-      for (const record of page.allPieces()) {
-        const piece = record.component;
-        const shift = new Translate(record.x, record.y);
-        piece.render(board, xform.compose(shift));
+      for (const piece of page.allPieces()) {
+        const shift = new Translate(piece.x, piece.y);
+        piece.component.render(board, xform.compose(shift));
       }
     }
     this._pdf.save(pdfFileName);
