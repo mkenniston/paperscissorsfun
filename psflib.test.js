@@ -306,7 +306,7 @@ describe("AffineTransformation", () => {
     result = new Rotate(ROT180)._matrix;
     expect(result).toStrictEqual([[-1, 0, 0], [0, -1, 0], [0, 0, 1]]);
     result = new Rotate(ROT270)._matrix;
-    expect(result).toStrictEqual([[0, 1, 0], [-1, 0, 0], [0, 0, 0]]);
+    expect(result).toStrictEqual([[0, 1, 0], [-1, 0, 0], [0, 0, 1]]);
   });
 
   test("ReflectAroundXAxis.constructor", () => {

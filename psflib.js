@@ -604,7 +604,7 @@ class Rotate extends AffineTransformation {
     } else if (which == ROT180) {
       m = [[-1, 0, 0], [0, -1, 0], [0, 0, 1]];
     } else if (which == ROT270) {
-      m = [[0, 1, 0], [-1, 0, 0], [0, 0, 0]];
+      m = [[0, 1, 0], [-1, 0, 0], [0, 0, 1]];
     } else {
       throw new Error(`invalid rotation ${which}`);
     }
