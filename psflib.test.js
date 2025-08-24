@@ -26,7 +26,7 @@ const psflib = require('./psflib');
 const Distance = psflib.Distance;
 const distancify = psflib.distancify;
 const numberify = psflib.numberify;
-const ConversionFactor = psflib.ConversionFactor;
+const ConversionFactors = psflib.ConversionFactors;
 const DPair = psflib.DPair;
 const AffineTransformation = psflib.AffineTransformation;
 const Resize = psflib.Resize;
@@ -173,15 +173,15 @@ describe("Distance", () => {
   });
 });
 
-describe("ConversionFactor.SCALE", () => {
+describe("ConversionFactor.scale()", () => {
   function checkEntry(key, ratio) {
-    const entry = ConversionFactor.SCALE[key];
+    const entry = ConversionFactors.scale(key);
       expect(entry.ratio).toBe(ratio);
       expect(typeof entry.description).toBe('string');
   }
 
   test("scale factors are correct", () => {
-    checkEntry("1:1", 1);
+    checkEntry("fullSize", 1);
     checkEntry("F", 20.3);
     checkEntry("G", 22.5);
     checkEntry("#3", 22.5);
@@ -370,13 +370,13 @@ describe("AffineTransformation", () => {
     checkOneMultiply(mat1, mat2, mat3);
 
     const p1 = new DPair("3 m", "5 m");
-    const scale2 = new Resize(2);
+    const resize2 = new Resize(2);
     const translate21 = new Translate("-2 m", "+1 m");
-    var results = scale2.compose(translate21).apply(p1);
+    var results = resize2.compose(translate21).apply(p1);
     expect(results.x).toBeCloseTo(2, 3);
     expect(results.y).toBeCloseTo(12, 3);
 
-    results = translate21.compose(scale2).apply(p1);
+    results = translate21.compose(resize2).apply(p1);
     expect(results.x).toBeCloseTo(4, 3);
     expect(results.y).toBeCloseTo(11, 3);
 

@@ -30,12 +30,24 @@ const bpjs = require('./bin-pack.js');
 const { jsPDF } = require("jspdf");
 
 /*
-    ==== CONVERSION FACTOR ====
+    ==== CONVERSION FACTORS ====
 
-The ConversionFactor class is just a parking place for static lookup tables.
-We put them into a class rather than an object, because that way all the
-tables are in one place and we avoid name pollution.
-(In fact, we never instantiate the class at all.)
+The ConversionFactors class is just a parking place where we provide
+access to various conversion factors.  We put everything into one
+class to avoid cluttering the name space.
+
+*/
+
+/*
+
+Measurement units:
+
+We include lots of measurement units, more than you might see any
+need for.  That is to make the program as general as possible.  Although
+the primary intended use is for model railraod buildings, it could
+also be used to diagram molecules, print play money, or illustrate
+aspects of astronomy.  In each case, we want to be able to use the
+natural measurement units of the objects being modeled.
 
 */
 
@@ -58,71 +70,65 @@ const _CUBIT = 18 * _INCH;
 const _FATHOM = 6 * _FOOT;
 const _LEAGUE = 5280 * _YARD;
 
-class ConversionFactor {
-  // used only to hold "static const" lookup tables
-}
+const _UNIT_TABLE = {
+  km:          _KM,
+  kilometer:   _KM,
+  kilometers:  _KM,
+  kilometre:   _KM,
+  kilometres:  _KM,
+  m:           _M,
+  meter:       _M,
+  meters:      _M,
+  metre:       _M,
+  metres:      _M,
+  cm:          _CM,
+  centimeter:  _CM,
+  centimeters: _CM,
+  centimetre:  _CM,
+  centimetres: _CM,
+  mm:          _MM,
+  millimeter:  _MM,
+  millimeters: _MM,
+  millimetre:  _MM,
+  millimetres: _MM,
 
-Object.defineProperty(ConversionFactor, 'UNIT', {
-  writable: false,
-  configurable: false,
-  enumerable: true,
-  value: {
-    km:          _KM,
-    kilometer:   _KM,
-    kilometers:  _KM,
-    kilometre:   _KM,
-    kilometres:  _KM,
-    m:           _M,
-    meter:       _M,
-    meters:      _M,
-    metre:       _M,
-    metres:      _M,
-    cm:          _CM,
-    centimeter:  _CM,
-    centimeters: _CM,
-    centimetre:  _CM,
-    centimetres: _CM,
-    mm:          _MM,
-    millimeter:  _MM,
-    millimeters: _MM,
-    millimetre:  _MM,
-    millimetres: _MM,
+  point:       _PT,
+  points:      _PT,
+  pica:        _PICA,
+  picas:       _PICA,
+  inch:        _INCH,
+  inches:      _INCH,
+  in:          _INCH,
+  '"':         _INCH,
+  foot:        _FOOT,
+  feet:        _FOOT,
+  ft:          _FOOT,
+  "'":         _FOOT,
+  yard:        _YARD,
+  yards:       _YARD,
+  yd:          _YARD,
+  barleycorn:  _BARLEYCORN,
+  barleycorns: _BARLEYCORN,
+  furlong:     _FURLONG,
+  furlongs:    _FURLONG,
+  chain:       _CHAIN,
+  chains:      _CHAIN,
+  rod:         _ROD,
+  rods:        _ROD,
+  link:        _LINK,
+  links:       _LINK,
+  cubit:       _CUBIT,
+  cubits:      _CUBIT,
+  fathom:      _FATHOM,
+  fathoms:     _FATHOM,
+  league:      _LEAGUE,
+  leagues:     _LEAGUE,
+};
 
-    point:       _PT,
-    points:      _PT,
-    pica:        _PICA,
-    picas:       _PICA,
-    inch:        _INCH,
-    inches:      _INCH,
-    in:          _INCH,
-    '"':         _INCH,
-    foot:        _FOOT,
-    feet:        _FOOT,
-    ft:          _FOOT,
-    "'":         _FOOT,
-    yard:        _YARD,
-    yards:       _YARD,
-    yd:          _YARD,
-    barleycorn:  _BARLEYCORN,
-    barleycorns: _BARLEYCORN,
-    furlong:     _FURLONG,
-    furlongs:    _FURLONG,
-    chain:       _CHAIN,
-    chains:      _CHAIN,
-    rod:         _ROD,
-    rods:        _ROD,
-    link:        _LINK,
-    links:       _LINK,
-    cubit:       _CUBIT,
-    cubits:      _CUBIT,
-    fathom:      _FATHOM,
-    fathoms:     _FATHOM,
-    league:      _LEAGUE,
-    leagues:     _LEAGUE,
-  }
-});
 
 /*
+
+Scales:
 
 In the table below, note that in a model railroad context we are
 talking about "scale", not about "track gauge".  Many gauges can
@@ -134,8 +140,9 @@ table picks whatever seems to be the most common (with a bias toward US)
 usage, e.g. using 1:450 for T-scale instead of 1:480 which is also used.
 Another example is "G", which technically designates a gauge used with
 many scales, so here we arbitrarily picked LGB usage.
-If you want any others you can force whatever you like by using numbers,
-e.g. "1:480".
+
+These letter names are just a convenience, so if you want any others
+you can force whatever you like by using numbers, e.g. "1:480".
 
 If that's not enough, for more scales than you can shake a stick at, see:
   http://www.gardenstatecentral.com/scale_calc.html
@@ -143,27 +150,38 @@ If that's not enough, for more scales than you can shake a stick at, see:
 
 */
 
-Object.defineProperty(ConversionFactor, 'SCALE', {
-  writable: false,
-  configurable: false,
-  enumerable: true,
-  value: {
-    "1:1": {ratio: 1,    description: "full size"},
-    F:     {ratio: 20.3, description: "F scale"},
-    G:     {ratio: 22.5, description: "German LGB scale"},  // same as #3
-    "#3":  {ratio: 22.5, description: "#3 Gauge"},  // same as G
-    "#2":  {ratio: 29,   description: "#2 Gauge"},
-    "#1":  {ratio: 32,   description: "#1 Gauge"},
-    O:     {ratio: 48,   description: "O scale"},
-    S:     {ratio: 64,   description: "S scale"},
-    OO:    {ratio: 76.2, description: "OO scale"},
-    HO:    {ratio: 87.1, description: "HO scale"},
-    TT:    {ratio: 120,  description: "TT scale"},
-    N:     {ratio: 160,  description: "N scale"},
-    Z:     {ratio: 220,  description: "Z scale"},
-    T:     {ratio: 450,  description: "T scale"},
+const _SCALE_TABLE = {
+  "fullSize": {ratio: 1,    description: "full size"},
+  F:          {ratio: 20.3, description: "F scale"},
+  G:          {ratio: 22.5, description: "German LGB scale"},  // same as #3
+  "#3":       {ratio: 22.5, description: "#3 Gauge"},  // same as G
+  "#2":       {ratio: 29,   description: "#2 Gauge"},
+  "#1":       {ratio: 32,   description: "#1 Gauge"},
+  O:          {ratio: 48,   description: "O scale"},
+  S:          {ratio: 64,   description: "S scale"},
+  OO:         {ratio: 76.2, description: "OO scale"},
+  HO:         {ratio: 87.1, description: "HO scale"},
+  TT:         {ratio: 120,  description: "TT scale"},
+  N:          {ratio: 160,  description: "N scale"},
+  Z:          {ratio: 220,  description: "Z scale"},
+  T:          {ratio: 450,  description: "T scale"},
+};
+
+class ConversionFactors {
+  static unit(name) {
+    if (! _UNIT_TABLE.hasOwnProperty(name)) {
+      throw new Error(`invalid measurement unit "${name}"`);
+    }
+    return _UNIT_TABLE[name];
   }
-});
+
+  static scale(name) {
+    if (! _SCALE_TABLE.hasOwnProperty(name)) {
+      throw new Error(`invalid scale "${name}"`);
+    }
+    return _SCALE_TABLE[name];  // returns entry w/ ratio and description
+  }
+}
 
 /*
     ==== DISTANCE ====
@@ -277,14 +295,10 @@ class Distance {
     var index = 0;
     let value = 0;
     while (index < tokens.length) {
-      const num = tokens[index].value;
+      const num = Number(tokens[index].value);
       index += 1;
-      const unit = tokens[index].value;
+      value += num * ConversionFactors.unit(tokens[index].value);
       index += 1;
-      if (! ConversionFactor.UNIT.hasOwnProperty(unit)) {
-        throw new Error(`invalid measurement unit ${unit}`);
-      }
-      value += Number(num) * ConversionFactor.UNIT[unit];
     }
     return value;
   }
@@ -879,7 +893,7 @@ class Kit {
     });
     this._pdf = pdf;
     // convert PDF "mm" to world "m"
-    const ratio = ConversionFactor.SCALE[this._options.scale].ratio;
+    const ratio = ConversionFactors.scale(this._options.scale).ratio;
     const adjust = ratio / 1000;
  
     // computer size of page in real-world meters
@@ -981,7 +995,7 @@ module.exports = {
   Distance,
   distancify,
   numberify,
-  ConversionFactor,
+  ConversionFactors,
   DPair,
   AffineTransformation,
   Resize,
