@@ -155,4 +155,5 @@ DONE:
 - changed Scale to Resize to avoid confusion with things like "HO scale"
 - changed ConversionFactors class to have static getter methods instead of
     just storing hashes, to allow progammatic parsing of ratios like "1:200".
+- changed "numberify" to "numerify" because it sounds much better
 

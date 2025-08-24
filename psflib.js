@@ -347,7 +347,7 @@ function distancify(arg) {
   throw new Error(`found ${arg} where string or Distance expected`);
 }
 
-function numberify(arg) { // used ONLY internally, not part of API
+function numerify(arg) { // used ONLY internally, not part of API
   if (typeof arg == 'number') {
     return arg;
   }
@@ -507,8 +507,8 @@ class Piece {
   constructor(comp) {
     // These fields are required or produced by the bin-pack code.
     // We omit leading underscores because the bin-pack lib wants it that way.
-    this.width = numberify(comp.getWidth());
-    this.height = numberify(comp.getHeight());
+    this.width = numerify(comp.getWidth());
+    this.height = numerify(comp.getHeight());
     this.x = null;  // gets filled in by the bin-packer
     this.y = null;  // gets filled in by the bin-packer
     this.area = this.width * this.height;
@@ -565,7 +565,7 @@ class AffineTransformation {
 
   apply(pt) {
     const a = this._matrix;
-    const b = [numberify(pt.x()), numberify(pt.y()), 1];
+    const b = [numerify(pt.x()), numerify(pt.y()), 1];
     const result =
       [ a[0][0]*b[0] + a[0][1]*b[1] + a[0][2]*b[2],
         a[1][0]*b[0] + a[1][1]*b[1] + a[1][2]*b[2],
@@ -617,8 +617,8 @@ class Identity extends AffineTransformation {
 
 class Translate extends AffineTransformation {
   constructor(dx, dy) {
-    dx = numberify(dx);
-    dy = numberify(dy);
+    dx = numerify(dx);
+    dy = numerify(dy);
     super([[1, 0, dx], [0, 1, dy], [0, 0, 1]]);
   }
 }
@@ -928,8 +928,8 @@ class Kit {
     var notYetPacked = this._pieceList;
     while (notYetPacked.length > 0) {
       var bp = bpjs.BinPack();
-      bp.binWidth(numberify(this._pageWidth));
-      bp.binHeight(numberify(this._pageHeight));
+      bp.binWidth(numerify(this._pageWidth));
+      bp.binHeight(numerify(this._pageHeight));
       bp.sort((a, b) => b.area - a.area);
       bp.addAll(notYetPacked);
       if (bp.positioned.length == 0) {
@@ -994,7 +994,7 @@ class Kit {
 module.exports = {
   Distance,
   distancify,
-  numberify,
+  numerify,
   ConversionFactors,
   DPair,
   AffineTransformation,
