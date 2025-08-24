@@ -169,17 +169,32 @@ const _SCALE_TABLE = {
 
 class ConversionFactors {
   static unit(name) {
-    if (! _UNIT_TABLE.hasOwnProperty(name)) {
-      throw new Error(`invalid measurement unit "${name}"`);
+    if (_UNIT_TABLE.hasOwnProperty(name)) {
+      return _UNIT_TABLE[name];
     }
-    return _UNIT_TABLE[name];
+    throw new Error(`invalid measurement unit "${name}"`);
   }
 
   static scale(name) {
-    if (! _SCALE_TABLE.hasOwnProperty(name)) {
+    if (_SCALE_TABLE.hasOwnProperty(name)) {
+      return _SCALE_TABLE[name];  // returns entry w/ ratio and description
+    }
+    const parts = name.split(':');
+    if (parts.length != 2) {
       throw new Error(`invalid scale "${name}"`);
     }
-    return _SCALE_TABLE[name];  // returns entry w/ ratio and description
+    const numerator = Number(parts[1]);  // sic: reversed order
+    const denominator = Number(parts[0]);
+    if (isNaN(numerator) |
+        isNaN(denominator) |
+        numerator == 0 |
+        denominator == 0) {
+      throw new Error(`invalid scale "${name}"`);
+    }
+    return {
+      ratio: numerator/denominator,
+      description: `Custom ${name} scale`,
+    };
   }
 }
 

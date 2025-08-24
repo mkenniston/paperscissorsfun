@@ -1,6 +1,5 @@
 TODO:
 
-- add parsing of 1:200 scale factors
 - add very large and very small unit factors (e.g. for maps, microbes)
 
 - set up Options class to handle defaults-and-sets intuitively
@@ -21,6 +20,9 @@ TODO:
 - do NOT cache xformed Points, much safer to let point be immutable,
 	just recalc x and y when needed
 - add a Piece.priority level to manually force sort-order
+- add a feature to map input "cardstock thickness" (printer mm)
+    to "pageThickness" (world meters) -- and maybe something about
+    std font height (for adding bare text to a page)
 - add code for nested Components
 	test with translate, scale, rotate of subcomponents
 - create a BasicHouse class to demonstrate/test all the main features
@@ -156,4 +158,5 @@ DONE:
 - changed ConversionFactors class to have static getter methods instead of
     just storing hashes, to allow progammatic parsing of ratios like "1:200".
 - changed "numberify" to "numerify" because it sounds much better
+- added parsing of custom scale factors like "1:00"
 
