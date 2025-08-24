@@ -181,26 +181,27 @@ describe("ConversionFactor.scale()", () => {
   }
 
   test("scale factors are correct", () => {
-    checkEntry("10000000:1", 0.0000001);
-    checkEntry("2:1", 0.5);
+    checkEntry("10000000:1", 10000000);
+    checkEntry("2:1", 2);
     checkEntry("fullSize", 1);
     checkEntry("1:1", 1);
-    checkEntry("4:5", 1.25);
-    checkEntry("1:2", 2);
-    checkEntry("1:10.5", 10.5);
-    checkEntry("F", 20.3);
-    checkEntry("G", 22.5);
-    checkEntry("#3", 22.5);
-    checkEntry("#2", 29);
-    checkEntry("#1", 32);
-    checkEntry("O", 48);
-    checkEntry("S", 64);
-    checkEntry("OO", 76.2);
-    checkEntry("HO", 87.1);
-    checkEntry("TT", 120);
-    checkEntry("N", 160);
-    checkEntry("Z", 220);
-    checkEntry("T", 450);
+    checkEntry("4:5", 4/5);
+    checkEntry("1:2", 1/2);
+    checkEntry("1:10.5", 1/10.5);
+    checkEntry("F", 1/20.3);
+    checkEntry("G", 1/22.5);
+    checkEntry("#3", 1/22.5);
+    checkEntry("#2", 1/29);
+    checkEntry("#1", 1/32);
+    checkEntry("O", 1/48);
+    checkEntry("S", 1/64);
+    checkEntry("OO", 1/76.2);
+    checkEntry("HO", 1/87.1);
+    checkEntry("TT", 1/120);
+    checkEntry("N", 1/160);
+    checkEntry("Z", 1/220);
+    checkEntry("T", 1/450);
+    checkEntry("1:10000000", 0.0000001);
     expect(() => (ConversionFactors.scale("foo"))).toThrow();
     expect(() => (ConversionFactors.scale("0:1"))).toThrow();
     expect(() => (ConversionFactors.scale("a:4"))).toThrow();

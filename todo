@@ -159,4 +159,5 @@ DONE:
     just storing hashes, to allow progammatic parsing of ratios like "1:200".
 - changed "numberify" to "numerify" because it sounds much better
 - added parsing of custom scale factors like "1:00"
+- inverted scale ratio, to make "1:120" be "1/120", i.e. what it really means
 

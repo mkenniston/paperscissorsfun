@@ -152,19 +152,19 @@ If that's not enough, for more scales than you can shake a stick at, see:
 
 const _SCALE_TABLE = {
   "fullSize": {ratio: 1,    description: "full size"},
-  F:          {ratio: 20.3, description: "F scale"},
-  G:          {ratio: 22.5, description: "German LGB scale"},  // same as #3
-  "#3":       {ratio: 22.5, description: "#3 Gauge"},  // same as G
-  "#2":       {ratio: 29,   description: "#2 Gauge"},
-  "#1":       {ratio: 32,   description: "#1 Gauge"},
-  O:          {ratio: 48,   description: "O scale"},
-  S:          {ratio: 64,   description: "S scale"},
-  OO:         {ratio: 76.2, description: "OO scale"},
-  HO:         {ratio: 87.1, description: "HO scale"},
-  TT:         {ratio: 120,  description: "TT scale"},
-  N:          {ratio: 160,  description: "N scale"},
-  Z:          {ratio: 220,  description: "Z scale"},
-  T:          {ratio: 450,  description: "T scale"},
+  F:          {ratio: 1/20.3, description: "F scale"},
+  G:          {ratio: 1/22.5, description: "German LGB scale"},  // same as #3
+  "#3":       {ratio: 1/22.5, description: "#3 Gauge"},  // same as G
+  "#2":       {ratio: 1/29,   description: "#2 Gauge"},
+  "#1":       {ratio: 1/32,   description: "#1 Gauge"},
+  O:          {ratio: 1/48,   description: "O scale"},
+  S:          {ratio: 1/64,   description: "S scale"},
+  OO:         {ratio: 1/76.2, description: "OO scale"},
+  HO:         {ratio: 1/87.1, description: "HO scale"},
+  TT:         {ratio: 1/120,  description: "TT scale"},
+  N:          {ratio: 1/160,  description: "N scale"},
+  Z:          {ratio: 1/220,  description: "Z scale"},
+  T:          {ratio: 1/450,  description: "T scale"},
 };
 
 class ConversionFactors {
@@ -183,8 +183,8 @@ class ConversionFactors {
     if (parts.length != 2) {
       throw new Error(`invalid scale "${name}"`);
     }
-    const numerator = Number(parts[1]);  // sic: reversed order
-    const denominator = Number(parts[0]);
+    const numerator = Number(parts[0]);
+    const denominator = Number(parts[1]);
     if (isNaN(numerator) |
         isNaN(denominator) |
         numerator == 0 |
@@ -909,7 +909,7 @@ class Kit {
     this._pdf = pdf;
     // convert PDF "mm" to world "m"
     const ratio = ConversionFactors.scale(this._options.scale).ratio;
-    const adjust = ratio / 1000;
+    const adjust = 0.001 / ratio;
  
     // computer size of page in real-world meters
     const rawWidth = pdf.internal.pageSize.getWidth();  // in PDF "mm"
@@ -922,7 +922,7 @@ class Kit {
     // slide from 4th quandrant back to 1st
     const shift = new Translate(0, this._pageHeight);
     // convert world "m" to PDF "mm"
-    const shrink = new Resize(1000 / ratio);
+    const shrink = new Resize(1000 * ratio);
     const masterXform = shrink.compose(shift).compose(flip);
 
     this._pieceList = [];
