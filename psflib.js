@@ -51,10 +51,62 @@ natural measurement units of the objects being modeled.
 
 */
 
-const _M = 1;
-const _KM = 1000 * _M;
-const _CM = 0.01 * _M;
-const _MM = 0.001 * _M;
+const _LONG_PREFIX_TABLE = {  // for SI/metric inits
+  quetta:	1e30,
+  ronna:	1e27,
+  yotta:	1e24,
+  zetta:	1e21,
+  exa:		1e18,
+  peta:		1e15,
+  tera:		1e12,
+  giga:		1e9,
+  mega:		1e6,
+  kilo:		1e3,
+  hecto:	1e2,
+  deca:		1e1,
+  '':		1e0,
+  deci:		1e-1,
+  centi:	1e-2,
+  milli:	1e-3,
+  micro:	1e-6,
+  nano:		1e-9,
+  pico:		1e-12,
+  femto:	1e-15,
+  atto:		1e-18,
+  zepto:	1e-21,
+  yocto:	1e-24,
+  ronto:	1e-27,
+  quecto:	1e-30,
+};
+
+const _SHORT_PREFIX_TABLE = {  // for SI/metric inits
+  Q:	1e30,
+  R:	1e27,
+  Y:	1e24,
+  Z:	1e21,
+  E:	1e18,
+  P:	1e15,
+  T:	1e12,
+  G:	1e9,
+  M:	1e6,
+  k:	1e3,
+  h:	1e2,
+  da:	1e1,
+  '':	1e0,
+  d:	1e-1,
+  c:	1e-2,
+  m:	1e-3,
+  u:	1e-6,
+  μ:	1e-6,
+  n:	1e-9,
+  p:	1e-12,
+  f:	1e-15,
+  a:	1e-18,
+  z:	1e-21,
+  y:	1e-24,
+  r:	1e-27,
+  q:	1e-30,
+};
 
 const _INCH = 0.0254;
 const _FOOT = 12 * _INCH;
@@ -68,30 +120,19 @@ const _ROD = 0.25 * _CHAIN;
 const _LINK = 0.01 * _CHAIN;
 const _CUBIT = 18 * _INCH;
 const _FATHOM = 6 * _FOOT;
+const _MILE = 5280 * _FOOT;
 const _LEAGUE = 5280 * _YARD;
+const _AU = 1.49597870700e+11;
+const _PARSEC = 30856775814913673;
+const _LY = 9460730472580.8;
 
 const _UNIT_TABLE = {
-  km:          _KM,
-  kilometer:   _KM,
-  kilometers:  _KM,
-  kilometre:   _KM,
-  kilometres:  _KM,
-  m:           _M,
-  meter:       _M,
-  meters:      _M,
-  metre:       _M,
-  metres:      _M,
-  cm:          _CM,
-  centimeter:  _CM,
-  centimeters: _CM,
-  centimetre:  _CM,
-  centimetres: _CM,
-  mm:          _MM,
-  millimeter:  _MM,
-  millimeters: _MM,
-  millimetre:  _MM,
-  millimetres: _MM,
-
+  angstrom:    1e-10,
+  angstroms:   1e-10,
+  A:           1e-10,
+  'Å':         1e-10,
+  micron:      1e-6,
+  microns:     1e-6,
   point:       _PT,
   points:      _PT,
   pica:        _PICA,
@@ -121,8 +162,26 @@ const _UNIT_TABLE = {
   cubits:      _CUBIT,
   fathom:      _FATHOM,
   fathoms:     _FATHOM,
+  mile:        _MILE,
+  miles:       _MILE,
+  mi:          _MILE,
   league:      _LEAGUE,
   leagues:     _LEAGUE,
+  "astronomical-unit": _AU,
+  au:          _AU,
+  parsec:      _PARSEC,
+  parsecs:     _PARSEC,
+  pc:          _PARSEC,
+  kiloparsec:  1000 * _PARSEC,
+  kiloparsecs: 1000 * _PARSEC,
+  kpc:         1000 * _PARSEC,
+  megaparsec:  1e6 * _PARSEC,
+  megaparsecs: 1e6 * _PARSEC,
+  Mpc:         1e6 * _PARSEC,
+  'light-year':  _LY,
+  'light-years': _LY,
+  ly:           _LY,
+  lyr:          _LY,
 };
 
 
@@ -169,9 +228,27 @@ const _SCALE_TABLE = {
 
 class ConversionFactors {
   static unit(name) {
+    // First we try all the customary US units, and any with irregular names.
     if (_UNIT_TABLE.hasOwnProperty(name)) {
       return _UNIT_TABLE[name];
     }
+
+    // Now we try all the (many!) metric units.
+    if (name.slice(-1) == 'm') {
+      const prefix = name.slice(0, -1);
+      if (_SHORT_PREFIX_TABLE.hasOwnProperty(prefix)) {
+        return _SHORT_PREFIX_TABLE[prefix];
+      }
+    } else { // long-form
+      const m = name.match(/met(er|re)s?$/);
+      if (m) {
+        const prefix = name.slice(0, m.index);
+        if (_LONG_PREFIX_TABLE.hasOwnProperty(prefix)) {
+          return _LONG_PREFIX_TABLE[prefix];
+        }
+      }
+    }
+
     throw new Error(`invalid measurement unit "${name}"`);
   }
 
@@ -275,18 +352,17 @@ class Distance {
 
   _tokenize(input) {
     // break the input into tokens
-    const stringRep = input.toLowerCase();
     const tokens = [];
     let index = 0;
     const regexes = {
       number: /^[0123456789\.\+\-]+/,
-      units: /^[a-z\'\"]+/,
+      units: /^[a-zμA-ZÅ\'\"\-]+/,
       whitespace: /^\s+/,
     };
-    while (index < stringRep.length) {
+    while (index < input.length) {
       let matched = false;
       for (const type in regexes) {
-        const match = stringRep.substring(index).match(regexes[type]);
+        const match = input.substring(index).match(regexes[type]);
         if (match) {
           if (type !== 'whitespace') { // Ignore whitespace tokens
             tokens.push({ type: type, value: match[0] });
@@ -298,7 +374,7 @@ class Distance {
       }
       if (! matched) {
         throw new Error('Distance.constructor(): ' +
-          `Unexpected character at index ${index}: ${stringRep[index]}`);
+          `Unexpected character at index ${index} of ${input}`);
       }
     }
     return tokens;

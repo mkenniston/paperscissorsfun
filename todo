@@ -1,6 +1,5 @@
 TODO:
 
-- add very large and very small unit factors (e.g. for maps, microbes)
 
 - set up Options class to handle defaults-and-sets intuitively
 	(and make sure annotation displays them correctly)
@@ -160,4 +159,6 @@ DONE:
 - changed "numberify" to "numerify" because it sounds much better
 - added parsing of custom scale factors like "1:00"
 - inverted scale ratio, to make "1:120" be "1/120", i.e. what it really means
+- added very large and very small units (e.g. for maps, microbes), with
+    better parsing of SI prefixes to include ALL those units
 

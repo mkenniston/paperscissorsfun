@@ -46,11 +46,68 @@ function expectDV(s) {
 
 describe("Distance", () => {
   test("single metric units work", () => {
+    // base unit (meter)
     expectDV("1 m").toBeCloseTo(1, 3);
     expectDV("2 meter").toBeCloseTo(2, 3);
     expectDV("3.5 meters").toBeCloseTo(3.5, 3);
     expectDV("4 metre").toBeCloseTo(4, 3);
     expectDV("-0.05 metres").toBeCloseTo(-0.05, 5);
+
+    expectDV("3.45 millimetre").toBeCloseTo(0.00345);
+    expectDV("4.56 mm").toBeCloseTo(0.00456, -26);
+
+    // prefixed units
+    expectDV("1.30 quettameter").toBeCloseTo(1.30e30, -26);
+    expectDV("1.03 Qm").toBeCloseTo(1.03e30, -26);
+    expectDV("1.27 ronnameter").toBeCloseTo(1.27e27, -23);
+    expectDV("1.027 Rm").toBeCloseTo(1.027e27, -23);
+    expectDV("1.24 yottametre").toBeCloseTo(1.24e24, -20);
+    expectDV("1.024 Ym").toBeCloseTo(1.024e24, -20);
+    expectDV("1.21 zettameters").toBeCloseTo(1.21e21, -17);
+    expectDV("1.021 Zm").toBeCloseTo(1.021e21, -17);
+    expectDV("1.18 exametres").toBeCloseTo(1.18e18, -14);
+    expectDV("1.018 Em").toBeCloseTo(1.018e18, -14);
+    expectDV("1.15 petameter").toBeCloseTo(1.15e15, -11);
+    expectDV("1.015 Pm").toBeCloseTo(1.015e15, -11);
+    expectDV("1.12 terametre").toBeCloseTo(1.12e12, -8);
+    expectDV("1.012 Tm").toBeCloseTo(1.012e12, -8);
+    expectDV("1.09 gigameters").toBeCloseTo(1.09e9, -5);
+    expectDV("1.009 Gm").toBeCloseTo(1.009e9, -5);
+    expectDV("1.06 megametres").toBeCloseTo(1.06e6, -2);
+    expectDV("1.006 Mm").toBeCloseTo(1.006e6, -2);
+    expectDV("1.03 kilometer").toBeCloseTo(1.03e3, 1);
+    expectDV("1.003 km").toBeCloseTo(1.003e3, 1);
+    expectDV("1.02 hectometer").toBeCloseTo(1.02e2, 2);
+    expectDV("1.002 hm").toBeCloseTo(1.002e2, 2);
+    expectDV("1.01 decameter").toBeCloseTo(1.01e1, 3);
+    expectDV("1.001 dam").toBeCloseTo(1.001e1, 3);
+    expectDV("2.01 decimeter").toBeCloseTo(2.01e-1, 5);
+    expectDV("2.001 dm").toBeCloseTo(2.001e-1, 5);
+    expectDV("2.02 centimeter").toBeCloseTo(2.02e-2, 6);
+    expectDV("2.002 cm").toBeCloseTo(2.002e-2, 6);
+    expectDV("2.03 millimeter").toBeCloseTo(2.03e-3, 7);
+    expectDV("2.003 mm").toBeCloseTo(2.003e-3, 7);
+    expectDV("2.06 micrometers").toBeCloseTo(2.06e-6, 10);
+    expectDV("2.006 um").toBeCloseTo(2.006e-6, 10);
+    expectDV("2.006 μm").toBeCloseTo(2.006e-6, 10);
+    expectDV("2.09 nanometer").toBeCloseTo(2.09e-9, 13);
+    expectDV("2.009 nm").toBeCloseTo(2.009e-9, 13);
+    expectDV("2.12 picometer").toBeCloseTo(2.12e-12, 16);
+    expectDV("2.012 pm").toBeCloseTo(2.012e-12, 16);
+    expectDV("2.15 femtometer").toBeCloseTo(2.15e-15, 19);
+    expectDV("2.015 fm").toBeCloseTo(2.015e-15, 19);
+    expectDV("2.18 attometer").toBeCloseTo(2.18e-18, 22);
+    expectDV("2.018 am").toBeCloseTo(2.018e-18, 22);
+    expectDV("2.21 zeptometer").toBeCloseTo(2.21e-21, 25);
+    expectDV("2.021 zm").toBeCloseTo(2.021e-21, 25);
+    expectDV("2.24 yoctometer").toBeCloseTo(2.24e-24, 28);
+    expectDV("2.024 ym").toBeCloseTo(2.024e-24, 28);
+    expectDV("2.27 rontometer").toBeCloseTo(2.27e-27, 31);
+    expectDV("2.027 rm").toBeCloseTo(2.027e-27, 31);
+    expectDV("2.30 quectometer").toBeCloseTo(2.30e-30, 34);
+    expectDV("2.030 qm").toBeCloseTo(2.030e-30, 34);
+
+
     expectDV("1.23 km").toBeCloseTo(1230);
     expectDV("1.34 kilometer").toBeCloseTo(1340);
     expectDV("2.34 kilometers").toBeCloseTo(2340);
@@ -88,6 +145,8 @@ describe("Distance", () => {
     expectDV("18 points").toBeCloseTo(0.00635, 6);
     expectDV("19 pica").toBeCloseTo(0.0804333333, 5);
     expectDV("20 picas").toBeCloseTo(0.0846666667, 5);
+    expectDV("21 micron").toBeCloseTo(2.1e-5, -2);
+    expectDV("22 microns").toBeCloseTo(2.2e-5, -1);
     expectDV("5 chain").toBeCloseTo(100.584);
     expectDV("6 chains").toBeCloseTo(120.701);
     expectDV("7 rod").toBeCloseTo(35.204);
@@ -100,6 +159,27 @@ describe("Distance", () => {
     expectDV("14 fathoms").toBeCloseTo(25.6032);
     expectDV("15 league").toBeCloseTo(72420.6, 0);
     expectDV("16 leagues").toBeCloseTo(77248.6, 0);
+    expectDV("17 mile").toBeCloseTo(27358.8, 0);
+    expectDV("18 miles").toBeCloseTo(28968.2, 0);
+    expectDV("19 mi").toBeCloseTo(30577.5, 0);
+    expectDV("1 astronomical-unit").toBeCloseTo(1.49597879799e+11, -7);
+    expectDV("1 au").toBeCloseTo(1.49597879799e+11, -7);
+    expectDV("1 parsec").toBeCloseTo(3.0856775814e+16, -12);
+    expectDV("1 parsecs").toBeCloseTo(3.0856775814e+16, -12);
+    expectDV("1 pc").toBeCloseTo(3.0856775814e+16, -12);
+    expectDV("1 kiloparsec").toBeCloseTo(3.0856775814e+19, -15);
+    expectDV("1 kiloparsecs").toBeCloseTo(3.0856775814e+19, -15);
+    expectDV("1 kpc").toBeCloseTo(3.0856775814e+19, -15);
+    expectDV("1 megaparsec").toBeCloseTo(3.0856775814e+22, -18);
+    expectDV("1 megaparsecs").toBeCloseTo(3.0856775814e+22, -18);
+    expectDV("1 Mpc").toBeCloseTo(3.0856775814e+22, -18);
+    expectDV("1 light-year").toBeCloseTo(9.460730e12, -8);
+    expectDV("1 ly").toBeCloseTo(9.460730e12, -8);
+    expectDV("1 lyr").toBeCloseTo(9.460730e12, -8);
+    expectDV("2 angstrom").toBeCloseTo(2e-10);
+    expectDV("3 angstroms").toBeCloseTo(3e-10);
+    expectDV("4 A").toBeCloseTo(4e-10);
+    expectDV("5 Å").toBeCloseTo(5e-10);
   });
 
   test("example syntactic forms from doc all work", () => {
