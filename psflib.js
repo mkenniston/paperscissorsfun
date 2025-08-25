@@ -127,12 +127,17 @@ const _PARSEC = 30856775814913673;
 const _LY = 9460730472580.8;
 
 const _UNIT_TABLE = {
+  fermi:       1e-15,
+  fermis:      1e-15,
   angstrom:    1e-10,
   angstroms:   1e-10,
   A:           1e-10,
   'Å':         1e-10,
   micron:      1e-6,
   microns:     1e-6,
+  thou:        _INCH / 1000,
+  mil:         _INCH / 1000,
+  mils:        _INCH / 1000,
   point:       _PT,
   points:      _PT,
   pica:        _PICA,

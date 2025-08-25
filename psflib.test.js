@@ -96,6 +96,8 @@ describe("Distance", () => {
     expectDV("2.012 pm").toBeCloseTo(2.012e-12, 16);
     expectDV("2.15 femtometer").toBeCloseTo(2.15e-15, 19);
     expectDV("2.015 fm").toBeCloseTo(2.015e-15, 19);
+    expectDV("2.0015 fermi").toBeCloseTo(2.0015e-15, 19);
+    expectDV("2.00015 fermis").toBeCloseTo(2.00015e-15, 19);
     expectDV("2.18 attometer").toBeCloseTo(2.18e-18, 22);
     expectDV("2.018 am").toBeCloseTo(2.018e-18, 22);
     expectDV("2.21 zeptometer").toBeCloseTo(2.21e-21, 25);
@@ -141,6 +143,9 @@ describe("Distance", () => {
     expectDV("2 barleycorns").toBeCloseTo(0.0169333, 5);
     expectDV("3 furlong").toBeCloseTo(603.504);
     expectDV("4 furlongs").toBeCloseTo(804.672);
+    expectDV("100 thou").toBeCloseTo(0.00254, 4);
+    expectDV("100 mil").toBeCloseTo(0.00254, 4);
+    expectDV("100 mils").toBeCloseTo(0.00254, 4);
     expectDV("17 point").toBeCloseTo(0.00599722, 6);
     expectDV("18 points").toBeCloseTo(0.00635, 6);
     expectDV("19 pica").toBeCloseTo(0.0804333333, 5);
