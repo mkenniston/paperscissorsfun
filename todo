@@ -1,12 +1,15 @@
 TODO:
 
+- add tests for correct options set/get, annotation, propagation, and overrides
+- add tests for correct positioning of subcomponents
 
-- set up Options class to handle defaults-and-sets intuitively
-	(and make sure annotation displays them correctly)
 - add "Notes on measurements and coordinate systems" that explains
 	"World" coords vs. "Printer" coords.
 
 - try just comp.render(pen), so user never sees board and xform
+
+---- make a simple house
+
 - figure out how to add text
 - figure out how to add PNG pictures
 - add "Terminology" section of comments
@@ -56,6 +59,12 @@ TODO:
 
 - add input-options mechanism for setting params from either
     the web interface or the API level (includes scale/HO, etc.)
+    - three modes of operation:
+	- linux/command-line
+	- hosted web service
+	- browser reading local files (so you can edit JS directly
+		but not have to use command-line tools)
+		(unpack a zip file to get started)
 
 - figure out how to fill w/ a "texture" (code)
 	- figure out how to crop texture filling
@@ -161,4 +170,5 @@ DONE:
 - inverted scale ratio, to make "1:120" be "1/120", i.e. what it really means
 - added very large and very small units (e.g. for maps, microbes), with
     better parsing of SI prefixes to include ALL those units
+- enabled sub-components, with code to handle options and shifts appropriately
 

@@ -512,8 +512,8 @@ describe("Kit", () => {
    };
 
   class Box extends Component {
-    constructor(width, height, drawColor, fillColor) {
-      super();
+    constructor(oldOptions, newOptions, width, height, drawColor, fillColor) {
+      super(oldOptions, newOptions);
       this._width = distancify(width);
       this._height = distancify(height);
       this._drawColor = drawColor;
@@ -523,6 +523,7 @@ describe("Kit", () => {
     build() {
       // no sub-components, so nothing to do
     }
+
     render(board, xform) {
       const pen = board.getPen(xform);
       const inc = distancify("1 m");
@@ -559,13 +560,14 @@ describe("Kit", () => {
     getDefaultOptions() {
       return dummyOptions;
     }
-    build() {
-      this.addPiece(new Box("17 m", "5 m", "black", "yellow"));
-      this.addPiece(new Box("7 m", "5 m", "black", "orange"));
-      this.addPiece(new Box("18 m", "11 m", "black", "red"));
-      this.addPiece(new Box("11 m", "13 m", "white", "purple"));
-      this.addPiece(new Box("9 m", "12 m", "white", "blue"));
-      this.addPiece(new Box("6 m", "18 m", "white", "green"));
+    build(oldOpt) {
+      const newOpt = {};
+      this.addPiece(new Box(oldOpt, newOpt, "17 m", "5 m", "black", "yellow"));
+      this.addPiece(new Box(oldOpt, newOpt, "7 m", "5 m", "black", "orange"));
+      this.addPiece(new Box(oldOpt, newOpt, "18 m", "11 m", "black", "red"));
+      this.addPiece(new Box(oldOpt, newOpt, "11 m", "13 m", "white", "purple"));
+      this.addPiece(new Box(oldOpt, newOpt, "9 m", "12 m", "white", "blue"));
+      this.addPiece(new Box(oldOpt, newOpt, "6 m", "18 m", "white", "green"));
     }
   }
 

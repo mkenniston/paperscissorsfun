@@ -750,7 +750,7 @@ class ReflectAroundXAxis extends AffineTransformation {
 
 The Component class is intended to be used as a parent class.
 Each separate part (or sub-part) of a model should have its own
-class which extends Component.
+class which extends Component and has its own constructor.
 
 The "build()" method should be overridden by each child class.
 It is used only to figure out the size of each component, so that
@@ -763,6 +763,10 @@ the code should actually draw lines, paint colors, etc.  This need
 only be done for top-level components, as the library will automatially
 call "render()" on all the sub-components.
 
+Note that only these three methods (constructor, build, and render),
+marked "OVERRIDE this" in the code, should be overridden.  Leave
+the other methods alone.
+
 Each component must be created and drawn as if it has its own
 coordinate system, with the component representation drawn in the
 first quadrant (positive x and y) and nestled against the origin.
@@ -771,31 +775,52 @@ The library will automatically take care of mapping as needed.
 */
 
 class Component {
-  constructor() {  // OVERRIDE this.
+  constructor(oldOptions, newOptions) {  // OVERRIDE this, but call super().
+    this._options = Object.assign({}, oldOptions, newOptions);
     this._width = null;
     this._height = null;
+    this._shift = null;
+    this._subComponents = [];
   }
 
-  toString() {  // This may optionally be overridden.
-    return "Component()";
+  toString() {
+    return `${this.constructor.name}()`;
   }
 
-  getWidth() {  // This should NOT be overridden.
+  getWidth() {
     return this._width;
   }
 
-  getHeight() {  // This should NOT be overridden.
+  getHeight() {
     return this._height;
   }
 
-  build() {  // OVERRIDE this.
-    // compute size and store it
-    // create any subcomponents, and position them in parents
+  set(optionName, optionValue) {
+    this._options[optionName] = optionValue;
   }
 
-  render(board, xform) {  // OVERRIDE this.
-    xform = xform; // shush jshint
-    // draw all the shapes (but not the sub-components)
+  get(optionName) {
+    return this._options[optionName];
+  }
+
+  _setShift(position) {
+    this._shift = new Translate(position.x, position.y);
+  }
+
+  addSubComponent(subComponent, position) {
+    subComponent._setShift(position);
+    this._subComponents.push(subComponent);
+    // someday add code here to verify that subcomponent bounding box
+    // fits inside parent component bounding box
+  }
+
+  build(/*options*/) {  // OVERRIDE this.
+    // compute size and store it
+    // create any subcomponents, and position them in parent
+  }
+
+  render(/*board, xform*/) {  // OVERRIDE this.
+    // draw all the shapes, but not the sub-components
   }
 }
 
@@ -829,7 +854,7 @@ A DrawingBoard is basically a wrapper around the jsPDF object, with
 some extra useful information tagging along for the ride.
 
 Note the use of the factory method to create DrawingPen objects.  There is
-only single DrawingBoard object for an entire Kit, but there is a
+only a single DrawingBoard object for an entire Kit, but there is a
 new DrawingPen object created for each Component because each Component
 has its own xform (AffineTransformation).
 
@@ -936,7 +961,7 @@ class SimpleHouse extends Kit {
     };
   }
 
-  generate() {
+  build() {
     ... create all the Components here ...
   }
 }
@@ -975,13 +1000,8 @@ class Kit {
     return this._options[key];
   }
 
-  generate(options) {  // This should NOT be overridden.
-    for (const key in options) {
-      if (options.hasOwnProperty(key)) {
-        this._options[key] = options[key];
-      }
-    }
-
+  generate(initialOptions) {  // This should NOT be overridden.
+    this._options = Object.assign(this._options, initialOptions);
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -1007,7 +1027,7 @@ class Kit {
     const masterXform = shrink.compose(shift).compose(flip);
 
     this._pieceList = [];
-    this.build();
+    this.build(this._options);
     this._pageList = [];
     this.pack();
     this.render(masterXform, this._options.pdfFileName);
@@ -1017,7 +1037,7 @@ class Kit {
     this._pieceList.push(new Piece(comp));
   }
 
-  build() {  // OVERRIDE this.
+  build(/*options*/) {  // OVERRIDE this.
   }
 
   pack() { // This should NOT be overridden.
@@ -1047,21 +1067,13 @@ class Kit {
 
   render(xform, pdfFileName) {  // This should NOT be overridden.
     const timestamp = (new Date()).toUTCString();
-    const testOptions = {
-      animal: "dog",
-      name: "Rover",
-      ears: "floppy",
-      tail: "wags",
-      size: "giant",
-      };
-
     this._pdf.createAnnotation({
       type: 'text',
       title: 'Origination Data',
       bounds: {x: 1, y: 1, w: 50, h: 50 },
       contents: `File created at ${timestamp}\n` +
         `with class ${this.constructor.name} using these options:\n` +
-        JSON.stringify(testOptions, null, 2) +
+        JSON.stringify(this._options, null, 2) +
         '\nSee http://paperscissorsfun.com for more information.',
       color: "#FF0000",
       open: false // Set to true to open the pop-up by default
@@ -1075,11 +1087,20 @@ class Kit {
         this._pdf.addPage(this._options.format, "portrait");
       }
       for (const piece of page.allPieces()) {
-        const shift = new Translate(piece.x, piece.y);
-        piece.component.render(board, xform.compose(shift));
+        const component = piece.component;
+        component._setShift(piece);  // piece has .x and .y, so it's a position
+        this._renderTreeNodes(board, xform, component);
       }
     }
     this._pdf.save(pdfFileName);
+  }
+
+  _renderTreeNodes(board, xform, component) {
+    const currentXform = xform.compose(component._shift);
+    component.render(board, currentXform);
+    for (const subComponent of component._subComponents) {
+      this._renderTreeNodes(board, currentXform, subComponent);
+    }
   }
 }
 
