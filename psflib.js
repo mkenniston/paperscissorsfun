@@ -757,33 +757,69 @@ class ReflectAroundXAxis extends AffineTransformation {
 /*
     ==== COMPONENT ====
 
-The Component class is intended to be used as a parent class.
-Each separate part (or sub-part) of a model should have its own
-class which extends Component and has its own constructor.
+The Component class is intended to be used as a parent class.  Each type
+of separate part (or sub-part) of a model should have its own class which
+extends Component.  For example you can have a Wall class used to create
+multiple walls, and a different Roof class to draw a roof.  You will
+need to decide which things are sufficiently similar to be handled by a
+single class and which are sufficiently different to require their own
+class -- that is a design judgement; the library doesn't care.
 
-The "build()" method should be overridden by each child class.
-It is used only to figure out the size of each component, so that
-the library can figure out what page to put it on and where on the
-page it will fit.  The build() method should also create any
-sub-components, so that they can be found later.
+Note that only the methods listed below (constructor, getWidth, getHeight,
+and render), and marked "OVERRIDE this" in the code, should be overridden.
+The other Component methods are for internal use only.
+
+-- Constructor --
+
+Each child class needs its own constructor, whose primary jobs are:
+
+(1) Call the parent constructor with super().
+
+(2) Set up the geometry, i.e. use the options as appropriate to figure
+out where the interesting points are.  Stash all the points in
+instance variables of the Component object; by convention we put
+all that stuff in "this._geometry".
+
+(3) Figure out the total width and height of the component.  These are
+needed later by getWidth() and getHeight(), which in turn are used to
+figure out what page to put each Piece (which is a component) on and
+where on the page it will fit.
+
+(4) Create and position any (optional) sub-components.
+
+In other words, the constructor does pretty much everything
+except for the actual drawing.  (That final step must be deferred
+until the Pieces are all sized and positioned onto pages.)
+Since the logic may be long and complex, it is perfectly reasonable
+to have the constructor call helper methods to do most of the work.
+
+-- getWidth and getHeight --
 
 The getWidth() and getHeight() methods should also be overrideen by
 each child class.  These expose the results of any computation
-done by build() to determine the overall sizes of things.
+done by the constructor to determine the overall sizes of things.
+
+-- render --
 
 The "render()" method should also be overridden.  This is where
-the code should actually draw lines, paint colors, etc.  This need
-only be done for top-level components, as the library will automatially
-call "render()" on all the sub-components.
+the code should actually draw lines, paint colors, etc.  This is
+typically relatively straightforward, because all the interesting
+information is already stored in "this._geometry".
 
-Note that only these methods (constructor, getWidth/Height, build, and
-render), marked "OVERRIDE this" in the code, should be overridden.  Leave
-the other methods alone.
+A component's render method need only draw the graphic elements at
+that level, i.e. it need NOT draw the children (subComponents).  The
+library will automatically call render() for each subComponent later.
+That means children are drawn "on top of" parents, so for example
+when you draw a wall you don't need to leave "holes" for the 
+subComponent windows to fit into.
 
 Each component must be created and drawn as if it has its own
 coordinate system, with the component representation drawn in the
 first quadrant (positive x and y) and nestled against the origin.
-The library will automatically take care of mapping as needed.
+For example, when you are rendering a window, you put the lower
+left corner of the window at (0, 0) regardless of where the window is
+actually going to end up on the containing wall or on the physical page.
+All that mapping is handled automatically by the library.
 
 */
 
@@ -817,9 +853,11 @@ class Component {
   }
 
   getWidth() {  // OVERRIDE this.
+    throw new Error('"Component.getWidth()" must be overridden.');
   }
 
   getHeight() { // OVERRIDE this.
+    throw new Error('"Component.getHeight()" must be overridden.');
   }
 
   set(optionName, optionValue) {
@@ -841,12 +879,8 @@ class Component {
     // fits inside parent component bounding box
   }
 
-  build(/*options*/) {  // OVERRIDE this.
-
-  }
-
   render(/*pen*/) {  // OVERRIDE this.
-    // draw all the shapes, but not the sub-components
+    throw new Error('"Component.render(pen)" must be overridden.');
   }
 }
 
@@ -967,7 +1001,7 @@ class SimpleHouse extends Kit {
   }
 
   build() {
-    ... create all the Components here ...
+    ... create all the Components here and add each to this Kit ...
   }
 }
 
@@ -1047,6 +1081,7 @@ class Kit {
   }
 
   build() {  // OVERRIDE this.
+    throw new Error('"Kit.build()" must be overridden.');
   }
 
   pack() { // This should NOT be overridden.

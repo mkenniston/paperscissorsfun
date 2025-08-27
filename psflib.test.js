@@ -520,10 +520,6 @@ describe("Kit", () => {
       this._fillColor = fillColor;
     }
 
-    build(/*options*/) {
-      // no sub-components, so nothing to do
-    }
-
     getWidth() {
       return this._width;
     }

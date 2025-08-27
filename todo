@@ -1,10 +1,6 @@
 TODO:
 
-- try getting rid of Kit-ctor overrides, maybe not needed?
-- reorg test code to use new ctor/render conventions, maybe get rid of
-    build() completely?
-    clarify in comments what a child class needs to implement
-
+- reorg test code to use new ctor/render conventions
 - add tests for correct options set/get, annotation, propagation, and overrides
 - add tests for correct positioning of subcomponents
 
@@ -209,4 +205,7 @@ DONE:
 - added SimpleHouse class to do very basic stuff w/ Components (and produced
     first sheet printed/cut/assembled!)
 - removed class DrawingBoard and simplified Component.render to "render(pen)"
+- removed an invalid Kit.ctor in SimpleHouse
+- removed Component.build, added comments to clarify the functions of
+    the constructor and render() methods
 
