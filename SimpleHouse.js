@@ -42,9 +42,6 @@ const Page = psflib.Page;
 const Kit = psflib.Kit;
 
 class SimpleHouse extends Kit {
-  constructor(oldOptions, newOptions) {
-    super(oldOptions, newOptions);
-  }
 
   getDefaultOptions() {
     return {
