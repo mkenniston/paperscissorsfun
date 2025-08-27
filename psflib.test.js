@@ -237,13 +237,13 @@ describe("Distance", () => {
     expect(() => (p.times())).toThrow();
   });
 
-  test("Distance.divideBy() works", () => {
+  test("Distance.dividedBy() works", () => {
     const p = new Distance("100 m");
     const q = new Distance("20 m");
-    expect(p.divideBy(q)).toBeCloseTo(5);
-    expect(numerify(p.divideBy(40))).toBeCloseTo(2.5);
-    expect(p.divideBy("2 m")).toBeCloseTo(50);
-    expect(() => (p.divideBy("foo"))).toThrow();
+    expect(p.dividedBy(q)).toBeCloseTo(5);
+    expect(numerify(p.dividedBy(40))).toBeCloseTo(2.5);
+    expect(p.dividedBy("2 m")).toBeCloseTo(50);
+    expect(() => (p.dividedBy("foo"))).toThrow();
   });
 
   test("illegal formats detected", () => {
@@ -347,8 +347,8 @@ describe("DPair", () => {
     expect(() => (p3.times("zebra"))).toThrow();
   });
 
-  test("DPair.divideBy() works", () => {
-    var p3 = p1.divideBy(2);
+  test("DPair.dividedBy() works", () => {
+    var p3 = p1.dividedBy(2);
     expect(numerify(p3.x())).toBeCloseTo(1.524, 3);
     expect(numerify(p3.y())).toBeCloseTo(0.254,4);
     expect(() => (p3.times("lions"))).toThrow();
@@ -520,8 +520,16 @@ describe("Kit", () => {
       this._fillColor = fillColor;
     }
 
-    build() {
+    build(/*options*/) {
       // no sub-components, so nothing to do
+    }
+
+    getWidth() {
+      return this._width;
+    }
+
+    getHeight() {
+      return this._height;
     }
 
     render(board, xform) {
@@ -581,15 +589,15 @@ describe("Kit", () => {
     const k = new DummyKit();
     expect(k.getDefaultOptions()).toEqual(dummyOptions);
     k.generate({color: "red"});
-    expect(k.getOptionValue("color")).toEqual("red");
-    expect(k.getOptionValue("number")).toEqual(5);
+    expect(k.get("color")).toEqual("red");
+    expect(k.get("number")).toEqual(5);
   });
 
   test("Kit.generate() invokes build()", () => {
     const k = new DummyKit();
     k.generate({planet: "Earth"});
     expect(k._pieceList.length).toEqual(6);
-    expect(k.getOptionValue("planet")).toEqual("Earth");
+    expect(k.get("planet")).toEqual("Earth");
   });
 
   test("Kit.generate() invokes pack()", () => {

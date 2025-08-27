@@ -419,10 +419,10 @@ class Distance {
       result._value *= factor;
       return result;
     }
-    throw new Error("Distance.times() factor must be number");
+    throw new Error(`Distance.times() factor is ${typeof factor}, but must be number`);
   }
 
-  divideBy(divisor) {
+  dividedBy(divisor) {
     if (typeof divisor == 'number') {
       const result = new Distance(this);
       result._value /= divisor;
@@ -553,14 +553,14 @@ class DistancePair {
       this._y.times(factor));
   }
 
-  divideBy(divisor) {
+  dividedBy(divisor) {
     if (typeof divisor != 'number') {
       throw new Error(
-        `Distance.divideBy(): found ${divisor} where number expected`);
+        `Distance.dividedBy(): found ${divisor} where number expected`);
     }
     return new DistancePair(
-      this._x.divideBy(divisor),
-      this._y.divideBy(divisor));
+      this._x.dividedBy(divisor),
+      this._y.dividedBy(divisor));
   }
 }
 
@@ -581,6 +581,15 @@ function dPairify() {
     return new DPair(x, y);
   }
   throw new Error(`${numArgs} args found where 1 DPair or 2 Distances needed`);
+}
+
+function distanceBetween(p1, p2) {
+  const x1 = numerify(p1.x());
+  const x2 = numerify(p2.x());
+  const y1 = numerify(p1.y());
+  const y2 = numerify(p2.y());
+  const dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+  return new Distance(`${dist} m`);
 }
 
 /*
@@ -758,13 +767,17 @@ the library can figure out what page to put it on and where on the
 page it will fit.  The build() method should also create any
 sub-components, so that they can be found later.
 
+The getWidth() and getHeight() methods should also be overrideen by
+each child class.  These expose the results of any computation
+done by build() to determine the overall sizes of things.
+
 The "render()" method should also be overridden.  This is where
 the code should actually draw lines, paint colors, etc.  This need
 only be done for top-level components, as the library will automatially
 call "render()" on all the sub-components.
 
-Note that only these three methods (constructor, build, and render),
-marked "OVERRIDE this" in the code, should be overridden.  Leave
+Note that only these methods (constructor, getWidth/Height, build, and
+render), marked "OVERRIDE this" in the code, should be overridden.  Leave
 the other methods alone.
 
 Each component must be created and drawn as if it has its own
@@ -774,25 +787,39 @@ The library will automatically take care of mapping as needed.
 
 */
 
+function mergeDicts(baseDict, newEntries) {
+  for (const key in newEntries) {
+    if (newEntries.hasOwnProperty(key)) {
+      baseDict[key] = newEntries[key];
+    }
+  }
+}
+
 class Component {
   constructor(oldOptions, newOptions) {  // OVERRIDE this, but call super().
-    this._options = Object.assign({}, oldOptions, newOptions);
+    this._options = {};
+    mergeDicts(this._options, oldOptions);
+    mergeDicts(this._options, newOptions);
     this._width = null;
     this._height = null;
     this._shift = null;
     this._subComponents = [];
+    this._geometry = {};
+
+    // When overriding:
+    // Do all computations, set up the geometry, compute size of component,
+    // create any subComponents and position them in the parent.
+    // Do NOT render anything yet.
   }
 
   toString() {
     return `${this.constructor.name}()`;
   }
 
-  getWidth() {
-    return this._width;
+  getWidth() {  // OVERRIDE this.
   }
 
-  getHeight() {
-    return this._height;
+  getHeight() { // OVERRIDE this.
   }
 
   set(optionName, optionValue) {
@@ -804,7 +831,7 @@ class Component {
   }
 
   _setShift(position) {
-    this._shift = new Translate(position.x, position.y);
+    this._shift = new Translate(position.x(), position.y());
   }
 
   addSubComponent(subComponent, position) {
@@ -815,8 +842,7 @@ class Component {
   }
 
   build(/*options*/) {  // OVERRIDE this.
-    // compute size and store it
-    // create any subcomponents, and position them in parent
+
   }
 
   render(/*board, xform*/) {  // OVERRIDE this.
@@ -894,7 +920,7 @@ class DrawingPen {
     this._xform = xform;
   }
 
-  set(props) {
+  set(props) {  // maybe fold this into ctor
     if (props.hasOwnProperty("fillColor")) {
       this._board._pdf.setFillColor(props.fillColor);
     }
@@ -976,7 +1002,7 @@ class Kit {
       scale:  "HO",
       pdfFileName: `${this.constructor.name}.pdf`,
     };
-    Object.assign(this._options, this.getDefaultOptions());
+    mergeDicts(this._options, this.getDefaultOptions());
 
     // For other valid formats, see:
     // https://github.com/parallax/jsPDF/blob/ddbfc0f0250ca908f8061a72fa057116b7613e78/jspdf.js#L59
@@ -990,18 +1016,22 @@ class Kit {
   // options and their default values.  This is needed when using the
   // web interface, so the browser code can set up selection
   // boxes/pulldowns/checkboxes.  When running from node, this method
-  // can be skipped.
+  // is called automatically by the constructor.
 
   getDefaultOptions() {  // OVERRIDE this.
     return {};
   }
 
-  getOptionValue(key) {  // This should NOT be overriden.
-    return this._options[key];
+  set(optionName, optionValue) {
+    this._options[optionName] = optionValue;
   }
 
-  generate(initialOptions) {  // This should NOT be overridden.
-    this._options = Object.assign(this._options, initialOptions);
+  get(optionName) {
+    return this._options[optionName];
+  }
+
+  generate(userOptions) {  // This should NOT be overridden.
+    mergeDicts(this._options, userOptions);
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -1037,7 +1067,7 @@ class Kit {
     this._pieceList.push(new Piece(comp));
   }
 
-  build(/*options*/) {  // OVERRIDE this.
+  build() {  // OVERRIDE this.
   }
 
   pack() { // This should NOT be overridden.
@@ -1054,6 +1084,9 @@ class Kit {
       const page = new Page();
       for (const record of bp.positioned) {
         const piece = Piece.fromBinPackOutput(record);
+        piece._position = dPairify(
+          distancify(`${record.x} m`),
+          distancify(`${record.y} m`));
         page.addPositionedPiece(piece);
       }
       this._pageList.push(page);
@@ -1088,7 +1121,7 @@ class Kit {
       }
       for (const piece of page.allPieces()) {
         const component = piece.component;
-        component._setShift(piece);  // piece has .x and .y, so it's a position
+        component._setShift(piece._position);
         this._renderTreeNodes(board, xform, component);
       }
     }
@@ -1112,6 +1145,8 @@ module.exports = {
   Distance,
   distancify,
   numerify,
+  dPairify,
+  distanceBetween,
   ConversionFactors,
   DPair,
   AffineTransformation,

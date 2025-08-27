@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 
+wc -l ps*js Simple*js
 echo "Running jshint ..."
 jshint psflib.js psflib.test.js
 if [ $? -eq 0 ]; then
@@ -7,4 +8,3 @@ if [ $? -eq 0 ]; then
   jest psflib.test.js bin-pack.test.js
 fi
 echo "Done."
-
