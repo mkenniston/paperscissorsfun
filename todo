@@ -1,7 +1,11 @@
 TODO:
 
+- try just comp.render(pen), so user never sees board and xform
+	maybe get rid of "board"
+- try getting rid of Kit-ctor overrides, maybe not needed?
 - reorg test code to use new ctor/render conventions, maybe get rid of
     build() completely?
+    clarify in comments what a child class needs to implement
 
 - add tests for correct options set/get, annotation, propagation, and overrides
 - add tests for correct positioning of subcomponents
@@ -23,12 +27,20 @@ TODO:
 - add "Notes on measurements and coordinate systems" that explains
 	"World" coords vs. "Printer" coords.
 
-- try just comp.render(pen), so user never sees board and xform
-
 - figure out how to add text
 - figure out how to add PNG pictures
 - add "Terminology" section of comments
 	- scale:  "scaleName"/"HO", "scaleRatio"/87.1, "Scale" class
+
+- allow a Collection of Kits, for convenience (and efficiency for small
+	scales)
+- figure out how to do typed options (and maybe have a special call
+	to create new ones, to guard against misspellings)
+	and auto-conversion into geometry
+- experiment with using internal baffels/boxes/dice to reinforce bldgs
+- make a practice of printing baseplates (floors)
+- work on doing a "roof" module with options for flat, slanted, single-ridge,
+	gambrels, hips, T- and L- connections, dormers
 
 - add BezierControlPoint class, test it, explain it (w/ web refs)
 - try enhancement to packing
