@@ -191,7 +191,7 @@ DONE:
 - cleaned up names (dividedBy), added function (distanceBetween), made
     options work right, clarified component ctor/build/render usage, added
     geometry convention for ctor to share info with render, cleaned up
-    problem with positioning, 
+    problem with positioning
 - added SimpleHouse class to do very basic stuff w/ Components (and produced
     first sheet printed/cut/assembled!)
 
