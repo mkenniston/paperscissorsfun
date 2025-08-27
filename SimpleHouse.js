@@ -142,9 +142,7 @@ class PeakedWall extends Component {
     return this._geometry.yRidge;
   }
 
-  render(board, xform) {
-    const pen = board.getPen(xform);
-
+  render(pen) {
     pen.set({drawColor: "black", fillColor: this.get("wallColor")});
     pen.polygon(this._geometry.wallOutline, "fillAndStroke");
     pen.set({drawColor: "black", fillColor: this.get("basementColor")});
@@ -203,8 +201,7 @@ class StraightWall extends Component {
     return this._geometry.yEaves;
   }
 
-  render(board, xform) {
-    const pen = board.getPen(xform);
+  render(pen) {
     pen.set({drawColor: "black", fillColor: this.get("wallColor")});
     pen.polygon(this._geometry.wallOutline, "fillAndStroke");
     pen.set({drawColor: "black", fillColor: this.get("basementColor")});
@@ -244,8 +241,7 @@ class Window extends Component {
     return g.windowHeight;
   }
 
-  render(board, xform) {
-    const pen = board.getPen(xform);
+  render(pen) {
     pen.set({drawColor: this.get("trimColor")});
     pen.openPath(this._geometry.outline, "stroke");
   }
@@ -278,8 +274,7 @@ class Door extends Component {
     return this._geometry.yDoorTop;
   }
 
-  render(board, xform) {
-    const pen = board.getPen(xform);
+  render(pen) {
     pen.set({drawColor: this.get("trimColor")});
     pen.openPath(this._geometry.outline, "stroke");
   }
@@ -314,8 +309,7 @@ class RoofSlab extends Component {
     return this._geometry.ridgeHeight;
   }
 
-  render(board, xform) {
-    const pen = board.getPen(xform);
+  render(pen) {
     pen.set({drawColor: "black", fillColor: "gray"});
     pen.polygon(this._geometry.outline, "fillAndStroke");
   }

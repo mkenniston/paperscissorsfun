@@ -532,8 +532,7 @@ describe("Kit", () => {
       return this._height;
     }
 
-    render(board, xform) {
-      const pen = board.getPen(xform);
+    render(pen) {
       const inc = distancify("1 m");
 
       const x0 = distancify(0);

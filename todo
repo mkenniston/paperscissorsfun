@@ -1,7 +1,5 @@
 TODO:
 
-- try just comp.render(pen), so user never sees board and xform
-	maybe get rid of "board"
 - try getting rid of Kit-ctor overrides, maybe not needed?
 - reorg test code to use new ctor/render conventions, maybe get rid of
     build() completely?
@@ -26,6 +24,10 @@ TODO:
 
 - add "Notes on measurements and coordinate systems" that explains
 	"World" coords vs. "Printer" coords.
+
+- add coherent doc on what a user has to do:  which classes to inherit
+	from, and which methods to override.  Also throw Error in any
+	parent method which needs to be overridden but hasn't been.
 
 - figure out how to add text
 - figure out how to add PNG pictures
@@ -206,4 +208,5 @@ DONE:
     problem with positioning
 - added SimpleHouse class to do very basic stuff w/ Components (and produced
     first sheet printed/cut/assembled!)
+- removed class DrawingBoard and simplified Component.render to "render(pen)"
 

@@ -845,7 +845,7 @@ class Component {
 
   }
 
-  render(/*board, xform*/) {  // OVERRIDE this.
+  render(/*pen*/) {  // OVERRIDE this.
     // draw all the shapes, but not the sub-components
   }
 }
@@ -874,33 +874,13 @@ class Page {
 }
 
 /*
-    ==== DRAWING BOARD ====
-
-A DrawingBoard is basically a wrapper around the jsPDF object, with
-some extra useful information tagging along for the ride.
-
-Note the use of the factory method to create DrawingPen objects.  There is
-only a single DrawingBoard object for an entire Kit, but there is a
-new DrawingPen object created for each Component because each Component
-has its own xform (AffineTransformation).
-
-*/
-
-class DrawingBoard {
-  constructor(pdf) {
-    this._pdf = pdf;
-  }
-
-  getPen(xform) {
-    return new DrawingPen(this, xform);
-  }
-}
-
-/*
     ==== DRAWING PEN ====
 
 When you want to actually lay down digital ink, you use a DrawingPen
-to add the ink to a DrawingBoard.
+to add the ink to the pdf page(s).
+
+There is a new DrawingPen object created for each Component because
+each Component has its own xform (AffineTransformation).
 
 A DrawingPen is basically a wrapper around the jsPDF methods, and the
 pen is where the transformation matrix is finally applied to the
@@ -915,17 +895,17 @@ The beauty of the matrix is that everything is wrapped into a single
 */
 
 class DrawingPen {
-  constructor(board, xform) {
-    this._board = board;
+  constructor(pdf, xform) {
+    this._pdf = pdf;
     this._xform = xform;
   }
 
   set(props) {  // maybe fold this into ctor
     if (props.hasOwnProperty("fillColor")) {
-      this._board._pdf.setFillColor(props.fillColor);
+      this._pdf.setFillColor(props.fillColor);
     }
     if (props.hasOwnProperty("drawColor")) {
-      this._board._pdf.setDrawColor(props.drawColor);
+      this._pdf.setDrawColor(props.drawColor);
     }
   }
 
@@ -966,8 +946,7 @@ class DrawingPen {
       const prev = pdfPoints[i-1];
       pdfDiffs.push([cur.x - prev.x, cur.y - prev.y]);
     }
-    const pdf = this._board._pdf;
-    pdf.lines(pdfDiffs, x, y, null, style, closed);
+    this._pdf.lines(pdfDiffs, x, y, null, style, closed);
   }
 }
 
@@ -1111,7 +1090,6 @@ class Kit {
       color: "#FF0000",
       open: false // Set to true to open the pop-up by default
     });
-    const board = new DrawingBoard(this._pdf);
     var first = true;
     for (const page of this._pageList) {
       if (first) {
@@ -1122,17 +1100,17 @@ class Kit {
       for (const piece of page.allPieces()) {
         const component = piece.component;
         component._setShift(piece._position);
-        this._renderTreeNodes(board, xform, component);
+        this._renderTreeNodes(this._pdf, xform, component);
       }
     }
     this._pdf.save(pdfFileName);
   }
 
-  _renderTreeNodes(board, xform, component) {
+  _renderTreeNodes(pdf, xform, component) {
     const currentXform = xform.compose(component._shift);
-    component.render(board, currentXform);
+    component.render(new DrawingPen(pdf, currentXform));
     for (const subComponent of component._subComponents) {
-      this._renderTreeNodes(board, currentXform, subComponent);
+      this._renderTreeNodes(pdf, currentXform, subComponent);
     }
   }
 }
