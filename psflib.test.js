@@ -26,6 +26,15 @@ const psflib = require('./psflib');
 const Measurement = psflib.Measurement;
 const worldM = psflib.worldM;
 const printedM = psflib.printedM;
+const WORLD = psflib.WORLD;
+const PRINTED = psflib.PRINTED;
+const MeasurementPair = psflib.MeasurementPair;
+const POINT = psflib.POINT;
+const VECTOR = psflib.VECTOR;
+const SIZE = psflib.SIZE;
+const point = psflib.point;
+const vector = psflib.vector;
+const size = psflib.size;
 const Distance = psflib.Distance;
 const distancify = psflib.distancify;
 const numerify = psflib.numerify;
@@ -45,7 +54,7 @@ const Kit = psflib.Kit;
 
 describe("Measurement", () => {
   test("constructor works", () => {
-    const three = new Measurement('W', '3 m');
+    const three = new Measurement(WORLD, '3 m');
     expect(worldM(three)._toBare()).toEqual(3);
     expect(worldM(0)._toBare()).toEqual(0);
     expect(worldM("0")._toBare()).toEqual(0);
@@ -69,14 +78,14 @@ describe("Measurement", () => {
   });
 
   test("utility functions work", () => {
-    expect(worldM("50 cm").toString()).toEqual('Measurement(W, "0.5 m")');
+    expect(worldM("50 cm").toString()).toEqual('worldM("0.5 m")');
     expect(printedM(0)._toBare()).toEqual(0);
-    expect(printedM(0).type()).toEqual('P');
+    expect(printedM(0).referenceFrame()).toEqual(PRINTED);
     expect(worldM(0)._toBare()).toEqual(0);
-    expect(worldM(0).type()).toEqual('W');
-    expect(Measurement._fromBare('W', 37)._toBare()).toEqual(37);
+    expect(worldM(0).referenceFrame()).toEqual(WORLD);
+    expect(Measurement._fromBare(WORLD, 37)._toBare()).toEqual(37);
 
-    expect(() => (Measurement._fromBare('W', "footsie"))).toThrow();
+    expect(() => (Measurement._fromBare(WORLD, "footsie"))).toThrow();
     expect(() => (Measurement._fromBare('X', 77))).toThrow();
   });
 
@@ -127,15 +136,69 @@ describe("Measurement", () => {
     Measurement._setConversionFactor("S");
     const w = worldM("128 m");
     const p = printedM("500 mm");
-    expect(w.toPrinted().type()).toEqual('P');
+    expect(w.toPrinted().referenceFrame()).toEqual(PRINTED);
     expect(w.toPrinted()._toBare()).toEqual(2);
-    expect(p.toWorld().type()).toEqual('W');
+    expect(p.toWorld().referenceFrame()).toEqual(WORLD);
     expect(p.toWorld()._toBare()).toEqual(32);
     expect(p.toPdfMm()).toEqual(500);
 
     expect(() => w.toWorld()).toThrow();
     expect(() => p.toPrinted()).toThrow();
     expect(() => w.toPdfMm()).toThrow();
+  });
+});
+
+describe("MeasurementPair", () => {
+  test("constructor works", () => {
+    const p = point([4, "ft", 5, "in"], [8, "m"]);
+    const v = vector("2 m", "3 m");
+    const vp = vector(printedM(0), printedM(0));
+    const s = size(worldM(0), worldM(0));
+
+    expect(v.toString()).toEqual('vector(worldM("2 m"), worldM("3 m"))');
+    expect(s.referenceFrame()).toEqual(WORLD);
+    expect(vp.referenceFrame()).toEqual(PRINTED);
+    expect(p.type()).toEqual(POINT);
+    expect(v.type()).toEqual(VECTOR);
+    expect(s.type()).toEqual(SIZE);
+    expect(vector("3 m", "2 m").x()._toBare()).toEqual(3);
+    expect(vector("3 m", "2 m").y()._toBare()).toEqual(2);
+
+    expect(() => (new MeasurementPair(p, p))).toThrow();
+    expect(() => (new MeasurementPair(WORLD, p, p, p))).toThrow();
+    expect(() => (point(worldM(0), printedM(0)))).toThrow();
+  });
+
+  test("arithmetic works", () => {
+    const p = point("2 m", "3 m");
+    const v = vector("4 mm", "5 mm");
+    const vp = vector(printedM(0), printedM(0));
+    const s = size("60 m", "70 m");
+
+    var res = p.plus(v);
+    expect(res.x()._toBare()).toEqual(2.004);
+    expect(res.y()._toBare()).toEqual(3.005);
+    res = p.minus(v);
+    expect(res.x()._toBare()).toEqual(1.996);
+    expect(res.y()._toBare()).toEqual(2.995);
+    res = p.times(10);
+    expect(res.x()._toBare()).toEqual(20);
+    expect(res.y()._toBare()).toEqual(30);
+    res = p.dividedBy(2);
+    expect(res.x()._toBare()).toEqual(1);
+    expect(res.y()._toBare()).toEqual(1.5);
+    res = point("3 m", "4 m");
+    expect(res.length()._toBare()).toEqual(5);
+
+    expect(() => (p.plus(p))).toThrow();
+    expect(() => (p.plus(s))).toThrow();
+    expect(() => (p.plus(vp))).toThrow();
+    expect(() => (p.minus(p))).toThrow();
+    expect(() => (p.minus(s))).toThrow();
+    expect(() => (p.minus(vp))).toThrow();
+    expect(() => (p.times("foo"))).toThrow();
+    expect(() => (p.dividedBy("foo"))).toThrow();
+    expect(() => (p.dividedBy(0))).toThrow();
   });
 });
 

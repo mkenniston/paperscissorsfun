@@ -287,16 +287,19 @@ class ConversionFactors {
 
 */
 
+const WORLD = 'world';
+const PRINTED = 'printed';
+
 class Measurement {
-  constructor(type, spec) {
+  constructor(referenceFrame, spec) {
     const numArgs = arguments.length;
     if (numArgs != 2) {
       throw new Error(`Measurement.constructor: found ${numArgs} args when expecting 2`);
     }
-    if (type != 'W' & type != 'P') {
-      throw new Error(`Measurement.constructor: invalid type "${type}`);
+    if (referenceFrame != WORLD & referenceFrame != PRINTED) {
+      throw new Error(`Measurement.constructor: invalid referenceFrame "${referenceFrame}`);
     }
-    this._type = type;
+    this._referenceFrame= referenceFrame;
 
     if (spec instanceof Measurement) {
       this._cloneExisting(spec);
@@ -326,8 +329,8 @@ class Measurement {
   }
 
   _cloneExisting(spec) {
-    if (this._type != spec._type) {
-      throw new Error(`Measurement.constructor: invalid attempt to clone ${spec._type} into ${spec._type}`);
+    if (this._referenceFrame != spec._referenceFrame) {
+      throw new Error(`Measurement.constructor: invalid attempt to clone ${spec._referenceFrame} into ${spec._referenceFrame}`);
     }
     this._value = spec._value;
   }
@@ -370,54 +373,54 @@ class Measurement {
   }
 
   toString() {
-    return `Measurement(${this._type}, "${this._value} m")`;
+    return `${this._referenceFrame}M("${this._value} m")`;
   }
 
-  type() {
-    return this._type;
+  referenceFrame() {
+    return this._referenceFrame;
   }
 
   _toBare() {  // only for library internal use
     return this._value;
   }
 
-  static _fromBare(type, value) {  // only for library internal use
+  static _fromBare(referenceFrame, value) {  // only for library internal use
     if (typeof value != 'number') {
       throw new Error(`Measurement.fromBare: value ${value} is not a number`);
     }
-    const result = new Measurement(type, 0);
+    const result = new Measurement(referenceFrame, 0);
     result._value = value;
     return result;
   }
 
   _checkCompatible(rhs) {
     if (rhs instanceof Measurement) {
-      if (this._type != rhs._type) {
-        throw new Error(`Measurement: arithmetic not allowed between different types ${this._type} and ${rhs._type}`);
+      if (this._referenceFrame!= rhs._referenceFrame) {
+        throw new Error(`Measurement: arithmetic not allowed between different referenceFrames ${this._referenceFrame} and ${rhs._referenceFrame}`);
       }
     } else {
-      rhs = new Measurement(this._type, rhs);
+      rhs = new Measurement(this._referenceFrame, rhs);
     }
     return rhs;
   }
 
   plus(addend) {
     addend = this._checkCompatible(addend);
-    const result = new Measurement(this._type, 0);
+    const result = new Measurement(this._referenceFrame, 0);
     result._value = this._value + addend._value;
     return result;
   }
 
   minus(subtrahend) {
     subtrahend = this._checkCompatible(subtrahend);
-    const result = new Measurement(this._type, 0);
+    const result = new Measurement(this._referenceFrame, 0);
     result._value = this._value - subtrahend._value;
     return result;
   }
 
   times(factor) {
     if (typeof factor == 'number') {
-      const result = new Measurement(this._type, 0);
+      const result = new Measurement(this._referenceFrame, 0);
       result._value = this._value * factor;
       return result;
     }
@@ -429,7 +432,7 @@ class Measurement {
       if (divisor == 0) {
         throw new Error('Measurement.dividedBy: invalid division by zero');
       }
-      const result = new Measurement(this._type, this);
+      const result = new Measurement(this._referenceFrame, this);
       result._value = this._value / divisor;
       return result;
     }
@@ -480,7 +483,7 @@ class Measurement {
   }
 
   toWorld() {
-    if (this._type == 'W') {
+    if (this._referenceFrame == WORLD) {
       throw new Error(`Measurement.toWOrld: arg is alread a worldM`);
     }
     const result = worldM(0);
@@ -489,7 +492,7 @@ class Measurement {
   }
 
   toPrinted() {
-    if (this._type == 'P') {
+    if (this._referenceFrame== PRINTED) {
       throw new Error(`Measurement.toWOrld: arg is alread a printedM`);
     }
     const result = printedM(0);
@@ -499,7 +502,7 @@ class Measurement {
 
   toPdfMm() {
     // last step of conversion; printed-meters to printed-mm
-    if (this._type != 'P') {
+    if (this._referenceFrame != PRINTED) {
       throw new Error('Measurement.toPdfMm: not a printedM');
     }
     return this._value * 1000;
@@ -507,11 +510,128 @@ class Measurement {
 }
 
 function worldM(spec) {
-  return new Measurement('W', spec);
+  return new Measurement(WORLD, spec);
 }
 
 function printedM(spec) {
-  return new Measurement('P', spec);
+  return new Measurement(PRINTED, spec);
+}
+
+/*
+    ==== MEASUREMENT PAIR ====
+
+
+
+*/
+
+const POINT = 'point';
+const VECTOR = 'vector';
+const SIZE = 'size';
+
+class MeasurementPair {
+  constructor(type, x, y) {
+    if (arguments.length != 3) {
+      throw new Error("MeasurementPair.constructor: must have exactly 3 args");
+    }
+    if (! (x instanceof Measurement)) {
+      x = worldM(x);
+    }
+    if (! (y instanceof Measurement)) {
+      y = worldM(y);
+    }
+    if (x.referenceFrame() != y.referenceFrame()) {
+      throw new Error("MeasurementPair.constructor: args must be same referenceFrame");
+    }
+    this._type = type;
+    this._x = x;
+    this._y = y;
+  }
+
+  toString() {
+    return `${this._type}(${this._x}, ${this._y})`;
+  }
+
+  referenceFrame() {
+    return this._x.referenceFrame();
+  }
+
+  type() {
+    return this._type;
+  }
+
+  x() {
+    return this._x;
+  }
+
+  y() {
+    return this._y;
+  }
+
+  _checkCompatible(rhs) {
+    if (! (rhs instanceof MeasurementPair)) {
+      throw new Error("MeasurementPair.plus/minus: rhs must be a MeasurementPair");
+    }
+    if ((this._type == SIZE) | (rhs._type != VECTOR)) {
+      throw new Error(`Measurement: arithmetic not allowed between pair types ${this._type} and ${rhs._type}`);
+    }
+    if (this.referenceFrame() != rhs.referenceFrame()) {
+      throw new Error(`Measurement: arithmetic not allowed between different referenceFrames ${this._referenceFrame()} and ${rhs._referenceFrame()}`);
+    }
+  }
+
+  plus(addend) {
+    this._checkCompatible(addend);
+    const x = this.x().plus(addend.x());
+    const y = this.y().plus(addend.y());
+    return new MeasurementPair(this.type, x, y);
+  }
+
+  minus(subtrahend) {
+    this._checkCompatible(subtrahend);
+    const x = this.x().minus(subtrahend.x());
+    const y = this.y().minus(subtrahend.y());
+    return new MeasurementPair(this.type, x, y);
+  }
+
+  times(factor) {
+    if(typeof factor != 'number') {
+      throw new Error("MeasurementPair.times: factor must be a number");
+    }
+    const x = this.x().times(factor);
+    const y = this.y().times(factor);
+    return new MeasurementPair(this._type, x, y);
+  }
+
+  dividedBy(divisor) {
+    if(typeof divisor != 'number') {
+      throw new Error("MeasurementPair.divideBy: divisor must be a number");
+    }
+    if (divisor == 0) {
+      throw new Error("MeasurementPair.divideBy: divisor must not be zero");
+    }
+    const x = this.x().dividedBy(divisor);
+    const y = this.y().dividedBy(divisor);
+    return new MeasurementPair(this._type, x, y);
+  }
+
+  length() {
+    const x = this.x()._toBare();
+    const y = this.y()._toBare();
+    const hypotenuse = Math.sqrt(x * x + y * y);
+    return Measurement._fromBare(this.referenceFrame(), hypotenuse);
+  }
+}
+
+function point(m1, m2) {
+  return new MeasurementPair(POINT, m1, m2);
+}
+
+function vector(m1, m2) {
+  return new MeasurementPair(VECTOR, m1, m2);
+}
+
+function size(m1, m2) {
+  return new MeasurementPair(SIZE, m1, m2);
 }
 
 /*
@@ -1393,6 +1513,15 @@ module.exports = {
   Measurement,
   worldM,
   printedM,
+  WORLD,
+  PRINTED,
+  MeasurementPair,
+  POINT,
+  VECTOR,
+  SIZE,
+  point,
+  vector,
+  size,
   Distance,
   distancify,
   numerify,

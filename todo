@@ -1,5 +1,9 @@
 TODO:
 
+- Phase 2: change mainline code to use new M and MP classes
+- Phase 3: move/add/revise documentation (comments) for M and MP
+- Phase 4: remove (now dead) Distance and dPair
+
 - reorg test code to use new ctor/render conventions
 
 class Measurement(type W/P, value)
@@ -221,5 +225,7 @@ DONE:
 - removed an invalid Kit.ctor in SimpleHouse
 - removed Component.build, added comments to clarify the functions of
     the constructor and render() methods
-- created new Measurement class, with tests
+- Phase 1: created new Measurement class, with tests
+- Phase 2: renamed Measurement.type to refFrame, and created new
+    MeasurementPair class, with tests
 
