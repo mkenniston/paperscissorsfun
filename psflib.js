@@ -281,6 +281,240 @@ class ConversionFactors {
 }
 
 /*
+    ==== MEASUREMENT ====
+
+
+
+*/
+
+class Measurement {
+  constructor(type, spec) {
+    const numArgs = arguments.length;
+    if (numArgs != 2) {
+      throw new Error(`Measurement.constructor: found ${numArgs} args when expecting 2`);
+    }
+    if (type != 'W' & type != 'P') {
+      throw new Error(`Measurement.constructor: invalid type "${type}`);
+    }
+    this._type = type;
+
+    if (spec instanceof Measurement) {
+      this._cloneExisting(spec);
+      return;
+    }
+
+    if (spec == 0) {
+      this._handleEmpty(spec);
+      return;
+    }
+
+    // Accept string descriptor like "4 ft 6 in".
+
+    if (typeof spec == 'string') {
+      spec = spec.trim().split(/\s+/);
+      // do not return; fall through to parsing
+    }
+
+    // Accept lists like [4.5, "ft"].
+
+    if (Array.isArray(spec)) {
+      this._parse(spec);
+      return;
+    }
+
+    throw new Error(`Distance.constructor: invalid spec ${JSON.stringify(spec)}`);
+  }
+
+  _cloneExisting(spec) {
+    if (this._type != spec._type) {
+      throw new Error(`Measurement.constructor: invalid attempt to clone ${spec._type} into ${spec._type}`);
+    }
+    this._value = spec._value;
+  }
+
+  _handleEmpty(spec) {
+    if (spec === 0 | spec === "0") {
+      this._value = 0;
+      return;
+    }
+    // reject empty strings and empty lists
+    throw new Error(`Measurement.constructor: invalid empty arg`);
+  }
+
+  _parse(tokens) {
+    if (tokens.length % 2 != 0) {
+      throw new Error(`Measurment.constructor:  ${tokens} has odd number of tokens`);
+    }
+
+    let value = 0;
+    for (let index = 0; index < tokens.length; index += 2){
+      var num;
+      const numToken = tokens[index];
+      if ((typeof numToken) == 'number') {
+        num = numToken;
+      } else if ((typeof numToken) == 'string')  {
+        if (! (numToken.match(/^[0123456789\.\+\-]+$/))) {
+          throw new Error(`Measurement.constructor:  invalid number token "${numToken}"`);
+        }
+        num = Number(numToken);
+      } else {
+        throw new Error(`Measurement.constructor:  invalid number token "${numToken}"`);
+      }
+      const unitToken = tokens[index + 1];
+      if (! (unitToken.match(/^[a-zμA-ZÅ\'\"\-]+$/))) {
+        throw new Error(`Measurement.constructor:  invalid unit token "${unitToken}"`);
+      }
+      value += num * ConversionFactors.unit(unitToken);
+    }
+    this._value = value;
+  }
+
+  toString() {
+    return `Measurement(${this._type}, "${this._value} m")`;
+  }
+
+  type() {
+    return this._type;
+  }
+
+  _toBare() {  // only for library internal use
+    return this._value;
+  }
+
+  static _fromBare(type, value) {  // only for library internal use
+    if (typeof value != 'number') {
+      throw new Error(`Measurement.fromBare: value ${value} is not a number`);
+    }
+    const result = new Measurement(type, 0);
+    result._value = value;
+    return result;
+  }
+
+  _checkCompatible(rhs) {
+    if (rhs instanceof Measurement) {
+      if (this._type != rhs._type) {
+        throw new Error(`Measurement: arithmetic not allowed between different types ${this._type} and ${rhs._type}`);
+      }
+    } else {
+      rhs = new Measurement(this._type, rhs);
+    }
+    return rhs;
+  }
+
+  plus(addend) {
+    addend = this._checkCompatible(addend);
+    const result = new Measurement(this._type, 0);
+    result._value = this._value + addend._value;
+    return result;
+  }
+
+  minus(subtrahend) {
+    subtrahend = this._checkCompatible(subtrahend);
+    const result = new Measurement(this._type, 0);
+    result._value = this._value - subtrahend._value;
+    return result;
+  }
+
+  times(factor) {
+    if (typeof factor == 'number') {
+      const result = new Measurement(this._type, 0);
+      result._value = this._value * factor;
+      return result;
+    }
+    throw new Error(`Measurement.times() factor is ${typeof factor}, but must be number`);
+  }
+
+  dividedBy(divisor) {
+    if (typeof divisor == 'number') {
+      if (divisor == 0) {
+        throw new Error('Measurement.dividedBy: invalid division by zero');
+      }
+      const result = new Measurement(this._type, this);
+      result._value = this._value / divisor;
+      return result;
+    }
+    divisor = this._checkCompatible(divisor);
+    if (divisor._value == 0) {
+      throw new Error('Measurement.dividedBy: invalid division by zero');
+    }
+    return this._value / divisor._value;  // dimensionless ratio
+  }
+
+  greaterThan(rhs) {
+    rhs = this._checkCompatible(rhs);
+    return (this._value > rhs._value);
+  }
+
+  greaterThanOrEqualTo(rhs) {
+    rhs = this._checkCompatible(rhs);
+    return (this._value >= rhs._value);
+  }
+
+  lessThan(rhs) {
+    rhs = this._checkCompatible(rhs);
+    return (this._value < rhs._value);
+  }
+
+  lessThanOrEqualTo(rhs) {
+    rhs = this._checkCompatible(rhs);
+    return (this._value <= rhs._value);
+  }
+
+  equalTo(rhs) {
+    rhs = this._checkCompatible(rhs);
+    return (this._value == rhs._value);
+  }
+
+  notEqualTo(rhs) {
+    rhs = this._checkCompatible(rhs);
+    return (this._value != rhs._value);
+  }
+
+  static _setConversionFactor(scaleName) {
+    Object.defineProperty(Measurement, '_conversionFactor', {
+      writeable: false,
+      configurable: false,
+      enumerable: false,
+      value:  ConversionFactors.scale(scaleName).ratio,
+    });
+  }
+
+  toWorld() {
+    if (this._type == 'W') {
+      throw new Error(`Measurement.toWOrld: arg is alread a worldM`);
+    }
+    const result = worldM(0);
+    result._value = this._value / Measurement._conversionFactor;
+    return result;
+  }
+
+  toPrinted() {
+    if (this._type == 'P') {
+      throw new Error(`Measurement.toWOrld: arg is alread a printedM`);
+    }
+    const result = printedM(0);
+    result._value = this._value * Measurement._conversionFactor;
+    return result;
+  }
+
+  toPdfMm() {
+    // last step of conversion; printed-meters to printed-mm
+    if (this._type != 'P') {
+      throw new Error('Measurement.toPdfMm: not a printedM');
+    }
+    return this._value * 1000;
+  }
+}
+
+function worldM(spec) {
+  return new Measurement('W', spec);
+}
+
+function printedM(spec) {
+  return new Measurement('P', spec);
+}
+
+/*
     ==== DISTANCE ====
 
 The Distance class encapsulates the conversion of various units of
@@ -1052,6 +1286,7 @@ class Kit {
     });
     this._pdf = pdf;
     // convert PDF "mm" to world "m"
+    // Measurement._setConversionFactor(this._options.scale) {
     const ratio = ConversionFactors.scale(this._options.scale).ratio;
     const adjust = 0.001 / ratio;
  
@@ -1155,6 +1390,9 @@ class Kit {
 */
 
 module.exports = {
+  Measurement,
+  worldM,
+  printedM,
   Distance,
   distancify,
   numerify,

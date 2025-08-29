@@ -1,6 +1,18 @@
 TODO:
 
 - reorg test code to use new ctor/render conventions
+
+class Measurement(type W/P, value)
+	worldM(string or W or 0) // no conversions with ctors
+	printedM(string or P or 0)
+	M.fromBare(W/P, number)
+	m.toBare()
+        m.toWorld(), m.toPrinted() for conversions
+		using static M.conversionFactor
+	include comparisons (m1 <=> m2), distanceBetween(mp1, mp2)
+	mPair (must be same type)
+
+- change xform.apply() to .timesPair() -- conflict w/ JS "apply" defn
 - add tests for correct options set/get, annotation, propagation, and overrides
 - add tests for correct positioning of subcomponents
 
@@ -21,15 +33,13 @@ TODO:
 - add "Notes on measurements and coordinate systems" that explains
 	"World" coords vs. "Printer" coords.
 
-- add coherent doc on what a user has to do:  which classes to inherit
-	from, and which methods to override.  Also throw Error in any
-	parent method which needs to be overridden but hasn't been.
-
 - figure out how to add text
 - figure out how to add PNG pictures
 - add "Terminology" section of comments
 	- scale:  "scaleName"/"HO", "scaleRatio"/87.1, "Scale" class
 
+- audit all source, use "let" instead of "var" ??
+- in tests, for  all "throw Error", verify the error message
 - allow a Collection of Kits, for convenience (and efficiency for small
 	scales)
 - figure out how to do typed options (and maybe have a special call
@@ -115,7 +125,10 @@ TODO:
 - add "themes" for collections of Kits, e.g. New England Village,
 	Wild West Frontier Town, Modern Subdivision, Old Factories,
 	Santa's North Pole Workshop, castles, gingerbread houses,
-	dollhouses, trees & shrubs, swimming pools, etc.
+	dollhouses, trees & shrubs, swimming pools, famous buildings
+	(both modern and ancient), famous bridges, pyramids (Egypt,
+	Mexico, et.al.), rockets and missiles, ships, radio towers,
+	etc.
 	also play money, maps, molecular diagrams, rolling stock and track.
 - consider making special code to do comples roof hips, design roofs as
 	seaparate Pieces that are glued on top of roof "rafters"
@@ -208,4 +221,5 @@ DONE:
 - removed an invalid Kit.ctor in SimpleHouse
 - removed Component.build, added comments to clarify the functions of
     the constructor and render() methods
+- created new Measurement class, with tests
 

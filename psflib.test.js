@@ -23,6 +23,9 @@ SOFTWARE.
 */
 
 const psflib = require('./psflib');
+const Measurement = psflib.Measurement;
+const worldM = psflib.worldM;
+const printedM = psflib.printedM;
 const Distance = psflib.Distance;
 const distancify = psflib.distancify;
 const numerify = psflib.numerify;
@@ -39,6 +42,102 @@ const ReflectAroundXAxis = psflib.ReflectAroundXAxis;
 const Component = psflib.Component;
 const Page = psflib.Page;
 const Kit = psflib.Kit;
+
+describe("Measurement", () => {
+  test("constructor works", () => {
+    const three = new Measurement('W', '3 m');
+    expect(worldM(three)._toBare()).toEqual(3);
+    expect(worldM(0)._toBare()).toEqual(0);
+    expect(worldM("0")._toBare()).toEqual(0);
+    expect(worldM("125 cm")._toBare()).toBeCloseTo(1.25);
+    expect(worldM("5 m 10 cm")._toBare()).toBeCloseTo(5.1);
+    expect(worldM([2, "m", 37, "mm"])._toBare()).toBeCloseTo(2.037);
+    expect(worldM(["787", "mm"])._toBare()).toBeCloseTo(0.787);
+
+    expect(() => (new Measurement('W'))).toThrow();
+    expect(() => (new Measurement('W', 0, 3))).toThrow();
+    expect(() => (new Measurement('X', 0))).toThrow();
+    expect(() => (new Measurement('P', worldM(0)))).toThrow();
+    expect(() => (new Measurement('W', printedM(0)))).toThrow();
+    expect(() => (worldM(""))).toThrow();
+    expect(() => (worldM([]))).toThrow();
+    expect(() => (worldM("ft"))).toThrow();
+    expect(() => (worldM("4 ft 5"))).toThrow();
+    expect(() => (worldM("ft in"))).toThrow();
+    expect(() => (worldM("4 5"))).toThrow();
+    expect(() => (worldM({}))).toThrow();
+  });
+
+  test("utility functions work", () => {
+    expect(worldM("50 cm").toString()).toEqual('Measurement(W, "0.5 m")');
+    expect(printedM(0)._toBare()).toEqual(0);
+    expect(printedM(0).type()).toEqual('P');
+    expect(worldM(0)._toBare()).toEqual(0);
+    expect(worldM(0).type()).toEqual('W');
+    expect(Measurement._fromBare('W', 37)._toBare()).toEqual(37);
+
+    expect(() => (Measurement._fromBare('W', "footsie"))).toThrow();
+    expect(() => (Measurement._fromBare('X', 77))).toThrow();
+  });
+
+  test("arithmetic functions work", () => {
+    const m3 = worldM("3 m");
+    const m5 = worldM("5 m");
+    expect(m3.plus(m5)._toBare()).toEqual(8);
+    expect(m3.minus(m5)._toBare()).toEqual(-2);
+    expect(m3.times(5)._toBare()).toEqual(15);
+    expect(m3.dividedBy(5)._toBare()).toEqual(0.6);
+    expect(m3.dividedBy(m5)).toEqual(0.6);
+
+    expect(m3.greaterThan(m5)).toBe(false);
+    expect(m3.greaterThan(m3)).toBe(false);
+    expect(m5.greaterThan(m3)).toBe(true);
+    expect(m3.greaterThanOrEqualTo(m5)).toBe(false);
+    expect(m3.greaterThanOrEqualTo(m3)).toBe(true);
+    expect(m5.greaterThanOrEqualTo(m3)).toBe(true);
+    expect(m3.lessThan(m5)).toBe(true);
+    expect(m3.lessThan(m3)).toBe(false);
+    expect(m5.lessThan(m3)).toBe(false);
+    expect(m3.lessThanOrEqualTo(m5)).toBe(true);
+    expect(m3.lessThanOrEqualTo(m3)).toBe(true);
+    expect(m5.lessThanOrEqualTo(m3)).toBe(false);
+    expect(m3.equalTo(m5)).toBe(false);
+    expect(m3.equalTo(m3)).toBe(true);
+    expect(m5.equalTo(m3)).toBe(false);
+    expect(m3.notEqualTo(m5)).toBe(true);
+    expect(m3.notEqualTo(m3)).toBe(false);
+    expect(m5.notEqualTo(m3)).toBe(true);
+
+    expect(() => m3.plus(printedM(0))).toThrow();
+    expect(() => m3.minus(printedM(0))).toThrow();
+    expect(() => m3.times(printedM(0))).toThrow();
+    expect(() => m3.times(m5)).toThrow();
+    expect(() => m3.dividedBy(printedM(0))).toThrow();
+    expect(() => m3.dividedBy(worldM(0))).toThrow();
+    expect(() => m3.dividedBy(0)).toThrow();
+    expect(() => m3.lessThan(printedM(0))).toThrow();
+    expect(() => m3.lessThanOrEqualTo(printedM(0))).toThrow();
+    expect(() => m3.greaterThan(printedM(0))).toThrow();
+    expect(() => m3.greaterThanOrEqualTo(printedM(0))).toThrow();
+    expect(() => m3.equalTo(printedM(0))).toThrow();
+    expect(() => m3.notEqualTo(printedM(0))).toThrow();
+  });
+
+  test("conversion functions work", () => {
+    Measurement._setConversionFactor("S");
+    const w = worldM("128 m");
+    const p = printedM("500 mm");
+    expect(w.toPrinted().type()).toEqual('P');
+    expect(w.toPrinted()._toBare()).toEqual(2);
+    expect(p.toWorld().type()).toEqual('W');
+    expect(p.toWorld()._toBare()).toEqual(32);
+    expect(p.toPdfMm()).toEqual(500);
+
+    expect(() => w.toWorld()).toThrow();
+    expect(() => p.toPrinted()).toThrow();
+    expect(() => w.toPdfMm()).toThrow();
+  });
+});
 
 function expectDV(s) {
   return expect(numerify(new Distance(s)));
