@@ -1,51 +1,48 @@
 TODO:
 
-- Phase 2: change mainline code to use new M and MP classes
-- Phase 3: move/add/revise documentation (comments) for M and MP
-- Phase 4: remove (now dead) Distance and dPair
+- Phase 4: change SimpleHouse to use new M and MP classes
+- Phase 5: move/add/revise documentation (comments) for M and MP
+- Phase 6: remove (now dead) Distance and dPair
 
+- add "hand" (as in equine) to unit definitions
+- change setShift to setPagePosition
+- change SIZE to EXTENT
+- change xform.apply() to .timesPair() -- conflict w/ JS "apply" defn
+- change applyToXY -> applyToPoint (world in, printed out)
+- change getWidth/Height to getExtent
+- fix all Error usage to make args fit on the line (use "s + s + s" as needed)
+- audit M, MPair, make sure consistent
+	and doc: what is valid M-spec, MP-spec
+	and make sure library and API use pairs and not separate x, y
+- audit tests, make sure every piece of (esp new) code has an "expect"
+	and merge Distance tests w/ Measurement tests (and dPair/mPair)
 - reorg test code to use new ctor/render conventions
 
-class Measurement(type W/P, value)
-	worldM(string or W or 0) // no conversions with ctors
-	printedM(string or P or 0)
-	M.fromBare(W/P, number)
-	m.toBare()
-        m.toWorld(), m.toPrinted() for conversions
-		using static M.conversionFactor
-	include comparisons (m1 <=> m2), distanceBetween(mp1, mp2)
-	mPair (must be same type)
+- clean up use of bare (x, y) where we want point or vector,
 
-- change xform.apply() to .timesPair() -- conflict w/ JS "apply" defn
 - add tests for correct options set/get, annotation, propagation, and overrides
 - add tests for correct positioning of subcomponents
+- learn to mock pdf class, write appropriate tests
 
-- add Distance.printed(), Distance.world() -- same as ctor, Distance._raw()
-	also is there a better (shorter) word than "distance"?
-	or maybe we need two classes: WorldDistance and PrintedDistance,
-	w/ appropriate type-checking and conversions w/ ctors
-	and helpers "worldM()" == "new WorldMeasurement()" etc.
-	and toBare()/fromBare()
-	- or try a single Measurement class w/ a ._type field WORLD or PRINTED
-	but still use factory methods worldM() and printedM()
-	and store conversion factor as a static on class Measurement
-	should no longer need distancify and numerify; use ctors/bare instead
-
-- make distance/measuremen params more consistent, allow
-	("3 ft"), (3, "ft"), ("3 ft 2 in"), (3, "ft", 2, "in"), etc.
+>> proofread and review all the code, make sure it is coherent
+- start writing a user guide, w/ three levels:
+	beginner (predefined, just download PDF files)
+	intermediate (use the web interface to customize options)
+	expert (write JS code to create your own Kits and Components)
+		this includes the relevant API definitions
 
 - add "Notes on measurements and coordinate systems" that explains
-	"World" coords vs. "Printer" coords.
+       "World" coords vs. "Printer" coords.
 
 - figure out how to add text
 - figure out how to add PNG pictures
-- add "Terminology" section of comments
-	- scale:  "scaleName"/"HO", "scaleRatio"/87.1, "Scale" class
+-- add "Terminology" section of comments
+       - scale:  "scaleName"/"HO", "scaleRatio"/87.1, "Scale" class
 
 - audit all source, use "let" instead of "var" ??
 - in tests, for  all "throw Error", verify the error message
 - allow a Collection of Kits, for convenience (and efficiency for small
-	scales)
+       scales)
 - figure out how to do typed options (and maybe have a special call
 	to create new ones, to guard against misspellings)
 	and auto-conversion into geometry
@@ -64,12 +61,6 @@ class Measurement(type W/P, value)
 - add a feature to map input "cardstock thickness" (printer mm)
     to "pageThickness" (world meters) -- and maybe something about
     std font height (for adding bare text to a page)
-- add code for nested Components
-	test with translate, scale, rotate of subcomponents
-- create a BasicHouse class to demonstrate/test all the main features
-	use a separate BasicHouse.js file
-
-- learn to mock pdf class, write appropriate tests
 
 - consider finding a more strict "lint" tool to use on JS code
 	also try a custom tool to verify all "._[a-z]" is preceded by "this"
@@ -228,4 +219,5 @@ DONE:
 - Phase 1: created new Measurement class, with tests
 - Phase 2: renamed Measurement.type to refFrame, and created new
     MeasurementPair class, with tests
+- Phase 3: changed mainline code to use new M and MP classes
 

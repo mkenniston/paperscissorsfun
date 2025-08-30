@@ -314,7 +314,7 @@ class Measurement {
     // Accept string descriptor like "4 ft 6 in".
 
     if (typeof spec == 'string') {
-      spec = spec.trim().split(/\s+/);
+      spec = this._tokenize(spec);
       // do not return; fall through to parsing
     }
 
@@ -325,7 +325,7 @@ class Measurement {
       return;
     }
 
-    throw new Error(`Distance.constructor: invalid spec ${JSON.stringify(spec)}`);
+    throw new Error(`Measurement.constructor: invalid spec ${JSON.stringify(spec)}`);
   }
 
   _cloneExisting(spec) {
@@ -342,6 +342,36 @@ class Measurement {
     }
     // reject empty strings and empty lists
     throw new Error(`Measurement.constructor: invalid empty arg`);
+  }
+
+  _tokenize(input) {
+    // break the input into tokens
+    const tokens = [];
+    let index = 0;
+    const regexes = {
+      number: /^[0123456789\.\+\-]+/,
+      units: /^[a-zμA-ZÅ\'\"\-]+/,
+      whitespace: /^\s+/,
+    };
+    while (index < input.length) {
+      let matched = false;
+      for (const type in regexes) {
+        const match = input.substring(index).match(regexes[type]);
+        if (match) {
+          if (type !== 'whitespace') { // Ignore whitespace tokens
+            tokens.push(match[0]);
+          }
+          index += match[0].length;
+          matched = true;
+          break;
+        }
+      }
+      if (! matched) {
+        throw new Error('Measurement.constructor(): ' +
+          `Unexpected character at index ${index} of ${input}`);
+      }
+    }
+    return tokens;
   }
 
   _parse(tokens) {
@@ -510,10 +540,16 @@ class Measurement {
 }
 
 function worldM(spec) {
+  if ((spec instanceof Measurement) & (spec._referenceFrame == WORLD)) {
+    return spec;
+  }
   return new Measurement(WORLD, spec);
 }
 
 function printedM(spec) {
+  if ((spec instanceof Measurement) & (spec._referenceFrame == PRINTED)) {
+    return spec;
+  }
   return new Measurement(PRINTED, spec);
 }
 
@@ -568,6 +604,11 @@ class MeasurementPair {
   }
 
   _checkCompatible(rhs) {
+    if (Array.isArray(rhs)) {
+      rhs = new MeasurementPair(this._type,
+              new Measurement(this.referenceFrame(), rhs[0]),
+              new Measurement(this.referenceFrame(), rhs[1]));
+    }
     if (! (rhs instanceof MeasurementPair)) {
       throw new Error("MeasurementPair.plus/minus: rhs must be a MeasurementPair");
     }
@@ -577,23 +618,33 @@ class MeasurementPair {
     if (this.referenceFrame() != rhs.referenceFrame()) {
       throw new Error(`Measurement: arithmetic not allowed between different referenceFrames ${this._referenceFrame()} and ${rhs._referenceFrame()}`);
     }
+    return rhs;
   }
 
   plus(addend) {
-    this._checkCompatible(addend);
+    if (arguments.length != 1) {
+      throw new Error("MeasurementPair.plus: takes exactly 1 argument");
+    }
+    addend = this._checkCompatible(addend);
     const x = this.x().plus(addend.x());
     const y = this.y().plus(addend.y());
     return new MeasurementPair(this.type, x, y);
   }
 
   minus(subtrahend) {
-    this._checkCompatible(subtrahend);
+    if (arguments.length != 1) {
+      throw new Error("MeasurementPair.minus: takes exactly 1 argument");
+    }
+    subtrahend = this._checkCompatible(subtrahend);
     const x = this.x().minus(subtrahend.x());
     const y = this.y().minus(subtrahend.y());
     return new MeasurementPair(this.type, x, y);
   }
 
   times(factor) {
+    if (arguments.length != 1) {
+      throw new Error("MeasurementPair.times: takes exactly 1 argument");
+    }
     if(typeof factor != 'number') {
       throw new Error("MeasurementPair.times: factor must be a number");
     }
@@ -603,6 +654,9 @@ class MeasurementPair {
   }
 
   dividedBy(divisor) {
+    if (arguments.length != 1) {
+      throw new Error("MeasurementPair.dividedBy: takes exactly 1 argument");
+    }
     if(typeof divisor != 'number') {
       throw new Error("MeasurementPair.divideBy: divisor must be a number");
     }
@@ -679,6 +733,7 @@ that string, but it keeps your code more concise and easier to read.
 
 */
 
+/*
 class Distance {
   constructor(input) {
     if (input instanceof Distance) {
@@ -754,14 +809,14 @@ class Distance {
   }
 
   plus(addend) {
-    addend = distancify(addend);
+    addend = worldM(addend);
     const result = new Distance(this);
     result._value += addend._value;
     return result;
   }
 
   minus(subtrahend) {
-    subtrahend = distancify(subtrahend);
+    subtrahend = worldM(subtrahend);
     const result = new Distance(this);
     result._value -= subtrahend._value;
     return result;
@@ -782,7 +837,7 @@ class Distance {
       result._value /= divisor;
       return result;
     }
-    divisor = distancify(divisor);
+    divisor = worldM(divisor);
     return this._value / divisor._value;  // dimensionless ratio
   }
 }
@@ -809,6 +864,7 @@ function numerify(arg) { // used ONLY internally, not part of API
   }
   throw new Error(`found ${arg} where number, Distance, or string expected`);
 }
+*/
 
 /*
     ==== DISTANCE PAIR ====
@@ -865,10 +921,12 @@ polygons.
 
 */
 
+/*
+
 class DistancePair {
   constructor(x, y) {
-    this._x = distancify(x);
-    this._y = distancify(y);
+    this._x = worldM(x);
+    this._y = worldM(y);
   }
 
   toString() {
@@ -884,14 +942,14 @@ class DistancePair {
   }
 
   plus() {
-    const delta = dPairify.apply(this, arguments);
+    const delta = vector.apply(this, arguments);
     return new DistancePair(
       this._x.plus(delta._x),
       this._y.plus(delta._y));
   }
 
   minus() {
-    const delta = dPairify.apply(this, arguments);
+    const delta = point.apply(this, arguments);
     return new DistancePair(
       this._x.minus(delta._x),
       this._y.minus(delta._y));
@@ -938,13 +996,15 @@ function dPairify() {
 }
 
 function distanceBetween(p1, p2) {
-  const x1 = numerify(p1.x());
-  const x2 = numerify(p2.x());
-  const y1 = numerify(p1.y());
-  const y2 = numerify(p2.y());
+  const x1 = p1.x()._toBare();
+  const x2 = p2.x()._toBare();
+  const y1 = p1.y()._toBare();
+  const y2 = p2.y()._toBare();
   const dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-  return new Distance(`${dist} m`);
+  return worldM([dist, 'm']);
 }
+
+*/
 
 /*
     ==== PIECE ====
@@ -956,7 +1016,7 @@ incorporating it into Component for two reasons:
 (1) Conceptual clarity -- Components which are not top-level don't
 need the extra stuff.
 (2) Clean interface -- because Piece interfaces with the external bin-sort
-library, it has to deal with measurements in "bare" Numbers (not Distances),
+library, it has to deal with measurements in "bare" Numbers (not Measurements),
 and we don't want to pollute the library API (and the rest of the code)
 with bare Numbers, nor with the details of the bin-pack record formats.
 
@@ -966,8 +1026,9 @@ class Piece {
   constructor(comp) {
     // These fields are required or produced by the bin-pack code.
     // We omit leading underscores because the bin-pack lib wants it that way.
-    this.width = numerify(comp.getWidth());
-    this.height = numerify(comp.getHeight());
+    // Bin-pack also requires bare numbers, not Measurements.
+    this.width = comp.getWidth()._toBare();
+    this.height = comp.getHeight()._toBare();
     this.x = null;  // gets filled in by the bin-packer
     this.y = null;  // gets filled in by the bin-packer
     this.area = this.width * this.height;
@@ -976,13 +1037,6 @@ class Piece {
 
   toString() {
     return `Piece(${this.component})`;
-  }
-
-  static fromBinPackOutput(record) {
-    const piece = record.datum;
-    piece.x = distancify(`${record.x} m`);
-    piece.y = distancify(`${record.y} m`);
-    return piece;
   }
 }
 
@@ -1017,14 +1071,14 @@ class AffineTransformation {
   /*
     Because we know that all matrixes start with final row [0,0,1] and
     all vectors are padded to [x,y,1], we could eliminate about
-    half of all the multiplications in apply() and compose().
+    half of all the multiplications in applyToXY() and compose().
     That would be a tiny bit faster, but it would make the code much
     harder to read, understand, and verify, so we don't do that.
   */
 
-  apply(pt) {
+  applyToXY(pt) {
     const a = this._matrix;
-    const b = [numerify(pt.x()), numerify(pt.y()), 1];
+    const b = [pt.x()._toBare(), pt.y()._toBare(), 1];
     const result =
       [ a[0][0]*b[0] + a[0][1]*b[1] + a[0][2]*b[2],
         a[1][0]*b[0] + a[1][1]*b[1] + a[1][2]*b[2],
@@ -1076,8 +1130,8 @@ class Identity extends AffineTransformation {
 
 class Translate extends AffineTransformation {
   constructor(dx, dy) {
-    dx = numerify(dx);
-    dy = numerify(dy);
+    dx = worldM(dx)._toBare();
+    dy = worldM(dy)._toBare();
     super([[1, 0, dx], [0, 1, dy], [0, 0, 1]]);
   }
 }
@@ -1241,6 +1295,10 @@ class Component {
 /*
     ==== PAGE ====
 
+The Page class represents a single page of the pdf file.  It's really
+just a list and the logic is trivial so we don't really need a special
+class for it, but having a Page class makes the code easier to understand.
+
 */
 
 class Page {
@@ -1323,7 +1381,7 @@ class DrawingPen {
     // convert from world coordinates to PDF coordinates
     const pdfPoints = [];
     for (const point of points) {
-      pdfPoints.push(this._xform.apply(point));
+      pdfPoints.push(this._xform.applyToXY(point));
     }
     const x = pdfPoints[0].x;
     const y = pdfPoints[0].y;
@@ -1412,9 +1470,9 @@ class Kit {
  
     // computer size of page in real-world meters
     const rawWidth = pdf.internal.pageSize.getWidth();  // in PDF "mm"
-    this._pageWidth = new Distance(`${rawWidth * adjust} m`);  // in world "m"
+    this._pageWidth = worldM([rawWidth * adjust, 'm']);  // in world "m"
     const rawHeight = pdf.internal.pageSize.getHeight();  // in PDF "mm"
-    this._pageHeight = new Distance(`${rawHeight * adjust} m`);  // in world "m"
+    this._pageHeight = worldM([rawHeight * adjust, 'm']);  // in world "m"
 
     // invert Y-axis
     const flip = new ReflectAroundXAxis();
@@ -1443,8 +1501,8 @@ class Kit {
     var notYetPacked = this._pieceList;
     while (notYetPacked.length > 0) {
       var bp = bpjs.BinPack();
-      bp.binWidth(numerify(this._pageWidth));
-      bp.binHeight(numerify(this._pageHeight));
+      bp.binWidth(this._pageWidth._toBare());
+      bp.binHeight(this._pageHeight._toBare());
       bp.sort((a, b) => b.area - a.area);
       bp.addAll(notYetPacked);
       if (bp.positioned.length == 0) {
@@ -1452,16 +1510,16 @@ class Kit {
       }
       const page = new Page();
       for (const record of bp.positioned) {
-        const piece = Piece.fromBinPackOutput(record);
-        piece._position = dPairify(
-          distancify(`${record.x} m`),
-          distancify(`${record.y} m`));
+        const piece = record.datum;
+        piece._position = point(
+          worldM([record.x, 'm']),
+          worldM([record.y, 'm']));
         page.addPositionedPiece(piece);
       }
       this._pageList.push(page);
       notYetPacked = [];
       for (const record of bp.unpositioned) {
-        const piece = Piece.fromBinPackOutput(record);
+        const piece = record.datum;
         notYetPacked.push(piece);
       }
     }
@@ -1511,10 +1569,10 @@ class Kit {
 
 module.exports = {
   Measurement,
-  worldM,
-  printedM,
   WORLD,
   PRINTED,
+  worldM,
+  printedM,
   MeasurementPair,
   POINT,
   VECTOR,
@@ -1522,13 +1580,7 @@ module.exports = {
   point,
   vector,
   size,
-  Distance,
-  distancify,
-  numerify,
-  dPairify,
-  distanceBetween,
   ConversionFactors,
-  DPair,
   AffineTransformation,
   Resize,
   Identity,
