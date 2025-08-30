@@ -31,10 +31,10 @@ const printedM = psflib.printedM;
 const MeasurementPair = psflib.MeasurementPair;
 const POINT = psflib.POINT;
 const VECTOR = psflib.VECTOR;
-const SIZE = psflib.SIZE;
+const EXTENT = psflib.EXTENT;
 const point = psflib.point;
 const vector = psflib.vector;
-const size = psflib.size;
+const extent = psflib.extent;
 const ConversionFactors = psflib.ConversionFactors;
 const AffineTransformation = psflib.AffineTransformation;
 const Resize = psflib.Resize;
@@ -149,14 +149,14 @@ describe("MeasurementPair", () => {
     const p = point([4, "ft", 5, "in"], [8, "m"]);
     const v = vector("2 m", "3 m");
     const vp = vector(printedM(0), printedM(0));
-    const s = size(worldM(0), worldM(0));
+    const e = extent(worldM(0), worldM(0));
 
     expect(v.toString()).toEqual('vector(worldM("2 m"), worldM("3 m"))');
-    expect(s.referenceFrame()).toEqual(WORLD);
+    expect(e.referenceFrame()).toEqual(WORLD);
     expect(vp.referenceFrame()).toEqual(PRINTED);
     expect(p.type()).toEqual(POINT);
     expect(v.type()).toEqual(VECTOR);
-    expect(s.type()).toEqual(SIZE);
+    expect(e.type()).toEqual(EXTENT);
     expect(vector("3 m", "2 m").x()._toBare()).toEqual(3);
     expect(vector("3 m", "2 m").y()._toBare()).toEqual(2);
 
@@ -171,7 +171,7 @@ describe("MeasurementPair", () => {
     const p = point("2 m", "3 m");
     const v = vector("4 mm", "5 mm");
     const vp = vector(printedM(0), printedM(0));
-    const s = size("60 m", "70 m");
+    const s = extent("60 m", "70 m");
 
     var res = p.plus(v);
     expect(res.x()._toBare()).toEqual(2.004);

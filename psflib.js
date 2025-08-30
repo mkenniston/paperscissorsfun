@@ -649,7 +649,7 @@ requires you to specify which use you intend each time you create a pair:
 	is really just the place that the vector "P" ends up when it
 	starts from the origin, so the two uses are closely related.)
 
-    SIZE - Represent how big something is, so we can figure out where it
+    EXTENT - Represent how big something is, so we can figure out where it
 	fits.  To match the usual mathematical convention, "X" (width)
 	always comes first, followed by "Y" (height).
 
@@ -664,7 +664,7 @@ The libary provides useful methods for the MeasurementPair class as well:
 
 Access:      x(), y() -- to extract the individual coordinates
 Arithemetic: plus(), minus(), times(), dividedBy(), length().
-Convenience: point(), vector(), size() -- shortcuts to the constructor
+Convenience: point(), vector(), extent() -- shortcuts to the constructor
 
 
 The vast majority of MeasurementPairs will use WORLD measurements.
@@ -681,7 +681,7 @@ automatically as well.
 
 const POINT = 'point';
 const VECTOR = 'vector';
-const SIZE = 'size';
+const EXTENT = 'extent';
 
 class MeasurementPair {
   constructor(type, x, y) {
@@ -810,8 +810,8 @@ function vector(m1, m2) {
   return new MeasurementPair(VECTOR, m1, m2);
 }
 
-function size(m1, m2) {
-  return new MeasurementPair(SIZE, m1, m2);
+function extent(m1, m2) {
+  return new MeasurementPair(EXTENT, m1, m2);
 }
 
 /*
@@ -1384,10 +1384,10 @@ module.exports = {
   MeasurementPair,
   POINT,
   VECTOR,
-  SIZE,
+  EXTENT,
   point,
   vector,
-  size,
+  extent,
   ConversionFactors,
   AffineTransformation,
   Resize,
