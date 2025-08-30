@@ -283,7 +283,81 @@ class ConversionFactors {
 /*
     ==== MEASUREMENT ====
 
+In the context of this library, we deal with a lot of numbers.  Some of
+them represent a dimensionless count or ratio (e.g. "27"), while others
+represent a measurement of a dimension in the real world (e.g. "5 feet").
+It is crucial to keep track of which is which, for example if we try to
+add "27" to "5 feet" that is obviously not a valid operation.
 
+To help keep things clear, this library defines a "Measurement"
+abstraction which must be used for all real-world measurments.
+If you try to combine a number with a Measurement in a meaningless
+way, the code will throw an exception to alert you that there is a problem.
+(There is no special class for pure numbers; we just use plain old
+JavaScript numbers for those.)
+
+Furthermore, we define and manipulate measurements in two different
+"reference frames".  The first we call WORLD, which is measurents of the
+real-world objects that we creating models of.  For example, saying that
+a door is 6'8" high is a WORLD measurment.  The other reference frame we
+call PRINTED, and it is used to represent measurements on the printed
+paper which is the end result of creating our PDF file.  For example,
+the image of the door in 1:160 scale would be 1/2 inch on the paper.
+Just as we cannot mix numbers with measurements, we also cannot mix
+measurements from the two different reference frames.
+
+A note to model railroaders:  Use WORLD for measurements of the
+prototype, and use PRINTED for measurements of your models.
+
+Whenever you create a Measurement object you must say which reference
+frame you are using (in practice, nearly always WORLD), and the library
+will keep track of that and enforce the prohibition on invalid mixing.
+
+We must also be aware of a third aspect of measurements, which is
+the choice of units:  We could use feet, inches, meters, or any other
+standard units.  Fortunately this one is easy to handle, because the
+library forces you to specify which unit you are using every time you
+create a Measurement object, and if you mix-and-match beteween
+U.S. Customary units and SI (metric) units, the library will automatically
+and gracefully handle the conversions with no problems.
+
+Since different people in different countries and different contexts prefer
+to specify distances using different units and different notations, it is
+very desirable for the Measurement() constructor and other methods to
+accept their argument in a natural, uniform, easy-to-read way.  Rather
+than inventing complex new syntax, this implementation simply uses a
+string as the argument.  The allowed format is fairly flexible, so for
+example the following are all acceptable inputs:
+
+  "1 ft"       // double-quotes work fine
+  '1 yard'     // single-quotes also work fine
+  "1 ft 2 in"  // multiple parts will be added together
+  "1 ft 0 in"  // zero is allowed
+  "1ft2in"     // spacing is ignored
+  `1' 2"`      // the usual abbreviation, note the use of backticks
+               // to avoid any need for escaping ' or "
+  `${len} ft`  // backticks also allow variable interpolation
+  [8, "ft"]    // you can also use a list instead of ${xyz} notation
+  "4 m 23 cm"  // SI (metric) is supported
+  "4.56 feet"  // decimal values are allowed
+  "3 meters"   // plural units are allowed
+  "3 metre"    // alternate spellings are allowed
+  "-5 m"       // negative values are allowed
+  "+3 cm"      // a plus sign is redundant but allowed
+  ...          // all SI units and most U.S. Customary units may also be used
+
+Whenever any method takes a Measurement object as a paramter, you can also
+just pass a string or list.  The method will still build a Measurement
+object out of that string, but it can keep your code more concise and easier
+to read.
+
+The library also provides additional methods on Measurement objects.
+
+Arithemetic: plus(), minus(), times(), and dividedBy().
+Comparison:  greaterThan(), greaterThanOrEqual(), lessThan(),
+             lessThanOrEqual(), EqualTo(), notEqualTo().
+Conversion:  toWorld(), toPrinted().
+Convenience: worldM(), printedM() -- shortcuts to the constructor
 
 */
 
@@ -556,7 +630,49 @@ function printedM(spec) {
 /*
     ==== MEASUREMENT PAIR ====
 
+The MeasurementPair class simply defines an ordered pair of Measurement
+objects, along with convenient operations on them.
 
+There are three ways in which such a pair can be used, and the class
+requires you to specify which use you intend each time you create a pair:
+
+    POINT - Represent a point in space (or on paper), using standard
+	Cartesian coordinates (x, y).  This is the most common use.
+
+    VECTOR -  Represent a direction and length.  You can visualize this
+	as an arrow, motion, or change.  For example, you can add a
+	vector to a point to get a new point.  You can also add two
+	vectors with the intuitive result.  (But note that a point "P"
+	is really just the place that the vector "P" ends up when it
+	starts from the origin, so the two uses are closely related.)
+
+    SIZE - Represent how big something is, so we can figure out where it
+	fits.  To match the usual mathematical convention, "X" (width)
+	always comes first, followed by "Y" (height).
+
+To maintain consistency with mathematics, all three cases use standard
+Cartesian coordinates:
+
+  - The origin (0, 0) is at the lower left corner of the page.
+  - X increases as you move toward the right edge of the page.
+  - Y increases as you move toward the top edge of the page.
+
+The libary provides useful methods for the MeasurementPair class as well:
+
+Access:      x(), y() -- to extract the individual coordinates
+Arithemetic: plus(), minus(), times(), dividedBy(), length().
+Convenience: point(), vector(), size() -- shortcuts to the constructor
+
+
+The vast majority of MeasurementPairs will use WORLD measurements.
+The exception is that internally all the points eventually get mapped
+into PRINTED coordinates so they can be correctly rendered into the PDF
+file, but the library handles that automatically.
+
+The jsPdf library uses yet another different coordinate system
+(reference framework), which places the origin in the upper left
+corner and inverts the Y-axis, but the library handles that
+automatically as well.
 
 */
 
@@ -694,324 +810,6 @@ function vector(m1, m2) {
 function size(m1, m2) {
   return new MeasurementPair(SIZE, m1, m2);
 }
-
-/*
-    ==== DISTANCE ====
-
-The Distance class encapsulates the conversion of various units of
-distance (e.g. US Customary and SI/metric) into the single standard
-unit used internally by psflib.  (The standard unit happens to be "meter",
-but that is hidden inside the class.)  Having a specific class for
-distances also reinforces the conceptual distinction between dimensioned
-quantities like "12 feet" and dimensionless quantities like "12".
-It also enables code that manipulates distances to use "instanceof Distance"
-to verify that every distance has been properly converted, thus detecting
-accidental attempts to use an unconverted (and dimensionless) Number object.
-Note that distances can be used to specify both absolute position
-coordinates (e.g. for creating points) as well as relative vector
-coordinates (e.g. as the argument to DPair.plus()).
-
-Since different people in different countries and different contexts prefer
-to specify distances using different units and different notations, it is
-very desirable for the Distance() constructor and other methods to
-accept their argument in a natural, uniform, easy-to-read way.  Rather
-than inventing complex new syntax, this implementation simply uses a
-string as the argument.  The allowed format is fairly flexible, so for
-example the following are all acceptable inputs:
-
-  "1 ft"       // double-quotes work fine
-  '1 ft'       // single-quotes also work fine
-  "1 ft 2 in"  // multiple parts will be added together
-  "1 ft 0 in"  // zero is allowed
-  "1ft2in"     // spacing is ignored
-  `1' 2"`      // the usual abbreviation, note the use of backticks
-               // to avoid any need for escaping ' or "
-  `${len} ft`  // backticks also allow variable interpolation
-  "4 m 23 cm"  // metric is supported
-  "4.56 feet"  // decimal values are allowed
-  "3 meters"   // plural units are allowed
-  "3 metre"    // alternate spellings are allowed
-  "-5 m"       // negative values are allowed
-  "+3 cm"      // a plus sign is redundant but allowed
-
-Whenever any method takes a Distance object as a paramter, you can also
-just pass a string.  The method will still build a Distance object out of
-that string, but it keeps your code more concise and easier to read.
-
-*/
-
-/*
-class Distance {
-  constructor(input) {
-    if (input instanceof Distance) {
-      // clone the input
-      this._value = input._value;
-      return;
-    }
-    if (input == "0") {  // includes number 0
-      this._value = 0;
-      return;
-    }
-    if (input == undefined) {
-      this._value = undefined;
-      return;
-    }
-    if (typeof input != 'string') {
-      throw new Error("Distance.constructor(): arg must be string or Distance");
-    }
-
-    const tokens = this._tokenize(input);
-    if (tokens.length % 2 != 0) {
-      throw new Error(`${input} has odd number of tokens`);
-    }
-    this._value = this._parse(tokens);
-  }
-
-  toString() {
-    return `Distance("${this._value} m")`;
-  }
-
-  _tokenize(input) {
-    // break the input into tokens
-    const tokens = [];
-    let index = 0;
-    const regexes = {
-      number: /^[0123456789\.\+\-]+/,
-      units: /^[a-zμA-ZÅ\'\"\-]+/,
-      whitespace: /^\s+/,
-    };
-    while (index < input.length) {
-      let matched = false;
-      for (const type in regexes) {
-        const match = input.substring(index).match(regexes[type]);
-        if (match) {
-          if (type !== 'whitespace') { // Ignore whitespace tokens
-            tokens.push({ type: type, value: match[0] });
-          }
-          index += match[0].length;
-          matched = true;
-          break;
-        }
-      }
-      if (! matched) {
-        throw new Error('Distance.constructor(): ' +
-          `Unexpected character at index ${index} of ${input}`);
-      }
-    }
-    return tokens;
-  }
-
-  _parse(tokens) {
-    // parse the tokens into an internal distance value
-
-    var index = 0;
-    let value = 0;
-    while (index < tokens.length) {
-      const num = Number(tokens[index].value);
-      index += 1;
-      value += num * ConversionFactors.unit(tokens[index].value);
-      index += 1;
-    }
-    return value;
-  }
-
-  plus(addend) {
-    addend = worldM(addend);
-    const result = new Distance(this);
-    result._value += addend._value;
-    return result;
-  }
-
-  minus(subtrahend) {
-    subtrahend = worldM(subtrahend);
-    const result = new Distance(this);
-    result._value -= subtrahend._value;
-    return result;
-  }
-
-  times(factor) {
-    if (typeof factor == 'number') {
-      const result = new Distance(this);
-      result._value *= factor;
-      return result;
-    }
-    throw new Error(`Distance.times() factor is ${typeof factor}, but must be number`);
-  }
-
-  dividedBy(divisor) {
-    if (typeof divisor == 'number') {
-      const result = new Distance(this);
-      result._value /= divisor;
-      return result;
-    }
-    divisor = worldM(divisor);
-    return this._value / divisor._value;  // dimensionless ratio
-  }
-}
-
-function distancify(arg) {
-  if (arg instanceof Distance) {
-    return arg;
-  }
-  if (typeof arg == 'string' | arg == 0) {
-    return new Distance(arg);
-  }
-  throw new Error(`found ${arg} where string or Distance expected`);
-}
-
-function numerify(arg) { // used ONLY internally, not part of API
-  if (typeof arg == 'number') {
-    return arg;
-  }
-  if (arg instanceof Distance) {
-    return arg._value;
-  }
-  if (typeof arg == 'string') {
-    return (new Distance(arg))._value;
-  }
-  throw new Error(`found ${arg} where number, Distance, or string expected`);
-}
-*/
-
-/*
-    ==== DISTANCE PAIR ====
-
-The "DistancePair" class is used so much that we abbreviate it "DPair".
-
-The "DPair" class is just a pair of Distance objects.  They are used for
-three distinct purposes:
-  (1) Represent a point, using standard Cartesian coordinates.  This
-    is the most common use.
-  (2) Represent a vector (direction and length).  For example, you
-    can add a vector to a point to get a new point.  You can also
-    add two vectors with the intuitive result.  (But note that
-    a point "P" is really just the place that the vector "P" ends up
-    when it starts from the origin, so the two uses are closely related.)
-  (3) Represent a size.
-To match the usual mathematical convention, "X" (width) always comes first,
-followed by "Y" (height).
-
-We use two different 2-D coordinate systems:
-
-- The "in" coordinates (X and Y) are the "world" coordinates, e.g. the
-width and height of a real-world door in feet/inches or meters.
-To maintain consistency with mathematics, this uses standard Cartesian
-coordinates:
-  - The origin is at the lower left corner of the page.
-  - X increases as you move toward the right edge of the page.
-  - Y increases as you move toward the top edge of the page.
-
-- The "out" coordinates (X and Y) are the "rendering" coordinates, i.e.
-the place on the PDF page where the door appears, which is later the
-place on a piece of paper where the image of the door is printed.
-The jsPdf library dictates that we use a different coordinate system,
-similiar to rows and columns but measuring instead of counting:
-  - The origin is at the upper left corner of the page.
-  - X increases as you move toward the right edge of the page.
-  - Y increases as you move toward the bottom edge of the page.
-
-We always use the "in" coordinates when defining the sizes and positions
-of various shapes which we want to appear in the final PDF.
-
-We use "lazy evaluation" to do the actual transformation of coordinates
-between the two systems.  This is because when we are originally building
-the data structure which represents our whole kit, we cannot decide
-where on the page to put things until after we know what all the
-components are.  (This gives us at least a chance of packing the different
-components onto pages with some degree of efficiency.)
-
-The DPair.plus() method treats its argument as a vector which is to be
-added to a point, i.e. it means "move": start at the invoking
-point, then move a specified distance and direction, and return a
-new point at the ending location.  This can be very handy for creating
-polygons.
-
-*/
-
-/*
-
-class DistancePair {
-  constructor(x, y) {
-    this._x = worldM(x);
-    this._y = worldM(y);
-  }
-
-  toString() {
-    return `DistancePair(${this._x.toString()}, ${this._y.toString()})`;
-  }
-
-  x() {
-    return this._x;
-  }
-
-  y() {
-    return this._y;
-  }
-
-  plus() {
-    const delta = vector.apply(this, arguments);
-    return new DistancePair(
-      this._x.plus(delta._x),
-      this._y.plus(delta._y));
-  }
-
-  minus() {
-    const delta = point.apply(this, arguments);
-    return new DistancePair(
-      this._x.minus(delta._x),
-      this._y.minus(delta._y));
-  }
-
-  times(factor) {
-    if (typeof factor != 'number') {
-      throw new Error(
-        `Distance.times(): found ${factor} where number expected`);
-    }
-    return new DistancePair(
-      this._x.times(factor),
-      this._y.times(factor));
-  }
-
-  dividedBy(divisor) {
-    if (typeof divisor != 'number') {
-      throw new Error(
-        `Distance.dividedBy(): found ${divisor} where number expected`);
-    }
-    return new DistancePair(
-      this._x.dividedBy(divisor),
-      this._y.dividedBy(divisor));
-  }
-}
-
-const DPair = DistancePair;  // to make code more concise and save typing
-
-function dPairify() {
-  const numArgs = arguments.length;
-  if (numArgs == 1) {
-    const dp = arguments[0];
-    if (dp instanceof DistancePair) {
-      return dp;
-    } else {
-      throw new Error(`found ${dp} where DistancePair expected`);
-    }
-  } else if (numArgs == 2) {
-    const x = arguments[0];
-    const y = arguments[1];
-    return new DPair(x, y);
-  }
-  throw new Error(`${numArgs} args found where 1 DPair or 2 Distances needed`);
-}
-
-function distanceBetween(p1, p2) {
-  const x1 = p1.x()._toBare();
-  const x2 = p2.x()._toBare();
-  const y1 = p1.y()._toBare();
-  const y2 = p2.y()._toBare();
-  const dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-  return worldM([dist, 'm']);
-}
-
-*/
 
 /*
     ==== PIECE ====
