@@ -1054,7 +1054,7 @@ class Component {
     mergeDicts(this._options, newOptions);
     this._width = null;
     this._height = null;
-    this._shift = null;
+    this._positionXform = null;
     this._subComponents = [];
     this._geometry = {};
 
@@ -1084,12 +1084,12 @@ class Component {
     return this._options[optionName];
   }
 
-  _setShift(position) {
-    this._shift = new Translate(position.x(), position.y());
+  _setPositionXform(position) {
+    this._positionXform = new Translate(position.x(), position.y());
   }
 
   addSubComponent(subComponent, position) {
-    subComponent._setShift(position);
+    subComponent._setPositionXform(position);
     this._subComponents.push(subComponent);
     // someday add code here to verify that subcomponent bounding box
     // fits inside parent component bounding box
@@ -1355,7 +1355,7 @@ class Kit {
       }
       for (const piece of page.allPieces()) {
         const component = piece.component;
-        component._setShift(piece._position);
+        component._setPositionXform(piece._position);
         this._renderTreeNodes(this._pdf, xform, component);
       }
     }
@@ -1363,7 +1363,7 @@ class Kit {
   }
 
   _renderTreeNodes(pdf, xform, component) {
-    const currentXform = xform.compose(component._shift);
+    const currentXform = xform.compose(component._positionXform);
     component.render(new DrawingPen(pdf, currentXform));
     for (const subComponent of component._subComponents) {
       this._renderTreeNodes(pdf, currentXform, subComponent);
