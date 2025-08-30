@@ -109,6 +109,9 @@ const _SHORT_PREFIX_TABLE = {  // for SI/metric inits
 };
 
 const _INCH = 0.0254;
+   // _HAND (4 inches) would go here, but we omit it because standard
+   //       notation for "hands" is to use base 4 for the digits to the
+   //       right of the radix-point.  Too weird to justify the extra logic.
 const _FOOT = 12 * _INCH;
 const _YARD = 3 * _FOOT;
 const _PT = _INCH/72;

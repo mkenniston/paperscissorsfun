@@ -1,6 +1,5 @@
 TODO:
 
-- add "hand" (as in equine) to unit definitions
 - change setShift to setPagePosition
 - change SIZE to EXTENT
 - change xform.apply() to .timesPair() -- conflict w/ JS "apply" defn
@@ -219,4 +218,5 @@ DONE:
 - Phase 3: changed mainline code to use new M and MP classes
 - Phase 4: updated SimpleHouse to use new M and MP classes
 - Phase 5: moved/revised documentation (comments) for M/MP, removed dead code
+- looked at adding "hand" (equine) to unit definitions, but it's just too weird
 
