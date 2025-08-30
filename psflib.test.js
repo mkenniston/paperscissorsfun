@@ -165,6 +165,8 @@ describe("MeasurementPair", () => {
     expect(() => (point(worldM(0), printedM(0)))).toThrow();
   });
 
+  // TODO - expand below to three test: p arith, v arith, size arith
+
   test("arithmetic works", () => {
     const p = point("2 m", "3 m");
     const v = vector("4 mm", "5 mm");
@@ -177,6 +179,11 @@ describe("MeasurementPair", () => {
     res = p.minus(v);
     expect(res.x()._toBare()).toEqual(1.996);
     expect(res.y()._toBare()).toEqual(2.995);
+    const p2 = point("0.5 m", "0.75 m");
+    res = p.minus(p2);
+    expect(res.x()._toBare()).toEqual(1.5);
+    expect(res.y()._toBare()).toEqual(2.25);
+
     res = p.times(10);
     expect(res.x()._toBare()).toEqual(20);
     expect(res.y()._toBare()).toEqual(30);
@@ -189,7 +196,6 @@ describe("MeasurementPair", () => {
     expect(() => (p.plus(p))).toThrow();
     expect(() => (p.plus(s))).toThrow();
     expect(() => (p.plus(vp))).toThrow();
-    expect(() => (p.minus(p))).toThrow();
     expect(() => (p.minus(s))).toThrow();
     expect(() => (p.minus(vp))).toThrow();
     expect(() => (p.times("foo"))).toThrow();

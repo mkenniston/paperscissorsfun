@@ -23,12 +23,19 @@ SOFTWARE.
 */
 
 const psflib = require('./psflib');
-const Distance = psflib.Distance;
-const distancify = psflib.distancify;
-const numerify = psflib.numerify;
-const distanceBetween = psflib.distanceBetween;
+const Measurement = psflib.Measurement;
+const WORLD = psflib.WORLD;
+const PRINTED = psflib.PRINTED;
+const worldM = psflib.worldM;
+const printedM = psflib.printedM;
+const MeasurementPair = psflib.MeasurementPair;
+const POINT = psflib.POINT;
+const VECTOR = psflib.VECTOR;
+const SIZE = psflib.SIZE;
+const point = psflib.point;
+const vector = psflib.vector;
+const size = psflib.size;
 const ConversionFactors = psflib.ConversionFactors;
-const dPairify = psflib.dPairify;
 const AffineTransformation = psflib.AffineTransformation;
 const Resize = psflib.Resize;
 const Translate = psflib.Translate;
@@ -81,18 +88,18 @@ class PeakedWall extends Component {
     super(oldOptions, newOptions);
     const g = this._geometry;
 
-    g.windowWidth = distancify(this.get("windowWidth"));
-    g.atticWindowWidth = distancify(this.get("atticWindowWidth"));
-    g.doorWidth = distancify(this.get("doorWidth"));
-    g.houseWidth = distancify(this.get("houseWidth"));
+    g.windowWidth = worldM(this.get("windowWidth"));
+    g.atticWindowWidth = worldM(this.get("atticWindowWidth"));
+    g.doorWidth = worldM(this.get("doorWidth"));
+    g.houseWidth = worldM(this.get("houseWidth"));
     g.spacing = g.houseWidth.minus(g.windowWidth).minus(g.doorWidth).dividedBy(3);
     g.xMid = g.houseWidth.dividedBy(2);
-    g.foundationHeight = distancify(this.get("foundationHeight"));
-    g.storyHeight = distancify(this.get("storyHeight"));
-    g.ridgeHeight = distancify(this.get("ridgeHeight"));
-    g.windowBaseHeight = distancify(this.get("windowBaseHeight"));
+    g.foundationHeight = worldM(this.get("foundationHeight"));
+    g.storyHeight = worldM(this.get("storyHeight"));
+    g.ridgeHeight = worldM(this.get("ridgeHeight"));
+    g.windowBaseHeight = worldM(this.get("windowBaseHeight"));
 
-    g.xA = distancify(0);
+    g.xA = worldM(0);
     g.xB = g.xA.plus(g.spacing);
     g.xC = g.xB.plus(g.windowWidth);
     g.xD = g.xMid.minus(g.atticWindowWidth).dividedBy(2);
@@ -102,32 +109,32 @@ class PeakedWall extends Component {
     g.xH = g.xG.plus(g.doorWidth);
     g.xI = g.xH.plus(g.spacing);
 
-    g.yGround = distancify(0);
+    g.yGround = worldM(0);
     g.yFirstFloor = g.yGround.plus(g.foundationHeight);
     g.ySecondFloor = g.yFirstFloor.plus(g.storyHeight);
     g.yEaves = g.ySecondFloor.plus(g.storyHeight);
     g.yRidge = g.yEaves.plus(g.ridgeHeight);
 
     g.wallOutline = [
-      dPairify(g.xA, g.yGround), dPairify(g.xA, g.yEaves),
-      dPairify(g.xE, g.yRidge), dPairify(g.xI, g.yEaves),
-      dPairify(g.xI, g.yGround) ];
+      point(g.xA, g.yGround), point(g.xA, g.yEaves),
+      point(g.xE, g.yRidge), point(g.xI, g.yEaves),
+      point(g.xI, g.yGround) ];
 
     g.basementOutline = [
-      dPairify(g.xA, g.yGround), dPairify(g.xA, g.foundationHeight),
-      dPairify(g.xI, g.foundationHeight), dPairify(g.xI, g.yGround) ];
+      point(g.xA, g.yGround), point(g.xA, g.foundationHeight),
+      point(g.xI, g.foundationHeight), point(g.xI, g.yGround) ];
 
     const window1 = new Window(this._options, {});
-    var position = dPairify(g.xB, g.yFirstFloor.plus(g.windowBaseHeight));
+    var position = point(g.xB, g.yFirstFloor.plus(g.windowBaseHeight));
     this.addSubComponent(window1, position);
     const window2 = new Window(this._options, {});
-    position = dPairify(g.xB, g.ySecondFloor.plus(g.windowBaseHeight));
+    position = point(g.xB, g.ySecondFloor.plus(g.windowBaseHeight));
     this.addSubComponent(window2, position);
     const window3 = new Window(this._options, {});
-    position = dPairify(g.xG, g.ySecondFloor.plus(g.windowBaseHeight));
+    position = point(g.xG, g.ySecondFloor.plus(g.windowBaseHeight));
     this.addSubComponent(window3, position);
     const door1 = new Door(this._options, {});
-    position = dPairify(g.xG, g.foundationHeight);
+    position = point(g.xG, g.foundationHeight);
     this.addSubComponent(door1, position);
   }
 
@@ -152,28 +159,28 @@ class StraightWall extends Component {
     super(oldOptions, newOptions);
     const g = this._geometry;
 
-    g.houseDepth = distancify(this.get("houseDepth"));
-    g.foundationHeight = distancify(this.get("foundationHeight"));
-    g.windowBaseHeight = distancify(this.get("windowBaseHeight"));
-    g.storyHeight = distancify(this.get("storyHeight"));
-    g.windowWidth = distancify(this.get("windowWidth"));
+    g.houseDepth = worldM(this.get("houseDepth"));
+    g.foundationHeight = worldM(this.get("foundationHeight"));
+    g.windowBaseHeight = worldM(this.get("windowBaseHeight"));
+    g.storyHeight = worldM(this.get("storyHeight"));
+    g.windowWidth = worldM(this.get("windowWidth"));
 
-    g.xA = distancify(0);
+    g.xA = worldM(0);
     g.xQ = g.xA.plus(g.houseDepth);
-    g.yGround = distancify(0);
+    g.yGround = worldM(0);
     g.yFirstFloor = g.yGround.plus(g.foundationHeight);
     g.ySecondFloor = g.yFirstFloor.plus(g.storyHeight);
     g.yEaves = g.ySecondFloor.plus(g.storyHeight);
 
     g.wallOutline = [
-      dPairify(g.xA, g.yGround), dPairify(g.xA, g.yEaves),
-      dPairify(g.xQ, g.yEaves), dPairify(g.xQ, g.yGround) ];
+      point(g.xA, g.yGround), point(g.xA, g.yEaves),
+      point(g.xQ, g.yEaves), point(g.xQ, g.yGround) ];
 
     g.basementOutline = [
-      dPairify(g.xA, g.yGround),
-      dPairify(g.xA, g.foundationHeight),
-      dPairify(g.houseDepth, g.foundationHeight),
-      dPairify(g.houseDepth, g.yGround) ];
+      point(g.xA, g.yGround),
+      point(g.xA, g.foundationHeight),
+      point(g.houseDepth, g.foundationHeight),
+      point(g.houseDepth, g.yGround) ];
 
     const allWindows = g.windowWidth.times(3);
     const spacing = g.houseDepth.minus(allWindows).dividedBy(4);
@@ -184,7 +191,7 @@ class StraightWall extends Component {
       for (let col = 0; col < 3; col++) {
         const x = increment.times(col).plus(spacing);
         const w = new Window(this._options, {});
-        const position = dPairify(x, y);
+        const position = point(x, y);
         this.addSubComponent(w, position);
       }
     }
@@ -211,22 +218,22 @@ class Window extends Component {
     super(oldOptions, newOptions);
     const g = this._geometry;
 
-    g.windowWidth = distancify(this.get("windowWidth"));
-    g.windowHeight = distancify(this.get("windowHeight"));
+    g.windowWidth = worldM(this.get("windowWidth"));
+    g.windowHeight = worldM(this.get("windowHeight"));
 
-    g.xLeft = distancify(0);
+    g.xLeft = worldM(0);
     g.xRight = g.xLeft.plus(g.windowWidth);
     g.xMid = g.xLeft.plus(g.windowWidth.dividedBy(2));
-    g.yBottom = distancify(0);
+    g.yBottom = worldM(0);
     g.yTop = g.yBottom.plus(g.windowHeight);
     g.yMid = g.yBottom.plus(g.windowHeight.dividedBy(2));
 
     g.outline = [
-      dPairify(g.xMid, g.yTop), dPairify(g.xMid, g.yBottom),
-      dPairify(g.xLeft, g.yBottom), dPairify(g.xLeft, g.yTop),
-      dPairify(g.xRight, g.yTop), dPairify(g.xRight, g.yBottom),
-      dPairify(g.xLeft, g.yBottom), dPairify(g.xLeft, g.yMid),
-      dPairify(g.xRight, g.yMid) ];
+      point(g.xMid, g.yTop), point(g.xMid, g.yBottom),
+      point(g.xLeft, g.yBottom), point(g.xLeft, g.yTop),
+      point(g.xRight, g.yTop), point(g.xRight, g.yBottom),
+      point(g.xLeft, g.yBottom), point(g.xLeft, g.yMid),
+      point(g.xRight, g.yMid) ];
 
   }
 
@@ -249,18 +256,18 @@ class Door extends Component {
     super(oldOptions, newOptions);
     const g = this._geometry;
 
-    g.windowWidth = distancify(this.get("windowWidth"));
-    g.windowHeight = distancify(this.get("windowHeight"));
-    g.windowBaseHeight = distancify(this.get("windowBaseHeight"));
+    g.windowWidth = worldM(this.get("windowWidth"));
+    g.windowHeight = worldM(this.get("windowHeight"));
+    g.windowBaseHeight = worldM(this.get("windowBaseHeight"));
 
-    g.xLeft = distancify(0);
+    g.xLeft = worldM(0);
     g.xRight = g.xLeft.plus(g.windowWidth);
-    g.yBottom = distancify(0);
+    g.yBottom = worldM(0);
     g.yDoorTop = g.windowHeight.plus(g.windowBaseHeight);
 
     g.outline = [
-      dPairify(g.xLeft, g.yBottom), dPairify(g.xLeft, g.yDoorTop),
-      dPairify(g.xRight, g.yDoorTop), dPairify(g.xRight, g.yBottom) ];
+      point(g.xLeft, g.yBottom), point(g.xLeft, g.yDoorTop),
+      point(g.xRight, g.yDoorTop), point(g.xRight, g.yBottom) ];
   }
 
   getWidth() {
@@ -282,20 +289,20 @@ class RoofSlab extends Component {
     super(oldOptions, newOptions);
     const g = this._geometry;
 
-    g.houseWidth = distancify(this.get("houseWidth"));
-    g.houseDepth = distancify(this.get("houseDepth"));
-    g.ridgeHeight = distancify(this.get("ridgeHeight"));
+    g.houseWidth = worldM(this.get("houseWidth"));
+    g.houseDepth = worldM(this.get("houseDepth"));
+    g.ridgeHeight = worldM(this.get("ridgeHeight"));
 
-    g.x0 = distancify(0);
+    g.x0 = worldM(0);
     g.x1 = g.houseDepth;
-    g.y0 = distancify(0);
-    const p1 = dPairify(0, 0);
-    const p2 = dPairify(g.houseWidth.dividedBy(2), g.ridgeHeight);
-    g.y1 = distanceBetween(p1, p2);
+    g.y0 = worldM(0);
+    const p1 = point(0, 0);
+    const p2 = point(g.houseWidth.dividedBy(2), g.ridgeHeight);
+    g.y1 = (p1.minus(p2)).length();
 
     g.outline = [
-      dPairify(g.x0, g.y0), dPairify(g.x0, g.y1),
-      dPairify(g.x1, g.y1), dPairify(g.x1, g.y0) ];
+      point(g.x0, g.y0), point(g.x0, g.y1),
+      point(g.x1, g.y1), point(g.x1, g.y0) ];
   }
 
   getWidth() {

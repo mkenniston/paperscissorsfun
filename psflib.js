@@ -603,7 +603,7 @@ class MeasurementPair {
     return this._y;
   }
 
-  _checkCompatible(rhs) {
+  _checkCompatible(rhs, allowed, resultType) {
     if (Array.isArray(rhs)) {
       rhs = new MeasurementPair(this._type,
               new Measurement(this.referenceFrame(), rhs[0]),
@@ -612,33 +612,40 @@ class MeasurementPair {
     if (! (rhs instanceof MeasurementPair)) {
       throw new Error("MeasurementPair.plus/minus: rhs must be a MeasurementPair");
     }
-    if ((this._type == SIZE) | (rhs._type != VECTOR)) {
+    const typeCombo = this._type + rhs._type;
+    if (! (allowed.includes(typeCombo))) {
       throw new Error(`Measurement: arithmetic not allowed between pair types ${this._type} and ${rhs._type}`);
     }
     if (this.referenceFrame() != rhs.referenceFrame()) {
       throw new Error(`Measurement: arithmetic not allowed between different referenceFrames ${this._referenceFrame()} and ${rhs._referenceFrame()}`);
     }
-    return rhs;
+    return [rhs, resultType[typeCombo]];
   }
 
   plus(addend) {
     if (arguments.length != 1) {
       throw new Error("MeasurementPair.plus: takes exactly 1 argument");
     }
-    addend = this._checkCompatible(addend);
-    const x = this.x().plus(addend.x());
-    const y = this.y().plus(addend.y());
-    return new MeasurementPair(this.type, x, y);
+    const [rhs, resultType] = this._checkCompatible(
+      addend,
+      ['pointvector', 'vectorvector'],
+      {pointvector: POINT, vectorvector: VECTOR});
+    const x = this.x().plus(rhs.x());
+    const y = this.y().plus(rhs.y());
+    return new MeasurementPair(resultType, x, y);
   }
 
   minus(subtrahend) {
     if (arguments.length != 1) {
       throw new Error("MeasurementPair.minus: takes exactly 1 argument");
     }
-    subtrahend = this._checkCompatible(subtrahend);
-    const x = this.x().minus(subtrahend.x());
-    const y = this.y().minus(subtrahend.y());
-    return new MeasurementPair(this.type, x, y);
+    const [rhs, resultType] = this._checkCompatible(
+      subtrahend,
+      ['pointpoint', 'pointvector', 'vectorvector'],
+      {pointpoint: VECTOR, pointvector: POINT, vectorvector: VECTOR});
+    const x = this.x().minus(rhs.x());
+    const y = this.y().minus(rhs.y());
+    return new MeasurementPair(resultType, x, y);
   }
 
   times(factor) {

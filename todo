@@ -1,6 +1,5 @@
 TODO:
 
-- Phase 4: change SimpleHouse to use new M and MP classes
 - Phase 5: move/add/revise documentation (comments) for M and MP
 - Phase 6: remove (now dead) Distance and dPair
 
@@ -14,6 +13,7 @@ TODO:
 - audit M, MPair, make sure consistent
 	and doc: what is valid M-spec, MP-spec
 	and make sure library and API use pairs and not separate x, y
+- fix pair-arith tests (add a bunch more)
 - audit tests, make sure every piece of (esp new) code has an "expect"
 	and merge Distance tests w/ Measurement tests (and dPair/mPair)
 - reorg test code to use new ctor/render conventions
@@ -220,4 +220,5 @@ DONE:
 - Phase 2: renamed Measurement.type to refFrame, and created new
     MeasurementPair class, with tests
 - Phase 3: changed mainline code to use new M and MP classes
+- Phase 4: updated SimpleHouse to use new M and MP classes
 
