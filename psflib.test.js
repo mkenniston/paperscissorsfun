@@ -27,13 +27,16 @@ const Measurement = psflib.Measurement;
 const WORLD = psflib.WORLD;
 const PRINTED = psflib.PRINTED;
 const worldM = psflib.worldM;
+const W = worldM;
 const printedM = psflib.printedM;
 const MeasurementPair = psflib.MeasurementPair;
 const POINT = psflib.POINT;
 const VECTOR = psflib.VECTOR;
 const EXTENT = psflib.EXTENT;
 const point = psflib.point;
+const P = point;
 const vector = psflib.vector;
+const V = vector;
 const extent = psflib.extent;
 const ConversionFactors = psflib.ConversionFactors;
 const AffineTransformation = psflib.AffineTransformation;
@@ -51,34 +54,34 @@ const Kit = psflib.Kit;
 describe("Measurement", () => {
   test("constructor works", () => {
     const three = new Measurement(WORLD, '3 m');
-    expect(worldM(three)._toBare()).toEqual(3);
-    expect(worldM(0)._toBare()).toEqual(0);
-    expect(worldM("0")._toBare()).toEqual(0);
-    expect(worldM("125 cm")._toBare()).toBeCloseTo(1.25);
-    expect(worldM("5 m 10 cm")._toBare()).toBeCloseTo(5.1);
-    expect(worldM([2, "m", 37, "mm"])._toBare()).toBeCloseTo(2.037);
-    expect(worldM(["787", "mm"])._toBare()).toBeCloseTo(0.787);
+    expect(W(three)._toBare()).toEqual(3);
+    expect(W(0)._toBare()).toEqual(0);
+    expect(W("0")._toBare()).toEqual(0);
+    expect(W("125 cm")._toBare()).toBeCloseTo(1.25);
+    expect(W("5 m 10 cm")._toBare()).toBeCloseTo(5.1);
+    expect(W([2, "m", 37, "mm"])._toBare()).toBeCloseTo(2.037);
+    expect(W(["787", "mm"])._toBare()).toBeCloseTo(0.787);
 
     expect(() => (new Measurement('W'))).toThrow();
     expect(() => (new Measurement('W', 0, 3))).toThrow();
     expect(() => (new Measurement('X', 0))).toThrow();
     expect(() => (new Measurement('P', worldM(0)))).toThrow();
     expect(() => (new Measurement('W', printedM(0)))).toThrow();
-    expect(() => (worldM(""))).toThrow();
-    expect(() => (worldM([]))).toThrow();
-    expect(() => (worldM("ft"))).toThrow();
-    expect(() => (worldM("4 ft 5"))).toThrow();
-    expect(() => (worldM("ft in"))).toThrow();
-    expect(() => (worldM("4 5"))).toThrow();
-    expect(() => (worldM({}))).toThrow();
+    expect(() => (W(""))).toThrow();
+    expect(() => (W([]))).toThrow();
+    expect(() => (W("ft"))).toThrow();
+    expect(() => (W("4 ft 5"))).toThrow();
+    expect(() => (W("ft in"))).toThrow();
+    expect(() => (W("4 5"))).toThrow();
+    expect(() => (W({}))).toThrow();
   });
 
   test("utility functions work", () => {
-    expect(worldM("50 cm").toString()).toEqual('worldM("0.5 m")');
+    expect(W("50 cm").toString()).toEqual('worldM("0.5 m")');
     expect(printedM(0)._toBare()).toEqual(0);
     expect(printedM(0).referenceFrame()).toEqual(PRINTED);
-    expect(worldM(0)._toBare()).toEqual(0);
-    expect(worldM(0).referenceFrame()).toEqual(WORLD);
+    expect(W(0)._toBare()).toEqual(0);
+    expect(W(0).referenceFrame()).toEqual(WORLD);
     expect(Measurement._fromBare(WORLD, 37)._toBare()).toEqual(37);
 
     expect(() => (Measurement._fromBare(WORLD, "footsie"))).toThrow();
@@ -86,8 +89,8 @@ describe("Measurement", () => {
   });
 
   test("arithmetic functions work", () => {
-    const m3 = worldM("3 m");
-    const m5 = worldM("5 m");
+    const m3 = W("3 m");
+    const m5 = W("5 m");
     expect(m3.plus(m5)._toBare()).toEqual(8);
     expect(m3.minus(m5)._toBare()).toEqual(-2);
     expect(m3.times(5)._toBare()).toEqual(15);
@@ -118,7 +121,7 @@ describe("Measurement", () => {
     expect(() => m3.times(printedM(0))).toThrow();
     expect(() => m3.times(m5)).toThrow();
     expect(() => m3.dividedBy(printedM(0))).toThrow();
-    expect(() => m3.dividedBy(worldM(0))).toThrow();
+    expect(() => m3.dividedBy(W(0))).toThrow();
     expect(() => m3.dividedBy(0)).toThrow();
     expect(() => m3.lessThan(printedM(0))).toThrow();
     expect(() => m3.lessThanOrEqualTo(printedM(0))).toThrow();
@@ -130,7 +133,7 @@ describe("Measurement", () => {
 
   test("conversion functions work", () => {
     Measurement._setConversionFactor("S");
-    const w = worldM("128 m");
+    const w = W("128 m");
     const p = printedM("500 mm");
     expect(w.toPrinted().referenceFrame()).toEqual(PRINTED);
     expect(w.toPrinted()._toBare()).toEqual(2);
@@ -149,7 +152,7 @@ describe("MeasurementPair", () => {
     const p = point([4, "ft", 5, "in"], [8, "m"]);
     const v = vector("2 m", "3 m");
     const vp = vector(printedM(0), printedM(0));
-    const e = extent(worldM(0), worldM(0));
+    const e = extent(W(0), W(0));
 
     expect(v.toString()).toEqual('vector(worldM("2 m"), worldM("3 m"))');
     expect(e.referenceFrame()).toEqual(WORLD);
@@ -157,8 +160,8 @@ describe("MeasurementPair", () => {
     expect(p.type()).toEqual(POINT);
     expect(v.type()).toEqual(VECTOR);
     expect(e.type()).toEqual(EXTENT);
-    expect(vector("3 m", "2 m").x()._toBare()).toEqual(3);
-    expect(vector("3 m", "2 m").y()._toBare()).toEqual(2);
+    expect(V("3 m", "2 m").x()._toBare()).toEqual(3);
+    expect(V("3 m", "2 m").y()._toBare()).toEqual(2);
 
     expect(() => (new MeasurementPair(p, p))).toThrow();
     expect(() => (new MeasurementPair(WORLD, p, p, p))).toThrow();
@@ -168,10 +171,10 @@ describe("MeasurementPair", () => {
   // TODO - expand below to three test: p arith, v arith, size arith
 
   test("arithmetic works", () => {
-    const p = point("2 m", "3 m");
-    const v = vector("4 mm", "5 mm");
-    const vp = vector(printedM(0), printedM(0));
-    const s = extent("60 m", "70 m");
+    const p = P("2 m", "3 m");
+    const v = V("4 mm", "5 mm");
+    const vp = V(printedM(0), printedM(0));
+    const e = extent("60 m", "70 m");
 
     var res = p.plus(v);
     expect(res.x()._toBare()).toEqual(2.004);
@@ -179,7 +182,7 @@ describe("MeasurementPair", () => {
     res = p.minus(v);
     expect(res.x()._toBare()).toEqual(1.996);
     expect(res.y()._toBare()).toEqual(2.995);
-    const p2 = point("0.5 m", "0.75 m");
+    const p2 = P("0.5 m", "0.75 m");
     res = p.minus(p2);
     expect(res.x()._toBare()).toEqual(1.5);
     expect(res.y()._toBare()).toEqual(2.25);
@@ -190,13 +193,13 @@ describe("MeasurementPair", () => {
     res = p.dividedBy(2);
     expect(res.x()._toBare()).toEqual(1);
     expect(res.y()._toBare()).toEqual(1.5);
-    res = point("3 m", "4 m");
+    res = P("3 m", "4 m");
     expect(res.length()._toBare()).toEqual(5);
 
     expect(() => (p.plus(p))).toThrow();
-    expect(() => (p.plus(s))).toThrow();
+    expect(() => (p.plus(e))).toThrow();
     expect(() => (p.plus(vp))).toThrow();
-    expect(() => (p.minus(s))).toThrow();
+    expect(() => (p.minus(e))).toThrow();
     expect(() => (p.minus(vp))).toThrow();
     expect(() => (p.times("foo"))).toThrow();
     expect(() => (p.dividedBy("foo"))).toThrow();
@@ -205,7 +208,7 @@ describe("MeasurementPair", () => {
 });
 
 function expectWB(s) {
-  return expect(worldM(s)._toBare());
+  return expect(W(s)._toBare());
 }
 
 describe("Measurement units", () => {
@@ -365,16 +368,16 @@ describe("Measurement units", () => {
   });
 
   test("variations on forms", () => {
-    expectWB(worldM("387 m")).toBeCloseTo(387);
-    expectWB(worldM(0)).toEqual(0);
-    expectWB(worldM("0")).toEqual(0);
-    expect((worldM("1 in")).toString()).toEqual('worldM("0.0254 m")');
+    expectWB(W("387 m")).toBeCloseTo(387);
+    expectWB(W(0)).toEqual(0);
+    expectWB(W("0")).toEqual(0);
+    expect((W("1 in")).toString()).toEqual('worldM("0.0254 m")');
   });
 
   test("Distance.plus() works", () => {
-    const p = worldM("3 m");
-    const z = worldM("0 m");
-    const a = worldM("  8   m   ");
+    const p = W("3 m");
+    const z = W("0 m");
+    const a = W("  8   m   ");
     expect(p.plus(a)._toBare()).toBeCloseTo(11);
     expect(p.plus(z)._toBare()).toBeCloseTo(3);
     expect(p.plus("2 m")._toBare()).toBeCloseTo(5);
@@ -384,14 +387,14 @@ describe("Measurement units", () => {
   });
 
   test("Distance.minus() works", () => {
-    const p = worldM("6 m");
-    const q = worldM("7 m");
+    const p = W("6 m");
+    const q = W("7 m");
     expect(p.minus(q)._toBare()).toBeCloseTo(-1);
     expect(p.minus("4 m")._toBare()).toBeCloseTo(2);
   });
 
   test("Distance.times() works", () => {
-    const p = worldM("11 m");
+    const p = W("11 m");
     expect(p.times(0)._toBare()).toBe(0);
     expect(p.times(1)._toBare()).toBeCloseTo(11);
     expect(p.times(10)._toBare()).toBeCloseTo(110);
@@ -401,8 +404,8 @@ describe("Measurement units", () => {
   });
 
   test("Distance.dividedBy() works", () => {
-    const p = worldM("100 m");
-    const q = worldM("20 m");
+    const p = W("100 m");
+    const q = W("20 m");
     expect(p.dividedBy(q)).toBeCloseTo(5);
     expect(p.dividedBy(40)._toBare()).toBeCloseTo(2.5);
     expect(p.dividedBy("2 m")).toBeCloseTo(50);
@@ -410,13 +413,13 @@ describe("Measurement units", () => {
   });
 
   test("illegal formats detected", () => {
-    expect(() => worldM("4 m cm")).toThrow();
-    expect(() => worldM("3 * 8 m")).toThrow();
-    expect(() => worldM("m 8")).toThrow();
-    expect(() => worldM("10 toes")).toThrow();
-    expect(() => worldM("0 m").plus(2)).toThrow();
-    expect(() => worldM("3 m").plus()).toThrow();
-    expect(() => worldM("2.5 m").times("5")).toThrow();
+    expect(() => W("4 m cm")).toThrow();
+    expect(() => W("3 * 8 m")).toThrow();
+    expect(() => W("m 8")).toThrow();
+    expect(() => W("10 toes")).toThrow();
+    expect(() => W("0 m").plus(2)).toThrow();
+    expect(() => W("3 m").plus()).toThrow();
+    expect(() => W("2.5 m").times("5")).toThrow();
   });
 });
 
@@ -458,14 +461,14 @@ describe("ConversionFactor.scale()", () => {
 });
 
 describe("vector", () => {
-  const p1 = vector("10 ft", "20 in");
-  const p2 = vector(worldM("3 ft 5 in"), worldM( "1 ft 7 in"));
+  const p1 = V("10 ft", "20 in");
+  const p2 = V(W("3 ft 5 in"), W( "1 ft 7 in"));
   
   test("vector.constructor works", () => {
     expect(p1).toBeInstanceOf(MeasurementPair);
     expect(p1.x()._toBare()).toBeCloseTo(3.048, 3);
     expect(p1.y()._toBare()).toBeCloseTo(0.508, 4);
-    const p3 = vector("17 m 3 cm", "38 mm");
+    const p3 = V("17 m 3 cm", "38 mm");
     expect(p3.toString()).toEqual(
       'vector(worldM("17.03 m"), worldM("0.038 m"))');
   });
@@ -476,13 +479,13 @@ describe("vector", () => {
     var p3 = p1.plus(["3 ft -2 in", "4 ft 0 in"]);
     expect(p3.x()._toBare()).toBeCloseTo(3.9116, 3);
     expect(p3.y()._toBare()).toBeCloseTo(1.7272);
-    p3 = p1.plus(vector(worldM("33 in"), "48 in"));
+    p3 = p1.plus(V(W("33 in"), "48 in"));
     expect(p3.x()._toBare()).toBeCloseTo(3.8862, 3);
     expect(p3.y()._toBare()).toBeCloseTo(1.7272, 3);
-    p3 = p1.plus(vector("3 ft -2 in", "4 ft 0 in"));
+    p3 = p1.plus(V("3 ft -2 in", "4 ft 0 in"));
     expect(p3.x()._toBare()).toBeCloseTo(3.9116, 3);
     expect(p3.y()._toBare()).toBeCloseTo(1.7272);
-    var p4 = p1.plus([worldM("-4 in"), worldM( "-12 in")]);
+    var p4 = p1.plus([W("-4 in"), W( "-12 in")]);
     expect(p4.x()._toBare()).toBeCloseTo(2.9464, 3);
     expect(p4.y()._toBare()).toBeCloseTo(0.2032, 4);
     expect(p3._comp).toBe(p4._comp);
@@ -495,7 +498,7 @@ describe("vector", () => {
     var p3 = p1.minus(["5 ft", "10 in"]);
     expect(p3.x()._toBare()).toBeCloseTo(1.524, 3);
     expect(p3.y()._toBare()).toBeCloseTo(0.254, 4);
-    p3 = p1.minus(vector("5 ft", "10 in"));
+    p3 = p1.minus(V("5 ft", "10 in"));
     expect(p3.x()._toBare()).toBeCloseTo(1.524, 3);
     expect(p3.y()._toBare()).toBeCloseTo(0.254, 4);
     expect(() => (p3.minus("bar"))).toThrow();
@@ -516,8 +519,8 @@ describe("vector", () => {
   });
 
   test("bad arguments detected", () => {
-    expect(() => (vector())).toThrow();
-    expect(() => (vector(5))).toThrow();
+    expect(() => (V())).toThrow();
+    expect(() => (V(5))).toThrow();
     expect(() => (p1.plus())).toThrow();
     expect(() => (p1.plus(1, 2, 3))).toThrow();
   });
@@ -574,7 +577,7 @@ describe("AffineTransformation", () => {
   });
 
   test("AffineTransformation.applyToPoint() works", () => {
-    const pt = vector("3 m", "5 m");
+    const pt = V("3 m", "5 m");
 
     var result = (new Resize(2)).applyToPoint(pt);
     expect(result.x()._toBare()).toBeCloseTo(6, 3);
@@ -627,7 +630,7 @@ describe("AffineTransformation", () => {
     mat3 = [ [-13, 3, 0], [-13, 7, -7], [-6, -2, 11] ];
     checkOneMultiply(mat1, mat2, mat3);
 
-    const p1 = point("3 m", "5 m");
+    const p1 = P("3 m", "5 m");
     const resize2 = new Resize(2);
     const translate21 = new Translate("-2 m", "+1 m");
     var results = resize2.compose(translate21).applyToPoint(p1);
@@ -675,8 +678,8 @@ describe("Kit", () => {
   class Box extends Component {
     constructor(oldOptions, newOptions, width, height, drawColor, fillColor) {
       super(oldOptions, newOptions);
-      this._width = worldM(width);
-      this._height = worldM(height);
+      this._width = W(width);
+      this._height = W(height);
       this._drawColor = drawColor;
       this._fillColor = fillColor;
     }
@@ -690,28 +693,28 @@ describe("Kit", () => {
     }
 
     render(pen) {
-      const inc = worldM("1 m");
+      const inc = W("1 m");
 
-      const x0 = worldM(0);
+      const x0 = W(0);
       const x2 = x0.plus(this._width.times(0.5));
       const x1 = x2.minus(inc);
       const x3 = x2.plus(inc);
       const x4 = x0.plus(this._width);
 
-      const y0 = worldM(0);
+      const y0 = W(0);
       const y1 = y0.plus(this._height.times(0.25));
       const y3 = y0.plus(this._height.times(0.75));
       const y2 = y3.minus(inc);
       const y4 = y0.plus(this._height);
 
-      const ptA = point(x0, y0);
-      const ptB = point(x0, y4);
-      const ptC = point(x4, y4);
-      const ptD = point(x4, y0);
-      const ptE = point(x2, y1);
-      const ptF = point(x1, y2);
-      const ptG = point(x2, y3);
-      const ptH = point(x3, y2);
+      const ptA = P(x0, y0);
+      const ptB = P(x0, y4);
+      const ptC = P(x4, y4);
+      const ptD = P(x4, y0);
+      const ptE = P(x2, y1);
+      const ptF = P(x1, y2);
+      const ptG = P(x2, y3);
+      const ptH = P(x3, y2);
 
       pen.set({drawColor: "black", fillColor: this._fillColor});
       pen.polygon([ptA, ptB, ptC, ptD], "fillAndStroke");
