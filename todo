@@ -1,8 +1,5 @@
 TODO:
 
-- change setShift to setPagePosition
-- change xform.apply() to .timesPair() -- conflict w/ JS "apply" defn
-- change applyToXY -> applyToPoint (world in, printed out)
 - change getWidth/Height to getExtent
 - fix all Error usage to make args fit on the line (use "s + s + s" as needed)
 - audit M, MPair, make sure consistent
@@ -219,4 +216,6 @@ DONE:
 - Phase 5: moved/revised documentation (comments) for M/MP, removed dead code
 - looked at adding "hand" (equine) to unit definitions, but it's just too weird
 - changed SIZE to EXTENT (name change only)
+- changed setShift to setPositionXform
+- changed applyToXY -> applyToPoint (world in, printed out)
 

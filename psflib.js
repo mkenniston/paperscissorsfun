@@ -606,14 +606,6 @@ class Measurement {
     result._value = this._value * Measurement._conversionFactor;
     return result;
   }
-
-  toPdfMm() {
-    // last step of conversion; printed-meters to printed-mm
-    if (this._referenceFrame != PRINTED) {
-      throw new Error('Measurement.toPdfMm: not a printedM');
-    }
-    return this._value * 1000;
-  }
 }
 
 function worldM(spec) {
@@ -879,19 +871,22 @@ class AffineTransformation {
   /*
     Because we know that all matrixes start with final row [0,0,1] and
     all vectors are padded to [x,y,1], we could eliminate about
-    half of all the multiplications in applyToXY() and compose().
+    half of all the multiplications in applyToPoint() and compose().
     That would be a tiny bit faster, but it would make the code much
     harder to read, understand, and verify, so we don't do that.
   */
 
-  applyToXY(pt) {
+  applyToPoint(pt) {
     const a = this._matrix;
     const b = [pt.x()._toBare(), pt.y()._toBare(), 1];
     const result =
       [ a[0][0]*b[0] + a[0][1]*b[1] + a[0][2]*b[2],
         a[1][0]*b[0] + a[1][1]*b[1] + a[1][2]*b[2],
         a[2][0]*b[0] + a[2][1]*b[1] + a[2][2]*b[2] ];
-    return {x: result[0], y: result[1]};
+    return point(
+      Measurement._fromBare(PRINTED, result[0]),
+      Measurement._fromBare(PRINTED, result[1]));
+    // return {x: result[0], y: result[1]};
   }
 
   compose(xform2) {
@@ -1189,16 +1184,15 @@ class DrawingPen {
     // convert from world coordinates to PDF coordinates
     const pdfPoints = [];
     for (const point of points) {
-      pdfPoints.push(this._xform.applyToXY(point));
+      pdfPoints.push(this._xform.applyToPoint(point));
     }
-    const x = pdfPoints[0].x;
-    const y = pdfPoints[0].y;
+    const x = pdfPoints[0].x()._toBare();
+    const y = pdfPoints[0].y()._toBare();
     const pdfDiffs = [];
     for (let i = 1; i < points.length; i++ ) {
       // jsPDF wants deltas, not points
-      const cur = pdfPoints[i];
-      const prev = pdfPoints[i-1];
-      pdfDiffs.push([cur.x - prev.x, cur.y - prev.y]);
+      const diff = pdfPoints[i].minus(pdfPoints[i-1]);
+      pdfDiffs.push([diff.x()._toBare(), diff.y()._toBare()]);
     }
     this._pdf.lines(pdfDiffs, x, y, null, style, closed);
   }

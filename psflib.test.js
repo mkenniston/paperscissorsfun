@@ -136,7 +136,7 @@ describe("Measurement", () => {
     expect(w.toPrinted()._toBare()).toEqual(2);
     expect(p.toWorld().referenceFrame()).toEqual(WORLD);
     expect(p.toWorld()._toBare()).toEqual(32);
-    expect(p.toPdfMm()).toEqual(500);
+    expect(p._toBare()).toEqual(0.5);
 
     expect(() => w.toWorld()).toThrow();
     expect(() => p.toPrinted()).toThrow();
@@ -573,32 +573,32 @@ describe("AffineTransformation", () => {
     expect(result).toStrictEqual([[1, 0, 0], [0, -1, 0], [0, 0, 1]]);
   });
 
-  test("AffineTransformation.applyToXY() works", () => {
+  test("AffineTransformation.applyToPoint() works", () => {
     const pt = vector("3 m", "5 m");
 
-    var result = (new Resize(2)).applyToXY(pt);
-    expect(result.x).toBeCloseTo(6, 3);
-    expect(result.y).toBeCloseTo(10, 3);
+    var result = (new Resize(2)).applyToPoint(pt);
+    expect(result.x()._toBare()).toBeCloseTo(6, 3);
+    expect(result.y()._toBare()).toBeCloseTo(10, 3);
 
-    result = (new Translate("-1 m", "2 m")).applyToXY(pt);
-    expect(result.x).toBeCloseTo(2, 3);
-    expect(result.y).toBeCloseTo(7, 3);
+    result = (new Translate("-1 m", "2 m")).applyToPoint(pt);
+    expect(result.x()._toBare()).toBeCloseTo(2, 3);
+    expect(result.y()._toBare()).toBeCloseTo(7, 3);
 
-    result = (new Rotate(ROT90)).applyToXY(pt);
-    expect(result.x).toBeCloseTo(-5, 3);
-    expect(result.y).toBeCloseTo(3, 3);
+    result = (new Rotate(ROT90)).applyToPoint(pt);
+    expect(result.x()._toBare()).toBeCloseTo(-5, 3);
+    expect(result.y()._toBare()).toBeCloseTo(3, 3);
 
-    result = (new Rotate(ROT180)).applyToXY(pt);
-    expect(result.x).toBeCloseTo(-3, 3);
-    expect(result.y).toBeCloseTo(-5, 3);
+    result = (new Rotate(ROT180)).applyToPoint(pt);
+    expect(result.x()._toBare()).toBeCloseTo(-3, 3);
+    expect(result.y()._toBare()).toBeCloseTo(-5, 3);
 
-    result = (new Rotate(ROT270)).applyToXY(pt);
-    expect(result.x).toBeCloseTo(5, 3);
-    expect(result.y).toBeCloseTo(-3, 3);
+    result = (new Rotate(ROT270)).applyToPoint(pt);
+    expect(result.x()._toBare()).toBeCloseTo(5, 3);
+    expect(result.y()._toBare()).toBeCloseTo(-3, 3);
 
-    result = (new ReflectAroundXAxis()).applyToXY(pt);
-    expect(result.x).toBeCloseTo(3);
-    expect(result.y).toBeCloseTo(-5);
+    result = (new ReflectAroundXAxis()).applyToPoint(pt);
+    expect(result.x()._toBare()).toBeCloseTo(3);
+    expect(result.y()._toBare()).toBeCloseTo(-5);
   });
 
   test("AffineTransformation.compose() works", () => {
@@ -630,13 +630,13 @@ describe("AffineTransformation", () => {
     const p1 = point("3 m", "5 m");
     const resize2 = new Resize(2);
     const translate21 = new Translate("-2 m", "+1 m");
-    var results = resize2.compose(translate21).applyToXY(p1);
-    expect(results.x).toBeCloseTo(2, 3);
-    expect(results.y).toBeCloseTo(12, 3);
+    var results = resize2.compose(translate21).applyToPoint(p1);
+    expect(results.x()._toBare()).toBeCloseTo(2, 3);
+    expect(results.y()._toBare()).toBeCloseTo(12, 3);
 
-    results = translate21.compose(resize2).applyToXY(p1);
-    expect(results.x).toBeCloseTo(4, 3);
-    expect(results.y).toBeCloseTo(11, 3);
+    results = translate21.compose(resize2).applyToPoint(p1);
+    expect(results.x()._toBare()).toBeCloseTo(4, 3);
+    expect(results.y()._toBare()).toBeCloseTo(11, 3);
 
     expect(() => (translate21.compose(p1))).toThrow();
   });
