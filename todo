@@ -1,6 +1,11 @@
 TODO:
 
 - fix all Error usage to make args fit on the line (use "s + s + s" as needed)
+- when we do tabs, figure out a reasonable way to choose the "tab width"
+	and "number of tab divisions", and also how to number them so
+	you can match pieces up correctly  (numbers must be assigned
+	dynamically)
+
 - audit M, MPair, make sure consistent
 	and doc: what is valid M-spec, MP-spec
 	and make sure library and API use pairs and not separate x, y
@@ -30,6 +35,7 @@ TODO:
 -- add "Terminology" section of comments
        - scale:  "scaleName"/"HO", "scaleRatio"/87.1, "Scale" class
 
+- check out coverage tools for JS testing
 - audit all source, use "let" instead of "var" ??
 - in tests, for  all "throw Error", verify the error message
 - allow a Collection of Kits, for convenience (and efficiency for small
@@ -98,10 +104,6 @@ TODO:
 	fit on a standard sheet of paper
 - add a feature where you can include signs in your components (being
 	careful to get rotation of text to match everything else)
-- when we do tabs, figure out a reasonable way to choose the "tab width"
-	and "number of tab divisions", and also how to number them so
-	you can match pieces up correctly  (numbers must be assigned
-	dynamically)
 - allow kits to include other kits
 
 - add a bunch of color capability
@@ -220,4 +222,5 @@ DONE:
 - defined super-short-cuts M, P, V for worldM, point, vector
 - changed getWidth/Height to getExtent
 - reorganized test code to use latest (new) ctor/render conventions
+- checked/updated code and tests for Measurement Error returns
 

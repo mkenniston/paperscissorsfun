@@ -371,10 +371,12 @@ class Measurement {
   constructor(referenceFrame, spec) {
     const numArgs = arguments.length;
     if (numArgs != 2) {
-      throw new Error(`Measurement.constructor: found ${numArgs} args when expecting 2`);
+      throw new Error("Measurement.constructor: " +
+        `found ${numArgs} args when expecting 2`);
     }
     if (referenceFrame != WORLD & referenceFrame != PRINTED) {
-      throw new Error(`Measurement.constructor: invalid referenceFrame "${referenceFrame}`);
+      throw new Error("Measurement.constructor: " +
+        `invalid referenceFrame "${referenceFrame}"`);
     }
     this._referenceFrame= referenceFrame;
 
@@ -384,7 +386,7 @@ class Measurement {
     }
 
     if (spec == 0) {
-      this._handleEmpty(spec);
+      this._handleZero(spec);
       return;
     }
 
@@ -402,17 +404,20 @@ class Measurement {
       return;
     }
 
-    throw new Error(`Measurement.constructor: invalid spec ${JSON.stringify(spec)}`);
+    throw new Error("Measurement.constructor: " +
+      `invalid spec ${JSON.stringify(spec)}`);
   }
 
   _cloneExisting(spec) {
     if (this._referenceFrame != spec._referenceFrame) {
-      throw new Error(`Measurement.constructor: invalid attempt to clone ${spec._referenceFrame} into ${spec._referenceFrame}`);
+      throw new Error("Measurement.constructor: " +
+        "invalid attempt to clone " +
+        `${spec._referenceFrame} into ${this._referenceFrame}`);
     }
     this._value = spec._value;
   }
 
-  _handleEmpty(spec) {
+  _handleZero(spec) {
     if (spec === 0 | spec === "0") {
       this._value = 0;
       return;
@@ -444,8 +449,8 @@ class Measurement {
         }
       }
       if (! matched) {
-        throw new Error('Measurement.constructor(): ' +
-          `Unexpected character at index ${index} of ${input}`);
+        throw new Error('Measurement.constructor: ' +
+          `unexpected character at index ${index} of ${input}`);
       }
     }
     return tokens;
@@ -453,7 +458,8 @@ class Measurement {
 
   _parse(tokens) {
     if (tokens.length % 2 != 0) {
-      throw new Error(`Measurment.constructor:  ${tokens} has odd number of tokens`);
+      throw new Error("Measurement.constructor: " +
+      `${JSON.stringify(tokens)} has odd number of tokens`);
     }
 
     let value = 0;
@@ -464,15 +470,18 @@ class Measurement {
         num = numToken;
       } else if ((typeof numToken) == 'string')  {
         if (! (numToken.match(/^[0123456789\.\+\-]+$/))) {
-          throw new Error(`Measurement.constructor:  invalid number token "${numToken}"`);
+          throw new Error("Measurement.constructor: " +
+            `invalid number token "${numToken}"`);
         }
         num = Number(numToken);
       } else {
-        throw new Error(`Measurement.constructor:  invalid number token "${numToken}"`);
+        throw new Error("Measurement.constructor: " +
+          `invalid number token "${JSON.stringify(numToken)}"`);
       }
       const unitToken = tokens[index + 1];
       if (! (unitToken.match(/^[a-zμA-ZÅ\'\"\-]+$/))) {
-        throw new Error(`Measurement.constructor:  invalid unit token "${unitToken}"`);
+       throw new Error("Measurement.constructor: " +
+         `invalid unit token "${unitToken}"`);
       }
       value += num * ConversionFactors.unit(unitToken);
     }
@@ -493,17 +502,20 @@ class Measurement {
 
   static _fromBare(referenceFrame, value) {  // only for library internal use
     if (typeof value != 'number') {
-      throw new Error(`Measurement.fromBare: value ${value} is not a number`);
+      throw new Error("Measurement._fromBare: " +
+        `value ${JSON.stringify(value)} is not a number`);
     }
     const result = new Measurement(referenceFrame, 0);
     result._value = value;
     return result;
   }
 
-  _checkCompatible(rhs) {
+  _checkCompatible(rhs, opName) {
     if (rhs instanceof Measurement) {
       if (this._referenceFrame!= rhs._referenceFrame) {
-        throw new Error(`Measurement: arithmetic not allowed between different referenceFrames ${this._referenceFrame} and ${rhs._referenceFrame}`);
+        throw new Error(`Measurement.${opName}: arithmetic ` +
+          "not allowed between different referenceFrames " +
+          `${this._referenceFrame} and ${rhs._referenceFrame}`);
       }
     } else {
       rhs = new Measurement(this._referenceFrame, rhs);
@@ -512,14 +524,14 @@ class Measurement {
   }
 
   plus(addend) {
-    addend = this._checkCompatible(addend);
+    addend = this._checkCompatible(addend, "plus");
     const result = new Measurement(this._referenceFrame, 0);
     result._value = this._value + addend._value;
     return result;
   }
 
   minus(subtrahend) {
-    subtrahend = this._checkCompatible(subtrahend);
+    subtrahend = this._checkCompatible(subtrahend, "minus");
     const result = new Measurement(this._referenceFrame, 0);
     result._value = this._value - subtrahend._value;
     return result;
@@ -531,7 +543,8 @@ class Measurement {
       result._value = this._value * factor;
       return result;
     }
-    throw new Error(`Measurement.times() factor is ${typeof factor}, but must be number`);
+    throw new Error("Measurement.times: " +
+      `factor is ${factor} but must be a number`);
   }
 
   dividedBy(divisor) {
@@ -543,7 +556,7 @@ class Measurement {
       result._value = this._value / divisor;
       return result;
     }
-    divisor = this._checkCompatible(divisor);
+    divisor = this._checkCompatible(divisor, "dividedBy");
     if (divisor._value == 0) {
       throw new Error('Measurement.dividedBy: invalid division by zero');
     }
@@ -551,32 +564,32 @@ class Measurement {
   }
 
   greaterThan(rhs) {
-    rhs = this._checkCompatible(rhs);
+    rhs = this._checkCompatible(rhs, "greaterThan");
     return (this._value > rhs._value);
   }
 
   greaterThanOrEqualTo(rhs) {
-    rhs = this._checkCompatible(rhs);
+    rhs = this._checkCompatible(rhs, "greaterThanOrEqualTo");
     return (this._value >= rhs._value);
   }
 
   lessThan(rhs) {
-    rhs = this._checkCompatible(rhs);
+    rhs = this._checkCompatible(rhs, "lessThan");
     return (this._value < rhs._value);
   }
 
   lessThanOrEqualTo(rhs) {
-    rhs = this._checkCompatible(rhs);
+    rhs = this._checkCompatible(rhs, "lessThanOrEqualTo");
     return (this._value <= rhs._value);
   }
 
   equalTo(rhs) {
-    rhs = this._checkCompatible(rhs);
+    rhs = this._checkCompatible(rhs, "equalTo");
     return (this._value == rhs._value);
   }
 
   notEqualTo(rhs) {
-    rhs = this._checkCompatible(rhs);
+    rhs = this._checkCompatible(rhs, "notEqualTo");
     return (this._value != rhs._value);
   }
 
@@ -591,7 +604,7 @@ class Measurement {
 
   toWorld() {
     if (this._referenceFrame == WORLD) {
-      throw new Error(`Measurement.toWOrld: arg is alread a worldM`);
+      throw new Error(`Measurement.toWorld: arg is already a worldM`);
     }
     const result = worldM(0);
     result._value = this._value / Measurement._conversionFactor;
@@ -600,7 +613,7 @@ class Measurement {
 
   toPrinted() {
     if (this._referenceFrame== PRINTED) {
-      throw new Error(`Measurement.toWOrld: arg is alread a printedM`);
+      throw new Error(`Measurement.toPrinted: arg is already a printedM`);
     }
     const result = printedM(0);
     result._value = this._value * Measurement._conversionFactor;

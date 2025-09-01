@@ -52,31 +52,56 @@ const Page = psflib.Page;
 const Kit = psflib.Kit;
 
 describe("Measurement", () => {
-  test("constructor works", () => {
+  test("constructor", () => {
     const three = new Measurement(WORLD, '3 m');
     expect(W(three)._toBare()).toEqual(3);
     expect(W(0)._toBare()).toEqual(0);
     expect(W("0")._toBare()).toEqual(0);
-    expect(W("125 cm")._toBare()).toBeCloseTo(1.25);
-    expect(W("5 m 10 cm")._toBare()).toBeCloseTo(5.1);
+    expect(W('125 cm')._toBare()).toBeCloseTo(1.25);
     expect(W([2, "m", 37, "mm"])._toBare()).toBeCloseTo(2.037);
+    expect(W("5 m 10 cm 0 km")._toBare()).toBeCloseTo(5.1);
+    expect(W("3m52cm")._toBare()).toBeCloseTo(3.52);
+    expect(W(`2'3"`)._toBare()).toBeCloseTo(0.6858);
+    expect(W(`${3+2} m`)._toBare()).toBeCloseTo(5);
     expect(W(["787", "mm"])._toBare()).toBeCloseTo(0.787);
+    expect(W(["5.4", "mm"])._toBare()).toBeCloseTo(0.0054);
+    expect(W(["-7", "m"])._toBare()).toBeCloseTo(-7);
+    expect(W(["+5678", "mm"])._toBare()).toBeCloseTo(5.678);
 
-    expect(() => (new Measurement('W'))).toThrow();
-    expect(() => (new Measurement('W', 0, 3))).toThrow();
-    expect(() => (new Measurement('X', 0))).toThrow();
-    expect(() => (new Measurement('P', worldM(0)))).toThrow();
-    expect(() => (new Measurement('W', printedM(0)))).toThrow();
-    expect(() => (W(""))).toThrow();
-    expect(() => (W([]))).toThrow();
-    expect(() => (W("ft"))).toThrow();
-    expect(() => (W("4 ft 5"))).toThrow();
-    expect(() => (W("ft in"))).toThrow();
-    expect(() => (W("4 5"))).toThrow();
-    expect(() => (W({}))).toThrow();
+    const ctor = 'Measurement.constructor: ';
+    expect(() => (new Measurement(WORLD))).toThrow(ctor + 
+      'found 1 args when expecting 2');
+    expect(() => (new Measurement(WORLD, 0, 3))).toThrow(ctor +
+      'found 3 args when expecting 2');
+    expect(() => (new Measurement('X', 0))).toThrow(ctor +
+      'invalid referenceFrame "X"');
+    expect(() => (new Measurement(PRINTED, worldM(0)))).toThrow(ctor +
+      'invalid attempt to clone world into printed');
+    expect(() => (new Measurement(WORLD, printedM(0)))).toThrow(ctor +
+      'invalid attempt to clone printed into world');
+    expect(() => (W(""))).toThrow(ctor +
+      'invalid empty arg');
+    expect(() => (W([]))).toThrow(ctor +
+      'invalid empty arg');
+    expect(() => (W("ft!in"))).toThrow(ctor +
+      'unexpected character at index 2 of ft!in');
+    expect(() => (W("ft"))).toThrow(ctor +
+      '["ft"] has odd number of tokens');
+    expect(() => (W("4 ft 5"))).toThrow(ctor +
+      '["4","ft","5"] has odd number of tokens');
+    expect(() => (W([6, "cm", 7]))).toThrow(ctor +
+      '[6,"cm",7] has odd number of tokens');
+    expect(() => (W(["ft", "in"]))).toThrow(ctor +
+      'invalid number token "ft"');
+    expect(() => (W([{}, "in"]))).toThrow(ctor +
+      'invalid number token "{}"');
+    expect(() => (W("4 5"))).toThrow(ctor +
+      'invalid unit token "5"');
+    expect(() => (W({}))).toThrow(ctor +
+      'invalid spec {}');
   });
 
-  test("utility functions work", () => {
+  test("utility methods", () => {
     expect(W("50 cm").toString()).toEqual('worldM("0.5 m")');
     expect(printedM(0)._toBare()).toEqual(0);
     expect(printedM(0).referenceFrame()).toEqual(PRINTED);
@@ -84,11 +109,13 @@ describe("Measurement", () => {
     expect(W(0).referenceFrame()).toEqual(WORLD);
     expect(Measurement._fromBare(WORLD, 37)._toBare()).toEqual(37);
 
-    expect(() => (Measurement._fromBare(WORLD, "footsie"))).toThrow();
-    expect(() => (Measurement._fromBare('X', 77))).toThrow();
+    expect(() => (Measurement._fromBare(WORLD, "footsie"))).toThrow(
+      'Measurement._fromBare: value "footsie" is not a number');
+    expect(() => (Measurement._fromBare('hephalump', 77))).toThrow(
+      'Measurement.constructor: invalid referenceFrame "hephalump"');
   });
 
-  test("arithmetic functions work", () => {
+  test("arithmetic", () => {
     const m3 = W("3 m");
     const m5 = W("5 m");
     expect(m3.plus(m5)._toBare()).toEqual(8);
@@ -116,22 +143,48 @@ describe("Measurement", () => {
     expect(m3.notEqualTo(m3)).toBe(false);
     expect(m5.notEqualTo(m3)).toBe(true);
 
-    expect(() => m3.plus(printedM(0))).toThrow();
-    expect(() => m3.minus(printedM(0))).toThrow();
-    expect(() => m3.times(printedM(0))).toThrow();
-    expect(() => m3.times(m5)).toThrow();
-    expect(() => m3.dividedBy(printedM(0))).toThrow();
-    expect(() => m3.dividedBy(W(0))).toThrow();
-    expect(() => m3.dividedBy(0)).toThrow();
-    expect(() => m3.lessThan(printedM(0))).toThrow();
-    expect(() => m3.lessThanOrEqualTo(printedM(0))).toThrow();
-    expect(() => m3.greaterThan(printedM(0))).toThrow();
-    expect(() => m3.greaterThanOrEqualTo(printedM(0))).toThrow();
-    expect(() => m3.equalTo(printedM(0))).toThrow();
-    expect(() => m3.notEqualTo(printedM(0))).toThrow();
+    expect(() => worldM("2 m").plus(printedM("3 in"))).toThrow(
+      'Measurement.plus: arithmetic not allowed between different ' +
+      'referenceFrames world and printed');
+    expect(() => worldM("2 m").minus(printedM("3 in"))).toThrow(
+      'Measurement.minus: arithmetic not allowed between different ' +
+      'referenceFrames world and printed');
+
+    const mt = "Measurement.times: ";
+    expect(() => m3.times(printedM(0))).toThrow(mt +
+      'factor is printedM("0 m") but must be a number');
+    expect(() => m3.times(m5)).toThrow(mt +
+      'factor is worldM("5 m") but must be a number');
+
+    const md = "Measurement.dividedBy: ";
+    expect(() => m3.dividedBy(printedM(0))).toThrow(md + 'arithmetic ' +
+      'not allowed between different referenceFrames world and printed');
+    expect(() => m3.dividedBy(W(0))).toThrow(md +
+      'invalid division by zero');
+    expect(() => m3.dividedBy(0)).toThrow(md +
+      'invalid division by zero');
+
+    expect(() => m3.lessThan(printedM(0))).toThrow(
+      'Measurement.lessThan: arithmetic ' +
+      'not allowed between different referenceFrames world and printed');
+    expect(() => m3.lessThanOrEqualTo(printedM(0))).toThrow(
+      'Measurement.lessThanOrEqualTo: arithmetic ' +
+      'not allowed between different referenceFrames world and printed');
+    expect(() => m3.greaterThan(printedM(0))).toThrow(
+      'Measurement.greaterThan: arithmetic ' +
+      'not allowed between different referenceFrames world and printed');
+    expect(() => m3.greaterThanOrEqualTo(printedM(0))).toThrow(
+      'Measurement.greaterThanOrEqualTo: arithmetic ' +
+      'not allowed between different referenceFrames world and printed');
+    expect(() => m3.equalTo(printedM(0))).toThrow(
+      'Measurement.equalTo: arithmetic ' +
+      'not allowed between different referenceFrames world and printed');
+    expect(() => m3.notEqualTo(printedM(0))).toThrow(
+      'Measurement.notEqualTo: arithmetic ' +
+      'not allowed between different referenceFrames world and printed');
   });
 
-  test("conversion functions work", () => {
+  test("conversions", () => {
     Measurement._setConversionFactor("S");
     const w = W("128 m");
     const p = printedM("500 mm");
@@ -140,10 +193,13 @@ describe("Measurement", () => {
     expect(p.toWorld().referenceFrame()).toEqual(WORLD);
     expect(p.toWorld()._toBare()).toEqual(32);
     expect(p._toBare()).toEqual(0.5);
+    expect(worldM(w)).toEqual(w);
+    expect(printedM(p)).toEqual(p);
 
-    expect(() => w.toWorld()).toThrow();
-    expect(() => p.toPrinted()).toThrow();
-    expect(() => w.toPdfMm()).toThrow();
+    expect(() => w.toWorld()).toThrow("Measurement.toWorld: " +
+      "arg is already a worldM");
+    expect(() => p.toPrinted()).toThrow("Measurement.toPrinted: " +
+      "arg is already a printedM");
   });
 });
 
