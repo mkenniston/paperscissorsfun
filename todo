@@ -7,7 +7,6 @@ TODO:
 - fix pair-arith tests (add a bunch more)
 - audit tests, make sure every piece of (esp new) code has an "expect"
 	and merge Distance tests w/ Measurement tests (and dPair/mPair)
-- reorg test code to use new ctor/render conventions
 
 - clean up use of bare (x, y) where we want point or vector,
 
@@ -220,4 +219,5 @@ DONE:
 - changed applyToXY -> applyToPoint (world in, printed out)
 - defined super-short-cuts M, P, V for worldM, point, vector
 - changed getWidth/Height to getExtent
+- reorganized test code to use latest (new) ctor/render conventions
 

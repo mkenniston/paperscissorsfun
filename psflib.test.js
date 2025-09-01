@@ -681,13 +681,9 @@ describe("Kit", () => {
       this._extent = extent;
       this._drawColor = drawColor;
       this._fillColor = fillColor;
-    }
 
-    getExtent() {
-      return this._extent;
-    }
+      const g = this._geometry;
 
-    render(pen) {
       const inc = W("1 m");
       const width = this.getExtent().x();
       const height = this.getExtent().y();
@@ -704,19 +700,27 @@ describe("Kit", () => {
       const y2 = y3.minus(inc);
       const y4 = y0.plus(height);
 
-      const ptA = P(x0, y0);
-      const ptB = P(x0, y4);
-      const ptC = P(x4, y4);
-      const ptD = P(x4, y0);
-      const ptE = P(x2, y1);
-      const ptF = P(x1, y2);
-      const ptG = P(x2, y3);
-      const ptH = P(x3, y2);
+      g.ptA = P(x0, y0);
+      g.ptB = P(x0, y4);
+      g.ptC = P(x4, y4);
+      g.ptD = P(x4, y0);
+      g.ptE = P(x2, y1);
+      g.ptF = P(x1, y2);
+      g.ptG = P(x2, y3);
+      g.ptH = P(x3, y2);
+    }
+
+    getExtent() {
+      return this._extent;
+    }
+
+    render(pen) {
+      const g = this._geometry;
 
       pen.set({drawColor: "black", fillColor: this._fillColor});
-      pen.polygon([ptA, ptB, ptC, ptD], "fillAndStroke");
+      pen.polygon([g.ptA, g.ptB, g.ptC, g.ptD], "fillAndStroke");
       pen.set({drawColor: this._drawColor});
-      pen.openPath([ptE, ptG, ptF, ptG, ptH]);
+      pen.openPath([g.ptE, g.ptG, g.ptF, g.ptG, g.ptH]);
     }
   }
 
