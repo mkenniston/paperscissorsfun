@@ -2,7 +2,7 @@
   "name": "paper-scissors-fun",
   "version": "1.0.0",
   "description": "",
-  "main": "hello.js",
+  "main": "psflib.js",
   "scripts": {
     "test": "jest"
   },

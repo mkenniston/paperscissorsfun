@@ -1,11 +1,17 @@
 #!/usr/bin/bash
 
+if [ "$1" == "-c" ]; then
+  COVER="--coverage --coveragePathIgnorePatterns bin-pack"
+else
+  COVER=""
+fi
+
 wc -l ps*js Simple*js
 echo 'Total "expect" statements:' `grep -c "expect(" psf*test.js`
 echo "Running jshint ..."
 jshint psflib.js psflib.test.js
 if [ $? -eq 0 ]; then
   echo "Running jest ..."
-  jest psflib.test.js bin-pack.test.js
+  jest psflib.test.js --silent $COVER
 fi
 echo "Done."

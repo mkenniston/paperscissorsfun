@@ -1,6 +1,6 @@
 
 function hello() {
-    console.log("Hello, Universe!");
+    // console.log("Hello, Universe!");
 }
 
 hello();
@@ -16,7 +16,7 @@ class Component {
     }
 
     render() {
-        console.log(`rendering ${this._name}`);
+        // console.log(`rendering ${this._name}`);
         for (const sc of this._subComps) {
             sc.render();
         }
@@ -50,7 +50,7 @@ function build() {
 
 b = build();
 b.render();
-console.log(`done with component ${b.name()}`);
+// console.log(`done with component ${b.name()}`);
 
 module.exports = build;
 
@@ -58,7 +58,7 @@ const { jsPDF } = require("jspdf");
 
 function generatePdf() {
     const doc = new jsPDF(format="letter");
-    console.log("generatePdf()");
+    // console.log("generatePdf()");
     doc.polygon = function(points, scale, style, closed) {
         var x1 = points[0][0];
         var y1 = points[0][1];
@@ -80,9 +80,9 @@ function generatePdf() {
     var points = [ [10, 30], [40, 40], [70, 30], [70, 100], [10, 100]];
     doc.setFillColor(255, 255, 0)
     doc.polygon(points, null, 'FD', true);
-    console.log("finished file");
+    // console.log("finished file");
     doc.save("sample.pdf");
-    console.log("saved file");
+    // console.log("saved file");
 }
 
 generatePdf();

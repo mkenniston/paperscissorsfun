@@ -1,17 +1,20 @@
 TODO:
 
 - fix all Error usage to make args fit on the line (use "s + s + s" as needed)
+- audit tests, make sure every piece of (esp new) code has an "expect"
+	and merge Distance tests w/ Measurement tests (and dPair/mPair)
+- fix pair-arith tests (add a bunch more)
+
+- automatically add cutting-margins around each Piece, and overlap
+	those intelligently with edge-of-page margins
+
 - when we do tabs, figure out a reasonable way to choose the "tab width"
-	and "number of tab divisions", and also how to number them so
-	you can match pieces up correctly  (numbers must be assigned
-	dynamically)
+	and "number of tab divisions", and also how to label them so you
+	can match pieces up correctly (manual assignement of labels is OK)
 
 - audit M, MPair, make sure consistent
 	and doc: what is valid M-spec, MP-spec
 	and make sure library and API use pairs and not separate x, y
-- fix pair-arith tests (add a bunch more)
-- audit tests, make sure every piece of (esp new) code has an "expect"
-	and merge Distance tests w/ Measurement tests (and dPair/mPair)
 
 - clean up use of bare (x, y) where we want point or vector,
 
@@ -98,8 +101,6 @@ TODO:
 - figure out how to fill w/ a "texture" (code)
 	- figure out how to crop texture filling
 
-- automatically add cutting-margins around each Piece, and overlap
-	those intelligently with edge-of-page margins
 - figure out a way to partition/divide Pieces that are too big to
 	fit on a standard sheet of paper
 - add a feature where you can include signs in your components (being
@@ -223,4 +224,6 @@ DONE:
 - changed getWidth/Height to getExtent
 - reorganized test code to use latest (new) ctor/render conventions
 - checked/updated code and tests for Measurement Error returns
+- added a count of "expect" statements to "doit" script
+- added a "-c" flag to "doit" to report code-coverage results
 
