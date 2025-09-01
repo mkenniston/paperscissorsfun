@@ -827,8 +827,8 @@ class Piece {
     // These fields are required or produced by the bin-pack code.
     // We omit leading underscores because the bin-pack lib wants it that way.
     // Bin-pack also requires bare numbers, not Measurements.
-    this.width = comp.getWidth()._toBare();
-    this.height = comp.getHeight()._toBare();
+    this.width = comp.getExtent().x()._toBare();
+    this.height = comp.getExtent().y()._toBare();
     this.x = null;  // gets filled in by the bin-packer
     this.y = null;  // gets filled in by the bin-packer
     this.area = this.width * this.height;
@@ -976,8 +976,8 @@ need to decide which things are sufficiently similar to be handled by a
 single class and which are sufficiently different to require their own
 class -- that is a design judgement; the library doesn't care.
 
-Note that only the methods listed below (constructor, getWidth, getHeight,
-and render), and marked "OVERRIDE this" in the code, should be overridden.
+Note that only the methods listed below (constructor, getExtent, and
+render), and marked "OVERRIDE this" in the code, should be overridden.
 The other Component methods are for internal use only.
 
 -- Constructor --
@@ -991,10 +991,10 @@ out where the interesting points are.  Stash all the points in
 instance variables of the Component object; by convention we put
 all that stuff in "this._geometry".
 
-(3) Figure out the total width and height of the component.  These are
-needed later by getWidth() and getHeight(), which in turn are used to
-figure out what page to put each Piece (which is a component) on and
-where on the page it will fit.
+(3) Figure out the total extent (i.e. width and height) of the component.
+This is needed later by getExtent(), which in turn are used to figure out
+what page to put each Piece (which is a component) on and where on the
+page it will fit.
 
 (4) Create and position any (optional) sub-components.
 
@@ -1004,11 +1004,11 @@ until the Pieces are all sized and positioned onto pages.)
 Since the logic may be long and complex, it is perfectly reasonable
 to have the constructor call helper methods to do most of the work.
 
--- getWidth and getHeight --
+-- getExtent --
 
-The getWidth() and getHeight() methods should also be overrideen by
-each child class.  These expose the results of any computation
-done by the constructor to determine the overall sizes of things.
+The getExtent() method should also be overrideen by each child class.
+This exposes the results of any computation done by the constructor
+to determine the overall sizes of things.
 
 -- render --
 
@@ -1063,12 +1063,8 @@ class Component {
     return `${this.constructor.name}()`;
   }
 
-  getWidth() {  // OVERRIDE this.
-    throw new Error('"Component.getWidth()" must be overridden.');
-  }
-
-  getHeight() { // OVERRIDE this.
-    throw new Error('"Component.getHeight()" must be overridden.');
+  getExtent() {  // OVERRIDE this.
+    throw new Error('"Component.getExtent()" must be overridden.');
   }
 
   set(optionName, optionValue) {

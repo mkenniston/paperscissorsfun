@@ -676,36 +676,33 @@ describe("Kit", () => {
    };
 
   class Box extends Component {
-    constructor(oldOptions, newOptions, width, height, drawColor, fillColor) {
+    constructor(oldOptions, newOptions, extent, drawColor, fillColor) {
       super(oldOptions, newOptions);
-      this._width = W(width);
-      this._height = W(height);
+      this._extent = extent;
       this._drawColor = drawColor;
       this._fillColor = fillColor;
     }
 
-    getWidth() {
-      return this._width;
-    }
-
-    getHeight() {
-      return this._height;
+    getExtent() {
+      return this._extent;
     }
 
     render(pen) {
       const inc = W("1 m");
+      const width = this.getExtent().x();
+      const height = this.getExtent().y();
 
       const x0 = W(0);
-      const x2 = x0.plus(this._width.times(0.5));
+      const x2 = x0.plus(width.times(0.5));
       const x1 = x2.minus(inc);
       const x3 = x2.plus(inc);
-      const x4 = x0.plus(this._width);
+      const x4 = x0.plus(width);
 
       const y0 = W(0);
-      const y1 = y0.plus(this._height.times(0.25));
-      const y3 = y0.plus(this._height.times(0.75));
+      const y1 = y0.plus(height.times(0.25));
+      const y3 = y0.plus(height.times(0.75));
       const y2 = y3.minus(inc);
-      const y4 = y0.plus(this._height);
+      const y4 = y0.plus(height);
 
       const ptA = P(x0, y0);
       const ptB = P(x0, y4);
@@ -729,12 +726,18 @@ describe("Kit", () => {
     }
     build(oldOpt) {
       const newOpt = {};
-      this.addPiece(new Box(oldOpt, newOpt, "17 m", "5 m", "black", "yellow"));
-      this.addPiece(new Box(oldOpt, newOpt, "7 m", "5 m", "black", "orange"));
-      this.addPiece(new Box(oldOpt, newOpt, "18 m", "11 m", "black", "red"));
-      this.addPiece(new Box(oldOpt, newOpt, "11 m", "13 m", "white", "purple"));
-      this.addPiece(new Box(oldOpt, newOpt, "9 m", "12 m", "white", "blue"));
-      this.addPiece(new Box(oldOpt, newOpt, "6 m", "18 m", "white", "green"));
+      this.addPiece(new Box(
+        oldOpt, newOpt, extent("17 m", "5 m"), "black", "yellow"));
+      this.addPiece(new Box(
+        oldOpt, newOpt, extent("7 m", "5 m"), "black", "orange"));
+      this.addPiece(new Box(
+        oldOpt, newOpt, extent("18 m", "11 m"), "black", "red"));
+      this.addPiece(new Box(
+        oldOpt, newOpt, extent("11 m", "13 m"), "white", "purple"));
+      this.addPiece(new Box(
+        oldOpt, newOpt, extent("9 m", "12 m"), "white", "blue"));
+      this.addPiece(new Box(
+        oldOpt, newOpt, extent("6 m", "18 m"), "white", "green"));
     }
   }
 

@@ -1,6 +1,5 @@
 TODO:
 
-- change getWidth/Height to getExtent
 - fix all Error usage to make args fit on the line (use "s + s + s" as needed)
 - audit M, MPair, make sure consistent
 	and doc: what is valid M-spec, MP-spec
@@ -220,4 +219,5 @@ DONE:
 - changed setShift to setPositionXform
 - changed applyToXY -> applyToPoint (world in, printed out)
 - defined super-short-cuts M, P, V for worldM, point, vector
+- changed getWidth/Height to getExtent
 

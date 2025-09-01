@@ -27,14 +27,17 @@ const Measurement = psflib.Measurement;
 const WORLD = psflib.WORLD;
 const PRINTED = psflib.PRINTED;
 const worldM = psflib.worldM;
+const W = psflib.worldM;
 const printedM = psflib.printedM;
 const MeasurementPair = psflib.MeasurementPair;
 const POINT = psflib.POINT;
 const VECTOR = psflib.VECTOR;
-const SIZE = psflib.SIZE;
+const EXTENT = psflib.EXTENT;
 const point = psflib.point;
+const P = point;
 const vector = psflib.vector;
-const size = psflib.size;
+const V = vector;
+const extent = psflib.extent;
 const ConversionFactors = psflib.ConversionFactors;
 const AffineTransformation = psflib.AffineTransformation;
 const Resize = psflib.Resize;
@@ -138,12 +141,8 @@ class PeakedWall extends Component {
     this.addSubComponent(door1, position);
   }
 
-  getWidth() {
-    return this._geometry.houseWidth;
-  }
-
-  getHeight() {
-    return this._geometry.yRidge;
+  getExtent() {
+    return extent(this._geometry.houseWidth, this._geometry.yRidge);
   }
 
   render(pen) {
@@ -197,12 +196,8 @@ class StraightWall extends Component {
     }
   }
 
-  getWidth() {
-    return this._geometry.houseDepth;
-  }
-
-  getHeight() {
-    return this._geometry.yEaves;
+  getExtent() {
+    return extent(this._geometry.houseDepth, this._geometry.yEaves);
   }
 
   render(pen) {
@@ -237,12 +232,8 @@ class Window extends Component {
 
   }
 
-  getWidth() {
-    return g.windowWidth;
-  }
-
-  getHeight() {
-    return g.windowHeight;
+  getExtent() {
+    return extent(this._geometry.windowWidth, this._geometry.windowHeight);
   }
 
   render(pen) {
@@ -270,12 +261,8 @@ class Door extends Component {
       point(g.xRight, g.yDoorTop), point(g.xRight, g.yBottom) ];
   }
 
-  getWidth() {
-    return this._geometry.windowWidth;
-  }
-
-  getHeight() {
-    return this._geometry.yDoorTop;
+  getExtent() {
+    return extent(this._geometry.windowWidth, this._geometry.yDoorTop);
   }
 
   render(pen) {
@@ -305,12 +292,8 @@ class RoofSlab extends Component {
       point(g.x1, g.y1), point(g.x1, g.y0) ];
   }
 
-  getWidth() {
-    return this._geometry.houseDepth;
-  }
-
-  getHeight() {
-    return this._geometry.ridgeHeight;
+  getExtent() {
+    return extent(this._geometry.houseDepth, this._geometry.ridgeHeight);
   }
 
   render(pen) {
